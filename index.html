@@ -65,6 +65,7 @@
         }
         button:hover { opacity: 0.9; transform: scale(1.02); }
         .btn-danger { background: var(--danger); }
+        .btn-warning { background: #eab308; color: #000; }
 
         /* --- LAYOUT DO PAINEL PRINCIPAL --- */
         #main-panel { display: none; width: 100vw; height: 100vh; position: relative; }
@@ -292,24 +293,28 @@
             <section id="mem" class="section">
                 <div class="collapsible-box" id="box-mem-form">
                     <div class="collapsible-header" onclick="toggleBox('box-mem-form')">
-                        <span>Cadastrar Novo Membro / Acesso</span>
+                        <span id="form-mem-title">Cadastrar Novo Membro / Acesso</span>
                         <span class="icon-indicator">+</span>
                     </div>
                     <div class="collapsible-content">
+                        <input type="hidden" id="m-key">
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                             <input type="text" id="m-id" placeholder="ID do Membro (Ex: 3461)">
                             <input type="text" id="m-nome" placeholder="Nome do Membro">
                             <input type="text" id="m-pass" placeholder="Senha de Acesso">
                             <input type="text" id="m-cargo" placeholder="Cargo/Função">
                         </div>
-                        <button style="margin-top: 15px;" onclick="addMembro()">SALVAR NOVO MEMBRO</button>
+                        <div style="display: flex; gap: 10px; margin-top: 15px;">
+                            <button id="btn-save-mem" onclick="saveMembro()">SALVAR NOVO MEMBRO</button>
+                            <button id="btn-cancel-edit" style="display: none;" class="btn-danger" onclick="cancelarEdicaoMembro()">CANCELAR</button>
+                        </div>
                     </div>
                 </div>
 
                 <div class="box-list">
                     <div class="box-title">Lista de Operadores Cadastrados</div>
                     <table>
-                        <thead><tr><th>ID</th><th>Membro</th><th>Cargo</th><th>Status / Visto por Último</th><th>Remover</th></tr></thead>
+                        <thead><tr><th>ID</th><th>Membro</th><th>Cargo</th><th>Senha</th><th>Status</th><th>Ações</th></tr></thead>
                         <tbody id="t-membros"></tbody>
                     </table>
                 </div>
@@ -506,20 +511,18 @@
             event.currentTarget.classList.add('active');
         }
 
-        // --- SISTEMA DE AUTENTICAÇÃO COM CONTA MESTRE FIXA ---
+        // --- SISTEMA DE AUTENTICAÇÃO ---
         function auth() {
             const u = document.getElementById('user-in').value.trim();
             const p = document.getElementById('pass-in').value.trim();
 
-            // 1. Procura primeiro nas contas registradas na lista do banco de dados
             const found = data.membros.find(m => (m.nome.toLowerCase() === u.toLowerCase() || String(m.uid) === u) && String(m.senha) === p);
             
             if(found) {
                 logarUsuario(found);
             } 
-            // 2. Se o banco estiver totalmente vazio ou caso queira forçar a criação com os novos dados:
-            else if(u.toLowerCase() === 'megan' && p === 'meganrk&') {
-                const adminMaster = { uid: "3461", nome: 'Megan', senha: 'meganrk&', cargo: 'Chefe' };
+            else if(u.toLowerCase() === 'megan' && p === '1234') {
+                const adminMaster = { uid: "3461", nome: 'Megan', senha: '1234', cargo: 'Chefe' };
                 const newRef = db.ref('membros').push();
                 newRef.set(adminMaster);
                 adminMaster.dbKey = newRef.key;
@@ -543,7 +546,7 @@
 
         window.onbeforeunload = () => updateStatus(false);
 
-        // --- OPERAÇÕES E RENDERIZADORES ---
+        // --- GERENCIAMENTO DE MEMBROS (COM EDIÇÃO) ---
         function renderMembros() {
             const t = document.getElementById('t-membros'); t.innerHTML = "";
             data.membros.forEach(m => {
@@ -559,26 +562,79 @@
                     <td><strong>#${m.uid || '---'}</strong></td>
                     <td>${m.nome}</td>
                     <td>${m.cargo || 'Operador'}</td>
+                    <td><span style="font-family: monospace; opacity: 0.7;">${m.senha}</span></td>
                     <td><span class="status-dot ${isOnline ? 'online' : 'offline'}"></span>${isOnline ? 'Online' : lastStr}</td>
-                    <td><button style="padding: 4px 10px; font-size:12px;" class="btn-danger" onclick="delMem('${m.dbKey}')">Deletar</button></td>
+                    <td>
+                        <button style="padding: 4px 10px; font-size:12px; margin-right: 5px;" class="btn-warning" onclick="prepararEdicaoMembro('${m.dbKey}')">Editar</button>
+                        <button style="padding: 4px 10px; font-size:12px;" class="btn-danger" onclick="delMem('${m.dbKey}')">Deletar</button>
+                    </td>
                 </tr>`;
             });
         }
 
-        function addMembro() {
+        function saveMembro() {
+            const key = document.getElementById('m-key').value;
             const uid = document.getElementById('m-id').value.trim();
             const nome = document.getElementById('m-nome').value.trim();
             const senha = document.getElementById('m-pass').value.trim();
             const cargo = document.getElementById('m-cargo').value.trim();
             if(!uid || !nome || !senha || !cargo) return;
 
-            db.ref('membros').push().set({ uid, nome, senha, cargo });
-            document.getElementById('m-id').value=""; document.getElementById('m-nome').value=""; document.getElementById('m-pass').value=""; document.getElementById('m-cargo').value="";
+            if(key) {
+                // Modo Edição: Atualiza os dados existentes mantendo o status anterior
+                db.ref('membros/' + key).update({ uid, nome, senha, cargo });
+                // Se o usuário editado for você mesmo, atualiza as informações do painel na hora
+                if(currentUser && currentUser.dbKey === key) {
+                    currentUser.nome = nome;
+                    currentUser.uid = uid;
+                    document.getElementById('logged-name').innerText = `${nome} | ${uid}`;
+                }
+            } else {
+                // Modo Cadastro: Cria um novo registro
+                db.ref('membros').push().set({ uid, nome, senha, cargo });
+            }
+
+            cancelarEdicaoMembro();
             toggleBox('box-mem-form');
+        }
+
+        function prepararEdicaoMembro(key) {
+            const mem = data.membros.find(m => m.dbKey === key);
+            if(!mem) return;
+
+            document.getElementById('m-key').value = mem.dbKey;
+            document.getElementById('m-id').value = mem.uid || '';
+            document.getElementById('m-nome').value = mem.nome || '';
+            document.getElementById('m-pass').value = mem.senha || '';
+            document.getElementById('m-cargo').value = mem.cargo || '';
+
+            document.getElementById('form-mem-title').innerText = "Editar Credenciais do Membro";
+            document.getElementById('btn-save-mem').innerText = "SALVAR ALTERAÇÕES";
+            document.getElementById('btn-cancel-edit').style.display = "inline-block";
+
+            // Abre a caixa de formulário caso esteja fechada
+            const box = document.getElementById('box-mem-form');
+            if(!box.classList.contains('open')) {
+                toggleBox('box-mem-form');
+            }
+            window.scrollTo({ top: box.offsetTop - 20, behavior: 'smooth' });
+        }
+
+        function cancelarEdicaoMembro() {
+            document.getElementById('m-key').value = "";
+            document.getElementById('m-id').value = "";
+            document.getElementById('m-nome').value = "";
+            document.getElementById('m-pass').value = "";
+            document.getElementById('m-cargo').value = "";
+
+            document.getElementById('form-mem-title').innerText = "Cadastrar Novo Membro / Acesso";
+            document.getElementById('btn-save-mem').innerText = "SALVAR NOVO MEMBRO";
+            document.getElementById('btn-cancel-edit').style.display = "none";
         }
         
         function delMem(k) { if(confirm("Remover este acesso do banco?")) db.ref('membros/'+k).remove(); }
 
+        // --- OUTRAS OPERAÇÕES E RENDERIZADORES ---
         function upDash() {
             const s = parseFloat(document.getElementById('in-saldo').value) || 0;
             const e = parseFloat(document.getElementById('in-ent').value) || 0;
