@@ -143,10 +143,15 @@
         .badge-low { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
         .badge-ok { background: rgba(34, 197, 94, 0.15); color: var(--success); }
 
-        /* Estilo dos Gráficos */
-        .charts-wrapper { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 25px; margin-top: 15px; }
+        /* Estilo dos Gráficos e Registros */
+        .charts-wrapper { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 25px; margin-bottom: 25px; }
         .chart-box { background: var(--glass); backdrop-filter: var(--blur); border: 1px solid var(--border); padding: 20px; border-radius: 16px; display: flex; flex-direction: column; align-items: center; }
         .chart-container { position: relative; width: 100%; height: 280px; }
+        
+        .log-timeline { display: flex; flex-direction: column; gap: 12px; max-height: 300px; overflow-y: auto; padding-right: 5px; }
+        .log-item { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border); padding: 14px 18px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
+        .log-item span strong { color: var(--primary); }
+        .log-time { font-size: 11px; opacity: 0.4; font-family: monospace; }
     </style>
 </head>
 <body>
@@ -297,7 +302,6 @@
             <section id="mov" class="section">
                 <div class="box-list">
                     <div class="box-title"><i class="fas fa-chart-bar"></i> Painel de Métricas Visuais Estratégicas</div>
-                    <p style="font-size: 13px; opacity: 0.6; margin-bottom: 20px;">Estáticas e fluxos gerados automaticamente com base em todas as entradas de dados e registros do sistema.</p>
                     
                     <div class="charts-wrapper">
                         <div class="chart-box">
@@ -312,6 +316,11 @@
                                 <canvas id="chartProdutos"></canvas>
                             </div>
                         </div>
+                    </div>
+
+                    <div class="box-title" style="margin-top: 10px; border-top: 1px solid var(--border); padding-top: 25px;"><i class="fas fa-history"></i> Mural de Atividades dos Operadores</div>
+                    <div class="log-timeline" id="log-container">
+                        <div style="text-align: center; opacity: 0.4; padding: 20px; font-size: 13px;">Nenhuma atividade registrada no painel ainda.</div>
                     </div>
                 </div>
             </section>
@@ -382,7 +391,6 @@
         let db = null;
         let data = { membros: [], estoque: [], vendas: [], movimentos: [], catalogo: [], notas: [], dash: { s: 0, e: 0, sa: 0 } };
         
-        // Instâncias Globais dos Gráficos
         let chartFinInstancia = null;
         let chartProdInstancia = null;
 
@@ -430,6 +438,7 @@
             renderVendas();
             renderNotas();
             renderEstatisticas();
+            renderLogs();
         }
 
         function atualizarLocalStorage(tipo) {
@@ -459,10 +468,50 @@
             db.ref('catalogo').on('value', s => { data.catalogo = s.val() || []; updateDrops(); renderFamilies(); renderEstatisticas(); });
             db.ref('estoque').on('value', s => { data.estoque = s.val() || []; renderEstoque(); renderEstatisticas(); });
             db.ref('vendas').on('value', s => { data.vendas = s.val() || []; renderVendas(); renderEstatisticas(); });
-            db.ref('movimentos').on('value', s => { data.movimentos = s.val() || []; renderEstatisticas(); });
+            db.ref('movimentos').on('value', s => { data.movimentos = s.val() || []; renderEstatisticas(); renderLogs(); });
             db.ref('notas').on('value', s => { data.notas = s.val() || []; renderNotas(); });
             db.ref('dash').on('value', s => { data.dash = s.val() || {s:0,e:0,sa:0}; renderDash(); renderEstatisticas(); });
             db.ref('bg').on('value', s => { if(s.val()) aplicasPlanoDeFundo(s.val()); });
+        }
+
+        // --- SISTEMA DE REGISTRO DE LOGS AUTOMÁTICOS ---
+        function registrarAcaoNoPainel(mensagem) {
+            const userName = currentUser ? currentUser.nome : "Sistema";
+            const novoLog = {
+                user: userName,
+                txt: mensagem,
+                time: new Date().toLocaleTimeString('pt-BR') + ' - ' + new Date().toLocaleDateString('pt-BR')
+            };
+            
+            data.movimentos.push(novoLog);
+            
+            if(db) {
+                db.ref('movimentos').set(data.movimentos);
+            } else {
+                atualizarLocalStorage('movimentos');
+                renderLogs();
+            }
+        }
+
+        function renderLogs() {
+            const container = document.getElementById('log-container');
+            if(!container) return;
+            
+            if(!data.movimentos || data.movimentos.length === 0) {
+                container.innerHTML = `<div style="text-align: center; opacity: 0.4; padding: 20px; font-size: 13px;">Nenhuma atividade registrada no painel ainda.</div>`;
+                return;
+            }
+
+            container.innerHTML = "";
+            // Mostra os logs mais recentes primeiro
+            [...data.movimentos].reverse().forEach(log => {
+                container.innerHTML += `
+                    <div class="log-item">
+                        <span><strong>${log.user}</strong>: ${log.txt}</span>
+                        <div class="log-time">${log.time}</div>
+                    </div>
+                `;
+            });
         }
 
         // --- MECANISMO DE AUTENTICAÇÃO ---
@@ -582,10 +631,26 @@
         // --- INTERFACES VISUAIS ---
         function toggleBox(id) { const box = document.getElementById(id); box.classList.toggle('open'); const ind = box.querySelector('.icon-indicator'); if(ind) ind.innerText = box.classList.contains('open') ? '-' : '+'; }
         function toggleSidebar() { const side = document.getElementById('sidebar'); const main = document.getElementById('main-content'); const icon = document.getElementById('t-icon'); side.classList.toggle('collapsed'); if(side.classList.contains('collapsed')) { icon.className = 'fas fa-chevron-right'; main.classList.add('expanded'); } else { icon.className = 'fas fa-chevron-left'; main.classList.remove('expanded'); } }
-        function tab(id) { document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); document.querySelectorAll('.menu-list li').forEach(l => l.classList.remove('active')); document.getElementById(id).classList.add('active'); event.currentTarget.classList.add('active'); if(id === 'mov') { setTimeout(renderEstatisticas, 50); } }
+        function tab(id) { document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); document.querySelectorAll('.menu-list li').forEach(l => l.classList.remove('active')); document.getElementById(id).classList.add('active'); event.currentTarget.classList.add('active'); if(id === 'mov') { setTimeout(() => { renderEstatisticas(); renderLogs(); }, 50); } }
 
         // FINANCEIRO & DASHBOARD
-        function upDash() { const s = parseFloat(document.getElementById('in-saldo').value) || 0; const e = parseFloat(document.getElementById('in-ent').value) || 0; const sa = parseFloat(document.getElementById('in-sai').value) || 0; if(db) db.ref('dash').set({s, e, sa}); else { data.dash = {s,e,sa}; atualizarLocalStorage('dash'); renderDash(); renderEstatisticas(); } toggleBox('box-dash-form'); }
+        function upDash() { 
+            const s = parseFloat(document.getElementById('in-saldo').value) || 0; 
+            const e = parseFloat(document.getElementById('in-ent').value) || 0; 
+            const sa = parseFloat(document.getElementById('in-sai').value) || 0; 
+            
+            if(db) {
+                db.ref('dash').set({s, e, sa});
+            } else { 
+                data.dash = {s,e,sa}; 
+                atualizarLocalStorage('dash'); 
+                renderDash(); 
+                renderEstatisticas(); 
+            }
+            
+            registrarAcaoNoPainel(`Atualizou o Banco da Família (Saldo: R$ ${s.toLocaleString('pt-BR')}, Entradas: R$ ${e.toLocaleString('pt-BR')}, Saídas: R$ ${sa.toLocaleString('pt-BR')})`);
+            toggleBox('box-dash-form'); 
+        }
         function renderDash() { document.getElementById('v-saldo').innerText = `R$ ${(data.dash.s || 0).toLocaleString('pt-BR', {minimumFractionDigits:2})}`; document.getElementById('v-ent').innerText = `R$ ${(data.dash.e || 0).toLocaleString('pt-BR', {minimumFractionDigits:2})}`; document.getElementById('v-sai').innerText = `R$ ${(data.dash.sa || 0).toLocaleString('pt-BR', {minimumFractionDigits:2})}`; }
 
         // PRODUTOS & CATÁLOGOS
@@ -595,13 +660,53 @@
 
         // MOVIMENTAÇÕES DE ESTOQUE
         function calcE() { const i = document.getElementById('e-item').value; const q = document.getElementById('e-qtd').value; if(i !== "" && q) document.getElementById('e-val').value = `R$ ${(data.catalogo[i].pre * q).toLocaleString('pt-BR', {minimumFractionDigits:2})}`; }
-        function addEstoque() { const i = document.getElementById('e-item').value; const q = parseInt(document.getElementById('e-qtd').value); if(i === "" || !q) return; const c = data.catalogo[i]; data.estoque.push({ emp: c.emp, pro: c.pro, q, v: c.pre * q }); if(db) db.ref('estoque').set(data.estoque); else { atualizarLocalStorage('estoque'); renderEstoque(); renderEstatisticas(); } document.getElementById('e-qtd').value = ""; document.getElementById('e-val').value = ""; toggleBox('box-est-form'); }
+        function addEstoque() { 
+            const i = document.getElementById('e-item').value; 
+            const q = parseInt(document.getElementById('e-qtd').value); 
+            if(i === "" || !q) return; 
+            const c = data.catalogo[i]; 
+            
+            data.estoque.push({ emp: c.emp, pro: c.pro, q, v: c.pre * q }); 
+            
+            if(db) {
+                db.ref('estoque').set(data.estoque);
+            } else { 
+                atualizarLocalStorage('estoque'); 
+                renderEstoque(); 
+                renderEstatisticas(); 
+            }
+            
+            registrarAcaoNoPainel(`Registrou entrada de estoque de ${q} un de "${c.pro}" da Família ${c.emp}`);
+            document.getElementById('e-qtd').value = ""; 
+            document.getElementById('e-val').value = ""; 
+            toggleBox('box-est-form'); 
+        }
         function renderMembros() { const t = document.getElementById('t-membros'); if(!t) return; t.innerHTML = ""; data.membros.forEach(m => { const isOnline = m.dbKey === 'master_local' ? (currentUser && currentUser.dbKey === 'master_local') : (m.status && m.status.online); t.innerHTML += `<tr><td><strong>#${m.uid}</strong></td><td>${m.nome}</td><td>${m.cargo}</td><td><span style="font-family:monospace; opacity:0.7">${m.senha}</span></td><td><span class="status-dot ${isOnline ? 'online' : 'offline'}"></span>${isOnline ? 'Online' : 'Offline'}</td><td><button class="btn-warning" style="padding:4px 10px; font-size:12px;" onclick="prepararEdicaoMembro('${m.dbKey}')">Editar</button> ${m.dbKey !== 'master_local' ? `<button class="btn-danger" style="padding:4px 10px; font-size:12px;" onclick="delMem('${m.dbKey}')">Deletar</button>` : ''}</td></tr>`; }); }
         function renderEstoque() { const t = document.getElementById('tab-est'); if(!t) return; t.innerHTML = "<tr><th>Família</th><th>Produto</th><th>Quantidade</th><th>Total</th><th>Status</th></tr>"; data.estoque.forEach(e => t.innerHTML += `<tr><td>${e.emp}</td><td><strong>${e.pro}</strong></td><td>${e.q} un</td><td>R$ ${e.v.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td><td><span class="badge ${e.q < 5 ? 'badge-low' : 'badge-ok'}">${e.q < 5 ? 'REPOSIÇÃO' : 'OK'}</span></td></tr>`); }
 
         // ENTRADA DE VENDAS
         function calcV() { const i = document.getElementById('v-item').value; const q = document.getElementById('v-qtd').value; if(i !== "" && q) document.getElementById('v-val').value = `R$ ${(data.catalogo[i].pre * q).toLocaleString('pt-BR', {minimumFractionDigits:2})}`; }
-        function addVenda() { const i = document.getElementById('v-item').value; const q = parseInt(document.getElementById('v-qtd').value); if(i === "" || !q) return; const c = data.catalogo[i]; data.vendas.push({ emp: c.emp, pro: c.pro, q, v: c.pre * q }); if(db) db.ref('vendas').set(data.vendas); else { atualizarLocalStorage('vendas'); renderVendas(); renderEstatisticas(); } document.getElementById('v-qtd').value = ""; document.getElementById('v-val').value = ""; toggleBox('box-ven-form'); }
+        function addVenda() { 
+            const i = document.getElementById('v-item').value; 
+            const q = parseInt(document.getElementById('v-qtd').value); 
+            if(i === "" || !q) return; 
+            const c = data.catalogo[i]; 
+            
+            data.vendas.push({ emp: c.emp, pro: c.pro, q, v: c.pre * q }); 
+            
+            if(db) {
+                db.ref('vendas').set(data.vendas);
+            } else { 
+                atualizarLocalStorage('vendas'); 
+                renderVendas(); 
+                renderEstatisticas(); 
+            }
+            
+            registrarAcaoNoPainel(`Confirmou a venda de ${q} un de "${c.pro}" para a Família ${c.emp} (Total: R$ ${(c.pre * q).toLocaleString('pt-BR')})`);
+            document.getElementById('v-qtd').value = ""; 
+            document.getElementById('v-val').value = ""; 
+            toggleBox('box-ven-form'); 
+        }
         function renderVendas() { const t = document.getElementById('tab-ven'); if(!t) return; t.innerHTML = "<tr><th>Família</th><th>Produto</th><th>Qtd</th><th>Faturamento</th></tr>"; data.vendas.forEach(v => t.innerHTML += `<tr><td>${v.emp}</td><td><strong>${v.pro}</strong></td><td>${v.q} un</td><td style="color:var(--success); font-weight:700">R$ ${v.v.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td></tr>`); }
 
         // --- ENGENHARIA DO SISTEMA DE GRÁFICOS (ABA MOVIMENTOS) ---
@@ -610,7 +715,6 @@
             const canvasProd = document.getElementById('chartProdutos');
             if (!canvasFin || !canvasProd) return;
 
-            // Coleta de dados estruturados para produtos
             let produtosObj = {};
             data.estoque.forEach(e => {
                 if(!produtosObj[e.pro]) produtosObj[e.pro] = { comprado: 0, vendido: 0 };
@@ -625,15 +729,12 @@
             let dadosComprados = labelsProdutos.map(p => produtosObj[p].comprado);
             let dadosVendidos = labelsProdutos.map(p => produtosObj[p].vendido);
 
-            // Destruir instâncias antigas para evitar bugs de hover visual
             if (chartFinInstancia) chartFinInstancia.destroy();
             if (chartProdInstancia) chartProdInstancia.destroy();
 
-            // Configurações Globais de Design do ChartJS
             Chart.defaults.color = '#94a3b8';
             Chart.defaults.font.family = "'Inter', sans-serif";
 
-            // 1. Renderização Gráfico Financeiro (Pizza)
             chartFinInstancia = new Chart(canvasFin, {
                 type: 'doughnut',
                 data: {
@@ -648,13 +749,10 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom' }
-                    }
+                    plugins: { legend: { position: 'bottom' } }
                 }
             });
 
-            // 2. Renderização Gráfico de Fluxo de Produtos (Barras Comparativas)
             chartProdInstancia = new Chart(canvasProd, {
                 type: 'bar',
                 data: {
@@ -683,9 +781,7 @@
                         y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.04)' } },
                         x: { grid: { display: false } }
                     },
-                    plugins: {
-                        legend: { position: 'bottom' }
-                    }
+                    plugins: { legend: { position: 'bottom' } }
                 }
             });
         }
