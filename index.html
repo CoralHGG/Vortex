@@ -136,7 +136,7 @@
         td { padding: 16px 15px; border-bottom: 1px solid var(--border); font-size: 14px; }
 
         .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 8px; }
-        .online { background: var(--success); }
+        .online { background: var(--success); box-shadow: 0 0 8px var(--success); }
         .offline { background: #64748b; }
         .badge { padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; }
         .badge-low { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
@@ -358,7 +358,7 @@
         let data = { membros: [], estoque: [], vendas: [], movimentos: [], catalogo: [], notas: [], dash: {} };
 
         // Cadastro Mestre Padrão
-        const masterFixo = { dbKey: "master_local", uid: "3461", nome: "Megan", senha: "1234", cargo: "Chefe" };
+        const masterFixo = { dbKey: "master_local", uid: "3461", nome: "Megan", senha: "1234", cargo: "Chefe", status: { online: false, lastSeen: 0 } };
 
         function forcarInjecaoMaster() {
             const jaExiste = data.membros.some(m => m.dbKey === 'master_local' || m.nome.toLowerCase() === 'megan');
@@ -368,7 +368,7 @@
             renderMembros();
         }
 
-        // --- 2. CONFIGURAÇÃO DO SEU FIREBASE (SÓ ATIVA SE PARAR DE USAR 'SUA_API_KEY') ---
+        // --- 2. CONFIGURAÇÃO DO SEU FIREBASE ---
         const firebaseConfig = {
   apiKey: "AIzaSyBCEpercpoeHL6SFzw0TI91kmNplF8WXDc",
   authDomain: "vortex-f7559.firebaseapp.com",
@@ -412,11 +412,10 @@
                 }
             });
         } else {
-            // Inicialização imediata local
             forcarInjecaoMaster();
         }
 
-        // --- 3. CORREÇÃO DO SISTEMA DE LOGIN (AVISA ERRO NA HORA) ---
+        // --- 3. ENGINE DE LOGIN ---
         function auth() {
             const u = document.getElementById('user-in').value.trim();
             const p = document.getElementById('pass-in').value.trim();
@@ -424,7 +423,6 @@
             
             errBox.style.display = 'none';
 
-            // Busca na lista atualizada
             const found = data.membros.find(m => 
                 (m.nome.toLowerCase() === u.toLowerCase() || String(m.uid) === u) && String(m.senha) === p
             );
@@ -432,27 +430,34 @@
             if(found) {
                 logarUsuario(found);
             } else {
-                errBox.style.display = 'block'; // Mostra o alerta vermelho se errar
+                errBox.style.display = 'block';
             }
         }
 
         function logarUsuario(userObj) {
             currentUser = userObj;
+            
+            // Simula status online na memória para exibição local imediata
+            userObj.status = { online: true, lastSeen: Date.now() };
+            
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('main-panel').style.display = 'block';
             document.getElementById('logged-name').innerText = `${userObj.nome} | ${userObj.uid || '---'}`;
             
+            renderMembros(); // Força atualização imediata da tabela com você Online
             updateStatus(true);
             setInterval(() => updateStatus(true), 15000);
         }
 
         function updateStatus(online) {
-            if(!currentUser || !db || currentUser.dbKey === 'master_local') return;
+            if(!currentUser) return;
+            currentUser.status = { online: online, lastSeen: Date.now() };
+            if(!db || currentUser.dbKey === 'master_local') return;
             db.ref('membros/' + currentUser.dbKey + '/status').set({ online: online, lastSeen: Date.now() });
         }
         window.onbeforeunload = () => updateStatus(false);
 
-        // --- 4. SISTEMA DE SALVAR E EDITAR MEMBROS TOTALMENTE CORRIGIDO ---
+        // --- 4. GESTÃO DE MEMBROS ---
         function saveMembro() {
             const key = document.getElementById('m-key').value;
             const uid = document.getElementById('m-id').value.trim();
@@ -463,22 +468,29 @@
             if(!uid || !nome || !senha || !cargo) return;
 
             if(key) {
-                // Modo Edição
                 if(key === 'master_local') {
                     masterFixo.uid = uid; masterFixo.nome = nome; masterFixo.senha = senha; masterFixo.cargo = cargo;
+                    if(currentUser && currentUser.dbKey === 'master_local') {
+                        currentUser.nome = nome; currentUser.uid = uid;
+                        document.getElementById('logged-name').innerText = `${nome} | ${uid}`;
+                    }
                 } else if(db) {
                     db.ref('membros/' + key).update({ uid, nome, senha, cargo });
                 } else {
                     const idx = data.membros.findIndex(m => m.dbKey === key);
-                    if(idx !== -1) data.membros[idx] = { dbKey: key, uid, nome, senha, cargo };
+                    if(idx !== -1) {
+                        const statusAntigo = data.membros[idx].status;
+                        data.membros[idx] = { dbKey: key, uid, nome, senha, cargo, status: statusAntigo };
+                    }
                 }
             } else {
-                // Modo Criação/Novo Login
                 const novaKey = 'local_' + Date.now();
+                const novoMembro = { uid, nome, senha, cargo, status: { online: false, lastSeen: 0 } };
                 if(db) {
-                    db.ref('membros').push().set({ uid, nome, senha, cargo });
+                    db.ref('membros').push().set(novoMembro);
                 } else {
-                    data.membros.push({ dbKey: novaKey, uid, nome, senha, cargo });
+                    novoMembro.dbKey = novaKey;
+                    data.membros.push(novoMembro);
                 }
             }
 
@@ -534,8 +546,8 @@
             t.innerHTML = "";
             
             data.membros.forEach(m => {
-                const diff = Date.now() - (m.status?.lastSeen || 0);
-                const isOnline = m.status?.online && diff < 30000;
+                // Checa se o status dele é ativo na memória interna ou servidor
+                const isOnline = m.status && m.status.online === true;
                 const btnDeletar = m.dbKey === 'master_local' ? '' : `<button style="padding: 4px 10px; font-size:12px;" class="btn-danger" onclick="delMem('${m.dbKey}')">Deletar</button>`;
 
                 t.innerHTML += `<tr>
