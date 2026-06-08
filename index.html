@@ -80,7 +80,6 @@
             position: absolute; top: 0; left: 0; z-index: 100;
         }
 
-        /* Recolhimento por translação pura para não espremer o conteúdo */
         .sidebar.collapsed {
             transform: translateX(-100%);
         }
@@ -142,7 +141,7 @@
             100% { transform: scale(0.9); opacity: 0.6; }
         }
 
-        /* BOTÃO DE ABRE/FECHA FLUTUANTE AJUSTADO */
+        /* BOTÃO DE ABRE/FECHA FLUTUANTE */
         .toggle-btn {
             position: absolute; 
             left: calc(var(--sidebar-w) - 16px); 
@@ -153,7 +152,7 @@
             transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* --- CONTEÚDO PRINCIPAL TOTALMENTE ESTÁVEL --- */
+        /* --- CONTEÚDO PRINCIPAL ESTÁVEL --- */
         .main-content { 
             position: absolute;
             top: 0;
@@ -168,7 +167,6 @@
             z-index: 1;
         }
         
-        /* Quando a barra fechar, o conteúdo ganha espaçamento padrão sem se mexer de forma errada */
         .main-content.expanded {
             padding-left: 60px;
         }
@@ -446,7 +444,6 @@
         let currentUser = null;
         let data = { membros: [], estoque: [], vendas: [], movimentos: [], catalogo: [], notas: [], dash: {} };
 
-        // --- SISTEMA DE EXPANDIR E RECOLHER (+ E -) ---
         function toggleBox(id) {
             const box = document.getElementById(id);
             const indicator = box.querySelector('.icon-indicator');
@@ -454,7 +451,6 @@
             indicator.innerText = box.classList.contains('open') ? '-' : '+';
         }
 
-        // --- CONTROLE DE ABERTURA DA BARRA LATERAL (ESTÁVEL) ---
         function toggleSidebar() {
             const side = document.getElementById('sidebar');
             const icon = document.getElementById('t-icon');
@@ -474,7 +470,6 @@
             }
         }
 
-        // --- ATUALIZAÇÃO DO STATUS DOS USUÁRIOS ---
         function updateStatus(online) {
             if(!currentUser) return;
             db.ref('membros/' + currentUser.dbKey + '/status').set({
@@ -483,7 +478,7 @@
             });
         }
 
-        // --- CAPTURA DE DADOS EM TEMPO REAL ---
+        // CAPTURA EM TEMPO REAL COMPLETA
         db.ref('membros').on('value', s => { 
             const val = s.val();
             data.membros = val ? Object.keys(val).map(k => ({...val[k], dbKey: k})) : [];
@@ -493,10 +488,9 @@
         db.ref('estoque').on('value', s => { data.estoque = s.val() || []; renderEstoque(); });
         db.ref('vendas').on('value', s => { data.vendas = s.val() || []; renderVendas(); });
         db.ref('movimentos').on('value', s => { data.movimentos = s.val() || []; renderMov(); });
-        db.ref('notas').on('value', s => { data.notas = s.val() || []; renderNotas(); });
+        db.ref('notes').on('value', s => { data.notas = s.val() || []; renderNotas(); });
         db.ref('dash').on('value', s => { data.dash = s.val() || {s:0,e:0,sa:0}; renderDash(); });
         
-        // Sincroniza o background tanto no body quanto na tela de login isolada
         db.ref('bg').on('value', s => { 
             if(s.val()) {
                 const urlStyle = `linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)), url('${s.val()}')`;
@@ -505,38 +499,51 @@
             }
         });
 
-        // --- TROCA DE ABA ---
         function tab(id) {
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.section').forEach(s => l = s.classList.remove('active'));
             document.querySelectorAll('.menu-list li').forEach(l => l.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             event.currentTarget.classList.add('active');
         }
 
-        // --- AUTENTICAÇÃO ---
+        // --- SISTEMA DE AUTENTICAÇÃO CORRIGIDO ---
         function auth() {
             const u = document.getElementById('user-in').value.trim();
             const p = document.getElementById('pass-in').value;
 
-            if(u.toLowerCase() === 'megan' && p === '1234' && data.membros.length === 0) {
-                db.ref('membros').push().set({ uid: "3461", nome: 'Megan', senha: '1234', cargo: 'Chefe' });
-                return;
-            }
-
-            const found = data.membros.find(m => (m.nome.toLowerCase() === u.toLowerCase() || m.uid === u) && m.senha === p);
+            // 1. Procura primeiro nas contas criadas do banco real
+            const found = data.membros.find(m => (m.nome.toLowerCase() === u.toLowerCase() || String(m.uid) === u) && String(m.senha) === p);
+            
             if(found) {
-                currentUser = found;
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('main-panel').style.display = 'block';
+                logarUsuario(found);
+            } 
+            // 2. Se o banco estiver zerado e tentar logar com a Megan padrão, cria ela e já loga direto!
+            else if(u.toLowerCase() === 'megan' && p === '1234' && data.membros.length === 0) {
+                const adminMaster = { uid: "3461", nome: 'Megan', senha: '1234', cargo: 'Chefe' };
+                const newRef = db.ref('membros').push();
+                newRef.set(adminMaster);
+                adminMaster.dbKey = newRef.key;
                 
-                document.getElementById('logged-name').innerText = `${found.nome} | ${found.uid || '---'}`;
-                
-                updateStatus(true);
-                setInterval(() => updateStatus(true), 15000);
-            } else {
+                logarUsuario(adminMaster);
+            } 
+            // 3. Senão, recusa o login por erro nos dados
+            else {
                 document.getElementById('login-err').style.display = 'block';
             }
         }
+
+        function logarUsuario(userObj) {
+            currentUser = userObj;
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('main-panel').style.display = 'block';
+            
+            // Renderiza o Nome e o ID dinamicamente no rodapé da barra lateral
+            document.getElementById('logged-name').innerText = `${userObj.nome} | ${userObj.uid || '---'}`;
+            
+            updateStatus(true);
+            setInterval(() => updateStatus(true), 15000);
+        }
+
         window.onbeforeunload = () => updateStatus(false);
 
         // --- OPERAÇÕES E RENDERIZADORES ---
@@ -564,7 +571,7 @@
         function addMembro() {
             const uid = document.getElementById('m-id').value.trim();
             const nome = document.getElementById('m-nome').value.trim();
-            const senha = document.getElementById('m-pass').value;
+            const senha = document.getElementById('m-pass').value.trim();
             const cargo = document.getElementById('m-cargo').value.trim();
             if(!uid || !nome || !senha || !cargo) return;
 
@@ -572,6 +579,7 @@
             document.getElementById('m-id').value=""; document.getElementById('m-nome').value=""; document.getElementById('m-pass').value=""; document.getElementById('m-cargo').value="";
             toggleBox('box-mem-form');
         }
+        
         function delMem(k) { if(confirm("Remover este acesso do banco?")) db.ref('membros/'+k).remove(); }
 
         function upDash() {
