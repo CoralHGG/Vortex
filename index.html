@@ -229,7 +229,9 @@
     <div id="login-screen">
         <div class="login-box">
             <div class="logo-area"><h2>VORTEX</h2><span>Painel Operacional</span></div>
-            <div id="login-err" style="color: var(--danger); font-size: 13px; margin-bottom: 15px; display: none;">Dados incorretos!</div>
+            <div id="login-err" style="color: var(--danger); background: rgba(239, 64, 64, 0.1); border: 1px solid rgba(239, 64, 64, 0.2); padding: 10px; border-radius: 10px; font-size: 13px; margin-bottom: 20px; display: none;">
+                Usuário ou senha incorretos! Verifique os dados.
+            </div>
             <input type="text" id="user-in" placeholder="Usuário/ID" style="margin-bottom: 15px;">
             <input type="password" id="pass-in" placeholder="Senha" style="margin-bottom: 25px;">
             <button style="width: 100%;" onclick="auth()">ENTRAR NO SISTEMA</button>
@@ -443,8 +445,14 @@
   appId: "1:254083067084:web:e40689772f4c507e426669",
   measurementId: "G-GMFS68CRGT"
 };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+        
+        let db = null;
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.database();
+        } catch(e) {
+            console.warn("Firebase não configurado ou com credenciais inválidas. Rodando em modo emergência local.");
+        }
 
         let currentUser = null;
         let data = { membros: [], estoque: [], vendas: [], movimentos: [], catalogo: [], notas: [], dash: {} };
@@ -476,33 +484,34 @@
         }
 
         function updateStatus(online) {
-            if(!currentUser) return;
+            if(!currentUser || !db) return;
             db.ref('membros/' + currentUser.dbKey + '/status').set({
                 online: online,
                 lastSeen: Date.now()
             });
         }
 
-        // CAPTURA EM TEMPO REAL COMPLETA
-        db.ref('membros').on('value', s => { 
-            const val = s.val();
-            data.membros = val ? Object.keys(val).map(k => ({...val[k], dbKey: k})) : [];
-            renderMembros(); 
-        });
-        db.ref('catalogo').on('value', s => { data.catalogo = s.val() || []; updateDrops(); renderFamilies(); });
-        db.ref('estoque').on('value', s => { data.estoque = s.val() || []; renderEstoque(); });
-        db.ref('vendas').on('value', s => { data.vendas = s.val() || []; renderVendas(); });
-        db.ref('movimentos').on('value', s => { data.movimentos = s.val() || []; renderMov(); });
-        db.ref('notas').on('value', s => { data.notas = s.val() || []; renderNotas(); });
-        db.ref('dash').on('value', s => { data.dash = s.val() || {s:0,e:0,sa:0}; renderDash(); });
-        
-        db.ref('bg').on('value', s => { 
-            if(s.val()) {
-                const urlStyle = `linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)), url('${s.val()}')`;
-                document.body.style.backgroundImage = urlStyle; 
-                document.getElementById('login-screen').style.backgroundImage = urlStyle;
-            }
-        });
+        // CAPTURA EM TEMPO REAL SEGURA (SÓ SE O FIREBASE INICIAR)
+        if(db) {
+            db.ref('membros').on('value', s => { 
+                const val = s.val();
+                data.membros = val ? Object.keys(val).map(k => ({...val[k], dbKey: k})) : [];
+                renderMembros(); 
+            });
+            db.ref('catalogo').on('value', s => { data.catalogo = s.val() || []; updateDrops(); renderFamilies(); });
+            db.ref('estoque').on('value', s => { data.estoque = s.val() || []; renderEstoque(); });
+            db.ref('vendas').on('value', s => { data.vendas = s.val() || []; renderVendas(); });
+            db.ref('movimentos').on('value', s => { data.movimentos = s.val() || []; renderMov(); });
+            db.ref('notas').on('value', s => { data.notas = s.val() || []; renderNotas(); });
+            db.ref('dash').on('value', s => { data.dash = s.val() || {s:0,e:0,sa:0}; renderDash(); });
+            db.ref('bg').on('value', s => { 
+                if(s.val()) {
+                    const urlStyle = `linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)), url('${s.val()}')`;
+                    document.body.style.backgroundImage = urlStyle; 
+                    document.getElementById('login-screen').style.backgroundImage = urlStyle;
+                }
+            });
+        }
 
         function tab(id) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -511,27 +520,44 @@
             event.currentTarget.classList.add('active');
         }
 
-        // --- SISTEMA DE AUTENTICAÇÃO ---
+        // --- SISTEMA DE AUTENTICAÇÃO ATUALIZADO (À PROVA DE TRAVAMENTOS) ---
         function auth() {
             const u = document.getElementById('user-in').value.trim();
             const p = document.getElementById('pass-in').value.trim();
-
-            const found = data.membros.find(m => (m.nome.toLowerCase() === u.toLowerCase() || String(m.uid) === u) && String(m.senha) === p);
+            const errBox = document.getElementById('login-err');
             
-            if(found) {
-                logarUsuario(found);
-            } 
-            else if(u.toLowerCase() === 'megan' && p === '1234') {
-                const adminMaster = { uid: "3461", nome: 'Megan', senha: '1234', cargo: 'Chefe' };
-                const newRef = db.ref('membros').push();
-                newRef.set(adminMaster);
-                adminMaster.dbKey = newRef.key;
+            errBox.style.display = 'none'; // Reseta o aviso de erro
+
+            // 1. Testa primeiro a conta master fixa para garantir acesso mesmo sem Firebase
+            if(u.toLowerCase() === 'megan' && p === '1234') {
+                let masterObj = { uid: "3461", nome: 'Megan', senha: '1234', cargo: 'Chefe', dbKey: 'master_key' };
                 
-                logarUsuario(adminMaster);
-            } 
-            else {
-                document.getElementById('login-err').style.display = 'block';
+                // Se o Firebase estiver ativo, tenta injetar ou salvar no banco online
+                if(db) {
+                    const foundInDb = data.membros.find(m => m.nome.toLowerCase() === 'megan');
+                    if(!foundInDb) {
+                        const newRef = db.ref('membros').push();
+                        newRef.set({ uid: "3461", nome: 'Megan', senha: '1234', cargo: 'Chefe' });
+                        masterObj.dbKey = newRef.key;
+                    } else {
+                        masterObj.dbKey = foundInDb.dbKey;
+                    }
+                }
+                logarUsuario(masterObj);
+                return;
             }
+
+            // 2. Se não for a conta master e tiver banco ativo, procura na lista dinâmica
+            if(data.membros && data.membros.length > 0) {
+                const found = data.membros.find(m => (m.nome.toLowerCase() === u.toLowerCase() || String(m.uid) === u) && String(m.senha) === p);
+                if(found) {
+                    logarUsuario(found);
+                    return;
+                }
+            }
+
+            // 3. Se passou por tudo e não bateu, exibe o aviso na tela de forma limpa
+            errBox.style.display = 'block';
         }
 
         function logarUsuario(userObj) {
@@ -546,7 +572,7 @@
 
         window.onbeforeunload = () => updateStatus(false);
 
-        // --- GERENCIAMENTO DE MEMBROS (COM EDIÇÃO) ---
+        // --- GERENCIAMENTO DE MEMBROS ---
         function renderMembros() {
             const t = document.getElementById('t-membros'); t.innerHTML = "";
             data.membros.forEach(m => {
@@ -573,6 +599,7 @@
         }
 
         function saveMembro() {
+            if(!db) return alert("Firebase desativado. Não é possível salvar alterações.");
             const key = document.getElementById('m-key').value;
             const uid = document.getElementById('m-id').value.trim();
             const nome = document.getElementById('m-nome').value.trim();
@@ -581,16 +608,13 @@
             if(!uid || !nome || !senha || !cargo) return;
 
             if(key) {
-                // Modo Edição: Atualiza os dados existentes mantendo o status anterior
                 db.ref('membros/' + key).update({ uid, nome, senha, cargo });
-                // Se o usuário editado for você mesmo, atualiza as informações do painel na hora
                 if(currentUser && currentUser.dbKey === key) {
                     currentUser.nome = nome;
                     currentUser.uid = uid;
                     document.getElementById('logged-name').innerText = `${nome} | ${uid}`;
                 }
             } else {
-                // Modo Cadastro: Cria um novo registro
                 db.ref('membros').push().set({ uid, nome, senha, cargo });
             }
 
@@ -612,11 +636,8 @@
             document.getElementById('btn-save-mem').innerText = "SALVAR ALTERAÇÕES";
             document.getElementById('btn-cancel-edit').style.display = "inline-block";
 
-            // Abre a caixa de formulário caso esteja fechada
             const box = document.getElementById('box-mem-form');
-            if(!box.classList.contains('open')) {
-                toggleBox('box-mem-form');
-            }
+            if(!box.classList.contains('open')) toggleBox('box-mem-form');
             window.scrollTo({ top: box.offsetTop - 20, behavior: 'smooth' });
         }
 
@@ -632,10 +653,14 @@
             document.getElementById('btn-cancel-edit').style.display = "none";
         }
         
-        function delMem(k) { if(confirm("Remover este acesso do banco?")) db.ref('membros/'+k).remove(); }
+        function delMem(k) { 
+            if(!db) return;
+            if(confirm("Remover este acesso do banco?")) db.ref('membros/'+k).remove(); 
+        }
 
         // --- OUTRAS OPERAÇÕES E RENDERIZADORES ---
         function upDash() {
+            if(!db) return;
             const s = parseFloat(document.getElementById('in-saldo').value) || 0;
             const e = parseFloat(document.getElementById('in-ent').value) || 0;
             const sa = parseFloat(document.getElementById('in-sai').value) || 0;
@@ -643,12 +668,13 @@
             toggleBox('box-dash-form');
         }
         function renderDash() {
-            document.getElementById('v-saldo').innerText = `R$ ${data.dash.s.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
-            document.getElementById('v-ent').innerText = `R$ ${data.dash.e.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
-            document.getElementById('v-sai').innerText = `R$ ${data.dash.sa.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
+            document.getElementById('v-saldo').innerText = `R$ ${(data.dash.s || 0).toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
+            document.getElementById('v-ent').innerText = `R$ ${(data.dash.e || 0).toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
+            document.getElementById('v-sai').innerText = `R$ ${(data.dash.sa || 0).toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
         }
 
         function addCat() {
+            if(!db) return;
             const emp = document.getElementById('c-emp').value.trim();
             const pro = document.getElementById('c-pro').value.trim();
             const pre = parseFloat(document.getElementById('c-pre').value);
@@ -696,6 +722,7 @@
             if(i !== "" && q) document.getElementById('e-val').value = `R$ ${(data.catalogo[i].pre * q).toLocaleString('pt-BR')}`;
         }
         function addEstoque() {
+            if(!db) return;
             const i = document.getElementById('e-item').value; const q = parseInt(document.getElementById('e-qtd').value);
             if(i === "" || !q) return;
             const item = data.catalogo[i];
@@ -714,6 +741,7 @@
             if(i !== "" && q) document.getElementById('v-val').value = `R$ ${(data.catalogo[i].pre * q).toLocaleString('pt-BR')}`;
         }
         function addVenda() {
+            if(!db) return;
             const i = document.getElementById('v-item').value; const q = parseInt(document.getElementById('v-qtd').value);
             if(i === "" || !q) return;
             const item = data.catalogo[i];
@@ -728,6 +756,7 @@
         }
 
         function addMov() {
+            if(!db) return;
             const t = document.getElementById('mo-t').value; const d = document.getElementById('mo-d').value.trim(); const v = parseFloat(document.getElementById('mo-v').value);
             if(!d || !v) return;
             data.movimentos.push({t, d, v});
@@ -742,6 +771,7 @@
         }
 
         function addNota() {
+            if(!db) return;
             const txt = document.getElementById('g-nota').value.trim(); if(!txt) return;
             data.notas.push({ txt, u: currentUser.nome, d: new Date().toLocaleDateString('pt-BR') });
             db.ref('notas').set(data.notas);
@@ -751,7 +781,7 @@
             const m = document.getElementById('mural'); m.innerHTML = "";
             [...data.notas].reverse().forEach(n => m.innerHTML += `<div class="box-list"><strong>${n.u}</strong> <small style="float:right; opacity:0.4;">${n.d}</small><p style="margin-top:12px; line-height:1.4;">${n.txt}</p></div>`);
         }
-        function saveBG() { db.ref('bg').set(document.getElementById('c-bg').value.trim()); toggleBox('box-cfg-bg'); }
+        function saveBG() { if(db) { db.ref('bg').set(document.getElementById('c-bg').value.trim()); toggleBox('box-cfg-bg'); } }
     </script>
 </body>
 </html>
