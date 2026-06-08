@@ -29,18 +29,19 @@
             height: 100vh;
             display: flex;
             overflow: hidden;
-            transition: 0.5s;
+            transition: background 0.3s ease;
         }
 
-        /* --- LOGIN --- */
+        /* --- LOGIN COM FUNDO ADAPTADO --- */
         #login-screen {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: #0b0813; display: flex; justify-content: center; align-items: center; z-index: 999;
+            display: flex; justify-content: center; align-items: center; z-index: 999;
+            background: transparent; /* Permite ver o fundo do body por trás */
         }
         .login-box {
             background: var(--glass); backdrop-filter: var(--blur);
             padding: 50px; border-radius: 24px; border: 1px solid var(--border);
-            width: 400px; text-align: center;
+            width: 400px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
         }
 
         input, select, textarea {
@@ -59,7 +60,7 @@
         /* --- LAYOUT DO PAINEL --- */
         #main-panel { display: none; width: 100vw; height: 100vh; display: flex; width: 100%; }
 
-        /* --- SIDEBAR --- */
+        /* --- SIDEBAR REVISADA --- */
         .sidebar {
             width: var(--sidebar-w); min-width: var(--sidebar-w);
             background: var(--glass); backdrop-filter: var(--blur);
@@ -85,18 +86,26 @@
         .menu-list li:hover { background: rgba(255,255,255,0.05); color: #fff; }
         .menu-list li.active { background: rgba(168, 85, 247, 0.15); color: #fff; border-left: 4px solid var(--primary); font-weight: 600; }
 
-        /* BOTÃO DE ABRE/FECHA (FLUTUANTE) */
+        /* BOTÃO DE ABRE/FECHA (FIXO SEGURO) */
         .toggle-btn {
-            position: fixed; left: calc(var(--sidebar-w) - 15px); top: 35px;
+            position: fixed; left: calc(var(--sidebar-w) - 16px); top: 35px;
             width: 32px; height: 32px; background: var(--primary);
             border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; z-index: 99; border: 2px solid #0b0813; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer; z-index: 999; border: 2px solid #0b0813; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .sidebar.collapsed + .main-content .toggle-btn { left: 15px; }
 
-        /* --- CONTEÚDO PRINCIPAL --- */
-        .main-content { flex-grow: 1; padding: 40px 40px 40px 60px; overflow-y: auto; background: transparent; width: 100%; }
-        .section { display: none; animation: fadeIn 0.4s ease; }
+        /* --- CONTEÚDO PRINCIPAL COM PROTEÇÃO DE CORTE --- */
+        .main-content { 
+            flex-grow: 1; 
+            padding: 40px; 
+            padding-left: 60px; /* Garante que o conteúdo não fique embaixo do botão flutuante */
+            overflow-y: auto; 
+            background: transparent; 
+            width: 100%;
+            max-width: 100%;
+            transition: padding-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .section { display: none; animation: fadeIn 0.4s ease; width: 100%; }
         .section.active { display: block; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
@@ -105,6 +114,7 @@
         .collapsible-box {
             background: var(--glass); backdrop-filter: var(--blur);
             border: 1px solid var(--border); border-radius: 16px; margin-bottom: 25px; overflow: hidden;
+            width: 100%;
         }
         .collapsible-header {
             padding: 20px; background: rgba(255,255,255,0.02); cursor: pointer;
@@ -125,7 +135,7 @@
         .card .value { font-size: 26px; font-weight: 700; }
 
         /* BOX PADRAO PARA LISTAS */
-        .box-list { background: var(--glass); backdrop-filter: var(--blur); border: 1px solid var(--border); padding: 25px; border-radius: 16px; margin-bottom: 25px; }
+        .box-list { background: var(--glass); backdrop-filter: var(--blur); border: 1px solid var(--border); padding: 25px; border-radius: 16px; margin-bottom: 25px; width: 100%; overflow-x: auto; }
         .box-title { font-size: 16px; font-weight: 600; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
 
         /* GRID PARA EXIBIR AS FAMILIAS SALVAS */
@@ -134,8 +144,8 @@
         .family-card h4 { font-size: 18px; color: #fff; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 5px; }
         .family-item { display: flex; justify-content: space-between; padding: 6px 0; font-size: 14px; opacity: 0.9; }
 
-        /* --- TABELAS --- */
-        table { width: 100%; border-collapse: collapse; }
+        /* --- TABELAS RESPONSIVAS --- */
+        table { width: 100%; border-collapse: collapse; min-width: 500px; }
         th { text-align: left; padding: 12px 15px; opacity: 0.5; font-size: 11px; text-transform: uppercase; }
         td { padding: 16px 15px; border-bottom: 1px solid var(--border); font-size: 14px; }
 
@@ -179,7 +189,7 @@
             </div>
         </aside>
 
-        <main class="main-content">
+        <main class="main-content" id="main-content">
             <div class="toggle-btn" id="toggle-btn" onclick="toggleSidebar()">
                 <i class="fas fa-chevron-left" id="t-icon"></i>
             </div>
@@ -346,7 +356,7 @@
 
     <script>
         // --- CONFIGURAÇÃO DO SEU FIREBASE ---
-        const firebaseConfig = {
+       const firebaseConfig = {
   apiKey: "AIzaSyBCEpercpoeHL6SFzw0TI91kmNplF8WXDc",
   authDomain: "vortex-f7559.firebaseapp.com",
   databaseURL: "https://vortex-f7559-default-rtdb.firebaseio.com",
@@ -370,20 +380,23 @@
             indicator.innerText = box.classList.contains('open') ? '-' : '+';
         }
 
-        // --- CONTROLE DE ABERTURA DA BARRA LATERAL ---
+        // --- CONTROLE DE ABERTURA DA BARRA LATERAL (CORRIGIDO) ---
         function toggleSidebar() {
             const side = document.getElementById('sidebar');
             const icon = document.getElementById('t-icon');
             const btn = document.getElementById('toggle-btn');
+            const mainContent = document.getElementById('main-content');
             
             side.classList.toggle('collapsed');
             
             if(side.classList.contains('collapsed')) {
                 icon.className = 'fas fa-chevron-right';
                 btn.style.left = '15px';
+                mainContent.style.paddingLeft = '60px'; // Recua o conteúdo para não ser sobreposto
             } else {
                 icon.className = 'fas fa-chevron-left';
-                btn.style.left = '245px';
+                btn.style.left = '244px';
+                mainContent.style.paddingLeft = '60px';
             }
         }
 
@@ -408,7 +421,13 @@
         db.ref('movimentos').on('value', s => { data.movimentos = s.val() || []; renderMov(); });
         db.ref('notas').on('value', s => { data.notas = s.val() || []; renderNotas(); });
         db.ref('dash').on('value', s => { data.dash = s.val() || {s:0,e:0,sa:0}; renderDash(); });
-        db.ref('bg').on('value', s => { if(s.val()) document.body.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('${s.val()}')`; });
+        
+        // Aplica o plano de fundo em todo o body (afeta painel e tela de login)
+        db.ref('bg').on('value', s => { 
+            if(s.val()) {
+                document.body.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)), url('${s.val()}')`; 
+            }
+        });
 
         // --- TROCA DE ABA ---
         function tab(id) {
@@ -432,6 +451,7 @@
             if(found) {
                 currentUser = found;
                 document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('main-panel').style.display = 'flex';
                 document.getElementById('logged-name').innerText = found.nome;
                 updateStatus(true);
                 setInterval(() => updateStatus(true), 15000);
@@ -532,7 +552,6 @@
             });
         }
 
-        // Cálculos e Funções de Estoque (Compras)
         function calcE() {
             const i = document.getElementById('e-item').value; const q = document.getElementById('e-qtd').value;
             if(i !== "" && q) document.getElementById('e-val').value = `R$ ${(data.catalogo[i].pre * q).toLocaleString('pt-BR')}`;
@@ -551,7 +570,6 @@
             data.estoque.forEach(e => t.innerHTML += `<tr><td>${e.emp}</td><td><strong>${e.pro}</strong></td><td>${e.q} unidades</td><td>R$ ${e.v.toLocaleString()}</td><td><span class="badge ${e.q < 5 ? 'badge-low' : 'badge-ok'}">${e.q < 5 ? 'REPOSIÇÃO' : 'DISPONÍVEL'}</span></td></tr>`);
         }
 
-        // Cálculos e Funções de Vendas
         function calcV() {
             const i = document.getElementById('v-item').value; const q = document.getElementById('v-qtd').value;
             if(i !== "" && q) document.getElementById('v-val').value = `R$ ${(data.catalogo[i].pre * q).toLocaleString('pt-BR')}`;
@@ -570,7 +588,6 @@
             data.vendas.forEach(v => t.innerHTML += `<tr><td>${v.emp}</td><td><strong>${v.pro}</strong></td><td>${v.q} unidades</td><td style="color: var(--success); font-weight: 700;">R$ ${v.v.toLocaleString()}</td></tr>`);
         }
 
-        // Movimentos Gerais
         function addMov() {
             const t = document.getElementById('mo-t').value; const d = document.getElementById('mo-d').value.trim(); const v = parseFloat(document.getElementById('mo-v').value);
             if(!d || !v) return;
