@@ -128,7 +128,7 @@
         .box-list { background: var(--glass); backdrop-filter: var(--blur); border: 1px solid var(--border); padding: 25px; border-radius: 16px; margin-bottom: 25px; width: 100%; overflow-x: auto; }
         .box-title { font-size: 16px; font-weight: 600; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
 
-        /* Grade de Famílias Estilo Post-it (Máximo 2 por linha) */
+        /* Grade de Famílias Estilo Post-it */
         .grid-families { 
             display: grid; 
             grid-template-columns: repeat(2, 1fr); 
@@ -150,9 +150,9 @@
             gap: 12px;
             position: relative;
         }
-        .family-card h4 { font-size: 15px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px; }
+        .family-card h4 { font-size: 15px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px; max-width: 85%; }
         .family-products-list { display: flex; flex-direction: column; gap: 8px; }
-        .family-item { display: flex; justify-content: space-between; font-size: 13.5px; opacity: 0.85; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
+        .family-item { display: flex; justify-content: space-between; align-items: center; font-size: 13.5px; opacity: 0.85; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
         .family-item:last-child { border-bottom: none; }
 
         table { width: 100%; border-collapse: collapse; }
@@ -182,6 +182,11 @@
         .note-card h5 { font-size: 15px; font-weight: 700; color: var(--primary); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
         .note-card p { font-size: 14px; opacity: 0.85; line-height: 1.5; white-space: pre-wrap; margin-bottom: 15px; }
         .note-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.04); padding-top: 10px; font-size: 11px; opacity: 0.5; }
+
+        .btn-table-delete {
+            background: transparent; color: var(--danger); padding: 4px 8px; border-radius: 6px; font-size: 13px; transition: 0.2s;
+        }
+        .btn-table-delete:hover { background: rgba(239, 68, 68, 0.15); transform: scale(1.05); }
     </style>
 </head>
 <body>
@@ -465,7 +470,7 @@
             data.vendas = JSON.parse(localStorage.getItem('vortex_vendas')) || [];
             data.movimentos = JSON.parse(localStorage.getItem('vortex_movimentos')) || [];
             data.catalogo = JSON.parse(localStorage.getItem('vortex_catalogo')) || [];
-            data.notas = JSON.parse(localStorage.getItem('vortex_notas')) || [];
+            data.notas = JSON.parse(localStorage.getItem('vortex_notes')) || [];
             data.dash = JSON.parse(localStorage.getItem('vortex_dash')) || { s: 0, e: 0, sa: 0 };
 
             const bgSalvo = localStorage.getItem('vortex_bg');
@@ -506,9 +511,25 @@
                 }
                 renderMembros();
             });
-            db.ref('catalogo').on('value', s => { data.catalogo = s.val() || []; updateDrops(); renderFamilies(); renderEstatisticas(); });
-            db.ref('estoque').on('value', s => { data.estoque = s.val() || []; renderEstoque(); renderEstatisticas(); });
-            db.ref('vendas').on('value', s => { data.vendas = s.val() || []; renderVendas(); renderEstatisticas(); });
+            db.ref('catalogo').on('value', s => { 
+                const val = s.val() || [];
+                data.catalogo = Object.keys(val).map(k => ({...val[k], id: k}));
+                updateDrops(); 
+                renderFamilies(); 
+                renderEstatisticas(); 
+            });
+            db.ref('estoque').on('value', s => { 
+                const val = s.val() || [];
+                data.estoque = Object.keys(val).map(k => ({...val[k], id: k}));
+                renderEstoque(); 
+                renderEstatisticas(); 
+            });
+            db.ref('vendas').on('value', s => { 
+                const val = s.val() || [];
+                data.vendas = Object.keys(val).map(k => ({...val[k], id: k}));
+                renderVendas(); 
+                renderEstatisticas(); 
+            });
             db.ref('movimentos').on('value', s => { data.movimentos = s.val() || []; renderEstatisticas(); renderLogs(); });
             db.ref('notes').on('value', s => { data.notes = s.val() || []; renderNotas(); });
             db.ref('dash').on('value', s => { data.dash = s.val() || {s:0,e:0,sa:0}; renderDash(); renderEstatisticas(); });
@@ -520,7 +541,7 @@
             const userName = currentUser ? currentUser.nome : "Sistema";
             const novoLog = {
                 user: userName,
-                txt: message,
+                txt: mensagem,
                 time: new Date().toLocaleTimeString('pt-BR') + ' - ' + new Date().toLocaleDateString('pt-BR')
             };
             data.movimentos.push(novoLog);
@@ -666,7 +687,7 @@
         // --- INTERFACES VISUAIS ---
         function toggleBox(id) { const box = document.getElementById(id); box.classList.toggle('open'); const ind = box.querySelector('.icon-indicator'); if(ind) ind.innerText = box.classList.contains('open') ? '-' : '+'; }
         function toggleSidebar() { const side = document.getElementById('sidebar'); const main = document.getElementById('main-content'); const icon = document.getElementById('t-icon'); side.classList.toggle('collapsed'); if(side.classList.contains('collapsed')) { icon.className = 'fas fa-chevron-right'; main.classList.add('expanded'); } else { icon.className = 'fas fa-chevron-left'; main.classList.remove('expanded'); } }
-        function tab(id) { document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); document.querySelectorAll('.menu-list li').forEach(l => l.classList.remove('active')); document.getElementById(id).classList.add('active'); event.currentTarget.classList.add('active'); if(id === 'mov') { setTimeout(() => { renderEstatisticas(); renderLogs(); }, 50); } else if(id === 'ger') { setTimeout(() => { renderNotas(); }, 50); } else if(id === 'cfg') { setTimeout(() => { renderFamilies(); }, 50); } }
+        function tab(id) { document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); document.querySelectorAll('.menu-list li').forEach(l => l.classList.remove('active')); document.getElementById(id).classList.add('active'); event.currentTarget.classList.add('active'); if(id === 'mov') { setTimeout(() => { renderEstatisticas(); renderLogs(); }, 50); } else if(id === 'ger') { setTimeout(() => { renderNotas(); }, 50); } else if(id === 'cfg') { setTimeout(() => { renderFamilies(); }, 50); } else if(id === 'est') { setTimeout(() => { renderEstoque(); }, 50); } else if(id === 'ven') { setTimeout(() => { renderVendas(); }, 50); } }
 
         // FINANCEIRO & DASHBOARD
         function upDash() { 
@@ -686,15 +707,20 @@
         }
         function renderDash() { document.getElementById('v-saldo').innerText = `R$ ${(data.dash.s || 0).toLocaleString('pt-BR', {minimumFractionDigits:2})}`; document.getElementById('v-ent').innerText = `R$ ${(data.dash.e || 0).toLocaleString('pt-BR', {minimumFractionDigits:2})}`; document.getElementById('v-sai').innerText = `R$ ${(data.dash.sa || 0).toLocaleString('pt-BR', {minimumFractionDigits:2})}`; }
 
-        // PRODUTOS & CATÁLOGOS (EXIBIÇÃO EM POST-ITS LADO A LADO - MÁXIMO 2)
+        // PRODUTOS & CATÁLOGOS (EXIBIÇÃO EM POST-ITS)
         function addCat() { 
             const emp = document.getElementById('c-emp').value.trim(); 
             const pro = document.getElementById('c-pro').value.trim(); 
             const pre = parseFloat(document.getElementById('c-pre').value); 
             if(!emp || !pro || !pre) return; 
-            data.catalogo.push({emp, pro, pre}); 
-            if(db) db.ref('catalogo').set(data.catalogo); 
-            else { 
+            
+            const novoItem = { emp, pro, pre };
+            
+            if(db) {
+                db.ref('catalogo').push().set(novoItem);
+            } else { 
+                novoItem.id = 'cat_' + Date.now();
+                data.catalogo.push(novoItem);
                 atualizarLocalStorage('catalogo'); 
                 updateDrops(); 
                 renderFamilies(); 
@@ -704,6 +730,21 @@
             document.getElementById('c-pro').value=""; 
             document.getElementById('c-pre').value=""; 
             toggleBox('box-cfg-fam'); 
+        }
+
+        function removeCatItem(id) {
+            if(confirm("Deseja mesmo excluir este produto do catálogo de famílias?")) {
+                if(db) {
+                    db.ref('catalogo/' + id).remove();
+                } else {
+                    data.catalogo = data.catalogo.filter(c => c.id !== id);
+                    atualizarLocalStorage('catalogo');
+                    updateDrops();
+                    renderFamilies();
+                    renderEstatisticas();
+                }
+                registrarAcaoNoPainel(`Removeu um item do catálogo de configurações.`);
+            }
         }
 
         function renderFamilies() { 
@@ -732,7 +773,10 @@
                     card += `
                         <div class="family-item">
                             <span>${p.pro}</span>
-                            <strong>R$ ${p.pre.toLocaleString('pt-BR', {minimumFractionDigits:2})}</strong>
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <strong>R$ ${p.pre.toLocaleString('pt-BR', {minimumFractionDigits:2})}</strong>
+                                <button class="btn-table-delete" onclick="removeCatItem('${p.id}')"><i class="fas fa-trash-alt"></i></button>
+                            </div>
                         </div>
                     `; 
                 }); 
@@ -753,10 +797,14 @@
             const q = parseInt(document.getElementById('e-qtd').value); 
             if(i === "" || !q) return; 
             const c = data.catalogo[i]; 
-            data.estoque.push({ emp: c.emp, pro: c.pro, q, v: c.pre * q }); 
+            
+            const novoEstoque = { emp: c.emp, pro: c.pro, q, v: c.pre * q };
+            
             if(db) {
-                db.ref('estoque').set(data.estoque);
+                db.ref('estoque').push().set(novoEstoque);
             } else { 
+                novoEstoque.id = 'est_' + Date.now();
+                data.estoque.push(novoEstoque); 
                 atualizarLocalStorage('estoque'); 
                 renderEstoque(); 
                 renderEstatisticas(); 
@@ -766,8 +814,29 @@
             document.getElementById('e-val').value = ""; 
             toggleBox('box-est-form'); 
         }
+
+        function removeEstoque(id) {
+            if(confirm("Remover este registro de estoque permanente?")) {
+                if(db) {
+                    db.ref('estoque/' + id).remove();
+                } else {
+                    data.estoque = data.estoque.filter(e => e.id !== id);
+                    atualizarLocalStorage('estoque');
+                    renderEstoque();
+                    renderEstatisticas();
+                }
+                registrarAcaoNoPainel(`Removeu um registro do histórico de estoque.`);
+            }
+        }
+
         function renderMembros() { const t = document.getElementById('t-membros'); if(!t) return; t.innerHTML = ""; data.membros.forEach(m => { const isOnline = m.dbKey === 'master_local' ? (currentUser && currentUser.dbKey === 'master_local') : (m.status && m.status.online); t.innerHTML += `<tr><td><strong>#${m.uid}</strong></td><td>${m.nome}</td><td>${m.cargo}</td><td><span style="font-family:monospace; opacity:0.7">${m.senha}</span></td><td><span class="status-dot ${isOnline ? 'online' : 'offline'}"></span>${isOnline ? 'Online' : 'Offline'}</td><td><button class="btn-warning" style="padding:4px 10px; font-size:12px;" onclick="prepararEdicaoMembro('${m.dbKey}')">Editar</button> ${m.dbKey !== 'master_local' ? `<button class="btn-danger" style="padding:4px 10px; font-size:12px;" onclick="delMem('${m.dbKey}')">Deletar</button>` : ''}</td></tr>`; }); }
-        function renderEstoque() { const t = document.getElementById('tab-est'); if(!t) return; t.innerHTML = "<tr><th>Família</th><th>Produto</th><th>Quantidade</th><th>Total</th><th>Status</th></tr>"; data.estoque.forEach(e => t.innerHTML += `<tr><td>${e.emp}</td><td><strong>${e.pro}</strong></td><td>${e.q} un</td><td>R$ ${e.v.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td><td><span class="badge ${e.q < 5 ? 'badge-low' : 'badge-ok'}">${e.q < 5 ? 'REPOSIÇÃO' : 'OK'}</span></td></tr>`); }
+        
+        function renderEstoque() { 
+            const t = document.getElementById('tab-est'); 
+            if(!t) return; 
+            t.innerHTML = "<tr><th>Família</th><th>Produto</th><th>Quantidade</th><th>Total</th><th>Status</th><th>Ações</th></tr>"; 
+            data.estoque.forEach(e => t.innerHTML += `<tr><td>${e.emp}</td><td><strong>${e.pro}</strong></td><td>${e.q} un</td><td>R$ ${e.v.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td><td><span class="badge ${e.q < 5 ? 'badge-low' : 'badge-ok'}">${e.q < 5 ? 'REPOSIÇÃO' : 'OK'}</span></td><td><button class="btn-table-delete" onclick="removeEstoque('${e.id}')"><i class="fas fa-trash-alt"></i></button></td></tr>`); 
+        }
 
         // ENTRADA DE VENDAS
         function calcV() { const i = document.getElementById('v-item').value; const q = document.getElementById('v-qtd').value; if(i !== "" && q) document.getElementById('v-val').value = `R$ ${(data.catalogo[i].pre * q).toLocaleString('pt-BR', {minimumFractionDigits:2})}`; }
@@ -776,10 +845,14 @@
             const q = parseInt(document.getElementById('v-qtd').value); 
             if(i === "" || !q) return; 
             const c = data.catalogo[i]; 
-            data.vendas.push({ emp: c.emp, pro: c.pro, q, v: c.pre * q }); 
+            
+            const novaVenda = { emp: c.emp, pro: c.pro, q, v: c.pre * q };
+            
             if(db) {
-                db.ref('vendas').set(data.vendas);
+                db.ref('vendas').push().set(novaVenda);
             } else { 
+                novaVenda.id = 'ven_' + Date.now();
+                data.vendas.push(novaVenda); 
                 atualizarLocalStorage('vendas'); 
                 renderVendas(); 
                 renderEstatisticas(); 
@@ -789,7 +862,27 @@
             document.getElementById('v-val').value = ""; 
             toggleBox('box-ven-form'); 
         }
-        function renderVendas() { const t = document.getElementById('tab-ven'); if(!t) return; t.innerHTML = "<tr><th>Família</th><th>Produto</th><th>Qtd</th><th>Faturamento</th></tr>"; data.vendas.forEach(v => t.innerHTML += `<tr><td>${v.emp}</td><td><strong>${v.pro}</strong></td><td>${v.q} un</td><td style="color:var(--success); font-weight:700">R$ ${v.v.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td></tr>`); }
+
+        function removeVenda(id) {
+            if(confirm("Deseja deletar permanentemente este registro de venda?")) {
+                if(db) {
+                    db.ref('vendas/' + id).remove();
+                } else {
+                    data.vendas = data.vendas.filter(v => v.id !== id);
+                    atualizarLocalStorage('vendas');
+                    renderVendas();
+                    renderEstatisticas();
+                }
+                registrarAcaoNoPainel(`Excluiu um registro de venda do sistema.`);
+            }
+        }
+
+        function renderVendas() { 
+            const t = document.getElementById('tab-ven'); 
+            if(!t) return; 
+            t.innerHTML = "<tr><th>Família</th><th>Produto</th><th>Qtd</th><th>Faturamento</th><th>Ações</th></tr>"; 
+            data.vendas.forEach(v => t.innerHTML += `<tr><td>${v.emp}</td><td><strong>${v.pro}</strong></td><td>${v.q} un</td><td style="color:var(--success); font-weight:700">R$ ${v.v.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td><td><button class="btn-table-delete" onclick="removeVenda('${v.id}')"><i class="fas fa-trash-alt"></i></button></td></tr>`); 
+        }
 
         // --- SISTEMA DE GRÁFICOS ---
         function renderEstatisticas() {
