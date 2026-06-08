@@ -64,6 +64,13 @@
         .btn-danger { background: var(--danger); }
         .btn-warning { background: #eab308; color: #000; }
 
+        .btn-add-row { background: rgba(255,255,255,0.05); border: 1px dashed var(--border); color: #94a3b8; margin-bottom: 15px; }
+        .btn-add-row:hover { background: rgba(168, 85, 247, 0.1); color: #fff; border-color: var(--primary); }
+
+        .dynamic-row { display: flex; gap: 15px; margin-bottom: 12px; align-items: center; animation: fadeIn 0.3s ease; }
+        .btn-remove-row { background: transparent; color: var(--danger); padding: 10px; font-size: 16px; }
+        .btn-remove-row:hover { background: rgba(239, 68, 68, 0.1); }
+
         /* --- PAINEL PRINCIPAL --- */
         #main-panel { display: none; width: 100vw; height: 100vh; position: relative; }
 
@@ -118,7 +125,7 @@
         .collapsible-header { padding: 20px; background: rgba(255,255,255,0.02); cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: 600; }
         .collapsible-header:hover { background: rgba(255,255,255,0.05); }
         .collapsible-content { padding: 0 20px; max-height: 0; overflow: hidden; transition: all 0.3s ease; }
-        .collapsible-box.open .collapsible-content { padding: 20px; max-height: 500px; border-top: 1px solid var(--border); }
+        .collapsible-box.open .collapsible-content { padding: 20px; max-height: 2000px; border-top: 1px solid var(--border); }
 
         .grid-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 25px; margin-bottom: 35px; }
         .card { background: var(--glass); backdrop-filter: var(--blur); padding: 25px; border-radius: 16px; border: 1px solid var(--border); }
@@ -295,16 +302,15 @@
             <section id="est" class="section">
                 <div class="collapsible-box" id="box-est-form">
                     <div class="collapsible-header" onclick="toggleBox('box-est-form')">
-                        <span>Lançar Entrada no Estoque (Compras)</span>
+                        <span>Lançar Entrada no Estoque (Compras Multi-Itens)</span>
                         <span class="icon-indicator">+</span>
                     </div>
                     <div class="collapsible-content">
-                        <div style="display: flex; gap: 15px;">
-                            <select id="e-item" onchange="calcE()"></select>
-                            <input type="number" id="e-qtd" placeholder="Quantidade" oninput="calcE()">
-                            <input type="text" id="e-val" placeholder="Custo Total Automático" readonly>
-                        </div>
-                        <button style="margin-top: 15px;" onclick="addEstoque()">REGISTRAR ENTRADA</button>
+                        <div id="container-rows-estoque">
+                            </div>
+                        <button type="button" class="button btn-add-row" onclick="addEstoqueRow()"><i class="fas fa-plus"></i> Adicionar Mais um Item</button>
+                        <br>
+                        <button style="margin-top: 5px;" onclick="submitEstoque()">REGISTRAR ENTRADA COMPLETA</button>
                     </div>
                 </div>
                 <div class="box-list">
@@ -316,16 +322,15 @@
             <section id="ven" class="section">
                 <div class="collapsible-box" id="box-ven-form">
                     <div class="collapsible-header" onclick="toggleBox('box-ven-form')">
-                        <span>Registrar Nova Venda para Famílias</span>
+                        <span>Registrar Nova Venda para Famílias (Multi-Itens)</span>
                         <span class="icon-indicator">+</span>
                     </div>
                     <div class="collapsible-content">
-                        <div style="display: flex; gap: 15px;">
-                            <select id="v-item" onchange="calcV()"></select>
-                            <input type="number" id="v-qtd" placeholder="Quantidade Vendida" oninput="calcV()">
-                            <input type="text" id="v-val" placeholder="Faturamento Total Automático" readonly>
-                        </div>
-                        <button style="margin-top: 15px;" onclick="addVenda()">CONFIRMAR VENDA</button>
+                        <div id="container-rows-vendas">
+                            </div>
+                        <button type="button" class="button btn-add-row" onclick="addVendaRow()"><i class="fas fa-plus"></i> Adicionar Mais um Item</button>
+                        <br>
+                        <button style="margin-top: 5px;" onclick="submitVendas()">CONFIRMAR VENDA COMPLETA</button>
                     </div>
                 </div>
                 <div class="box-list">
@@ -392,16 +397,15 @@
 
                 <div class="collapsible-box" id="box-cfg-fam">
                     <div class="collapsible-header" onclick="toggleBox('box-cfg-fam')">
-                        <span>Cadastrar Produtos de Famílias / Fornecedores</span>
+                        <span>Cadastrar Produtos de Famílias / Fornecedores (Em Lote)</span>
                         <span class="icon-indicator">+</span>
                     </div>
                     <div class="collapsible-content">
-                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
-                            <input type="text" id="c-emp" placeholder="Nome da Família / Fornecedor">
-                            <input type="text" id="c-pro" placeholder="Produto Comercializado">
-                            <input type="number" id="c-pre" placeholder="Preço Unitário (R$)">
-                        </div>
-                        <button style="margin-top: 15px;" onclick="addCat()">SALVAR E VINCULAR</button>
+                        <div id="container-rows-catalogo">
+                            </div>
+                        <button type="button" class="button btn-add-row" onclick="addCatalogoRow()"><i class="fas fa-plus"></i> Adicionar Mais um Produto</button>
+                        <br>
+                        <button style="margin-top: 5px;" onclick="submitCatalogo()">SALVAR TODOS E VINCULAR</button>
                     </div>
                 </div>
 
@@ -441,6 +445,7 @@
         let chartProdInstancia = null;
 
         window.onload = function() {
+            resetFormulariosMultiplos();
             if (usarFirebase && firebaseConfig.apiKey !== "SUA_API_KEY") {
                 try {
                     firebase.initializeApp(firebaseConfig);
@@ -478,7 +483,7 @@
 
             renderMembros();
             renderDash();
-            updateDrops();
+            updateDropsAllRows();
             renderFamilies();
             renderEstoque();
             renderVendas();
@@ -514,7 +519,7 @@
             db.ref('catalogo').on('value', s => { 
                 const val = s.val() || [];
                 data.catalogo = Object.keys(val).map(k => ({...val[k], id: k}));
-                updateDrops(); 
+                updateDropsAllRows(); 
                 renderFamilies(); 
                 renderEstatisticas(); 
             });
@@ -534,6 +539,197 @@
             db.ref('notes').on('value', s => { data.notes = s.val() || []; renderNotas(); });
             db.ref('dash').on('value', s => { data.dash = s.val() || {s:0,e:0,sa:0}; renderDash(); renderEstatisticas(); });
             db.ref('bg').on('value', s => { if(s.val()) aplicasPlanoDeFundo(s.val()); });
+        }
+
+        // --- MANIPULAÇÃO DINÂMICA DE MULTI-ITENS (FORMULÁRIOS) ---
+        function resetFormulariosMultiplos() {
+            document.getElementById('container-rows-estoque').innerHTML = '';
+            document.getElementById('container-rows-vendas').innerHTML = '';
+            document.getElementById('container-rows-catalogo').innerHTML = '';
+            addEstoqueRow();
+            addVendaRow();
+            addCatalogoRow();
+        }
+
+        // Estoque Dinâmico
+        function addEstoqueRow() {
+            const container = document.getElementById('container-rows-estoque');
+            const rowId = 'est_row_' + Date.now() + Math.random().toString(36).substr(2, 5);
+            const div = document.createElement('div');
+            div.className = 'dynamic-row';
+            div.id = rowId;
+            div.innerHTML = `
+                <select class="e-item-select" onchange="calcRowE('${rowId}')"></select>
+                <input type="number" class="e-qtd-input" placeholder="Quantidade" oninput="calcRowE('${rowId}')">
+                <input type="text" class="e-val-input" placeholder="Custo Automático" readonly>
+                <button type="button" class="btn-remove-row" onclick="removeFormRow('${rowId}')"><i class="fas fa-times"></i></button>
+            `;
+            container.appendChild(div);
+            populateSelectWithOptions(div.querySelector('.e-item-select'));
+        }
+
+        function calcRowE(rowId) {
+            const row = document.getElementById(rowId);
+            const select = row.querySelector('.e-item-select').value;
+            const qtd = row.querySelector('.e-qtd-input').value;
+            if(select !== "" && qtd) {
+                const item = data.catalogo[select];
+                row.querySelector('.e-val-input').value = `R$ ${(item.pre * qtd).toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
+            } else {
+                row.querySelector('.e-val-input').value = '';
+            }
+        }
+
+        function submitEstoque() {
+            const rows = document.querySelectorAll('#container-rows-estoque .dynamic-row');
+            let adicionados = 0;
+            rows.forEach(row => {
+                const idx = row.querySelector('.e-item-select').value;
+                const q = parseInt(row.querySelector('.e-qtd-input').value);
+                if(idx !== "" && q) {
+                    const c = data.catalogo[idx];
+                    const novoEstoque = { emp: c.emp, pro: c.pro, q, v: c.pre * q };
+                    if(db) {
+                        db.ref('estoque').push().set(novoEstoque);
+                    } else {
+                        novoEstoque.id = 'est_' + Date.now() + Math.random();
+                        data.estoque.push(novoEstoque);
+                    }
+                    adicionados++;
+                }
+            });
+            if(adicionados > 0) {
+                if(!db) atualizarLocalStorage('estoque');
+                registrarAcaoNoPainel(`Registrou entrada em lote de ${adicionados} produto(s) no estoque.`);
+                renderEstoque();
+                renderEstatisticas();
+                resetFormulariosMultiplos();
+                toggleBox('box-est-form');
+            }
+        }
+
+        // Vendas Dinâmicas
+        function addVendaRow() {
+            const container = document.getElementById('container-rows-vendas');
+            const rowId = 'ven_row_' + Date.now() + Math.random().toString(36).substr(2, 5);
+            const div = document.createElement('div');
+            div.className = 'dynamic-row';
+            div.id = rowId;
+            div.innerHTML = `
+                <select class="v-item-select" onchange="calcRowV('${rowId}')"></select>
+                <input type="number" class="v-qtd-input" placeholder="Quantidade Vendida" oninput="calcRowV('${rowId}')">
+                <input type="text" class="v-val-input" placeholder="Faturamento Automático" readonly>
+                <button type="button" class="btn-remove-row" onclick="removeFormRow('${rowId}')"><i class="fas fa-times"></i></button>
+            `;
+            container.appendChild(div);
+            populateSelectWithOptions(div.querySelector('.v-item-select'));
+        }
+
+        function calcRowV(rowId) {
+            const row = document.getElementById(rowId);
+            const select = row.querySelector('.v-item-select').value;
+            const qtd = row.querySelector('.v-qtd-input').value;
+            if(select !== "" && qtd) {
+                const item = data.catalogo[select];
+                row.querySelector('.v-val-input').value = `R$ ${(item.pre * qtd).toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
+            } else {
+                row.querySelector('.v-val-input').value = '';
+            }
+        }
+
+        function submitVendas() {
+            const rows = document.querySelectorAll('#container-rows-vendas .dynamic-row');
+            let adicionados = 0;
+            rows.forEach(row => {
+                const idx = row.querySelector('.v-item-select').value;
+                const q = parseInt(row.querySelector('.v-qtd-input').value);
+                if(idx !== "" && q) {
+                    const c = data.catalogo[idx];
+                    const novaVenda = { emp: c.emp, pro: c.pro, q, v: c.pre * q };
+                    if(db) {
+                        db.ref('vendas').push().set(novaVenda);
+                    } else {
+                        novaVenda.id = 'ven_' + Date.now() + Math.random();
+                        data.vendas.push(novaVenda);
+                    }
+                    adicionados++;
+                }
+            });
+            if(adicionados > 0) {
+                if(!db) atualizarLocalStorage('vendas');
+                registrarAcaoNoPainel(`Confirmou o envio de uma venda em lote com ${adicionados} item(ns).`);
+                renderVendas();
+                renderEstatisticas();
+                resetFormulariosMultiplos();
+                toggleBox('box-ven-form');
+            }
+        }
+
+        // Catálogo/Configuração Dinâmica
+        function addCatalogoRow() {
+            const container = document.getElementById('container-rows-catalogo');
+            const rowId = 'cat_row_' + Date.now() + Math.random().toString(36).substr(2, 5);
+            const div = document.createElement('div');
+            div.className = 'dynamic-row';
+            div.id = rowId;
+            div.innerHTML = `
+                <input type="text" class="c-emp-input" placeholder="Família / Fornecedor">
+                <input type="text" class="c-pro-input" placeholder="Produto Comercializado">
+                <input type="number" class="c-pre-input" placeholder="Preço Unitário (R$)">
+                <button type="button" class="btn-remove-row" onclick="removeFormRow('${rowId}')"><i class="fas fa-times"></i></button>
+            `;
+            container.appendChild(div);
+        }
+
+        function submitCatalogo() {
+            const rows = document.querySelectorAll('#container-rows-catalogo .dynamic-row');
+            let adicionados = 0;
+            rows.forEach(row => {
+                const emp = row.querySelector('.c-emp-input').value.trim();
+                const pro = row.querySelector('.c-pro-input').value.trim();
+                const pre = parseFloat(row.querySelector('.c-pre-input').value);
+                if(emp && pro && !isNaN(pre)) {
+                    const novoItem = { emp, pro, pre };
+                    if(db) {
+                        db.ref('catalogo').push().set(novoItem);
+                    } else {
+                        novoItem.id = 'cat_' + Date.now() + Math.random();
+                        data.catalogo.push(novoItem);
+                    }
+                    adicionados++;
+                }
+            });
+            if(adicionados > 0) {
+                if(!db) {
+                    atualizarLocalStorage('catalogo');
+                    updateDropsAllRows();
+                    renderFamilies();
+                    renderEstatisticas();
+                }
+                resetFormulariosMultiplos();
+                toggleBox('box-cfg-fam');
+            }
+        }
+
+        function removeFormRow(rowId) {
+            const row = document.getElementById(rowId);
+            if(row) row.remove();
+        }
+
+        function populateSelectWithOptions(selectElement) {
+            if(!selectElement) return;
+            selectElement.innerHTML = '<option value="">Escolha um item...</option>';
+            data.catalogo.forEach((c, i) => {
+                selectElement.innerHTML += `<option value="${i}">${c.emp} » ${c.pro}</option>`;
+            });
+        }
+
+        function updateDropsAllRows() {
+            document.querySelectorAll('.e-item-select, .v-item-select').forEach(select => {
+                const valorAtual = select.value;
+                populateSelectWithOptions(select);
+                select.value = valorAtual;
+            });
         }
 
         // --- SISTEMA DE REGISTRO DE LOGS AUTOMÁTICOS ---
@@ -707,31 +903,6 @@
         }
         function renderDash() { document.getElementById('v-saldo').innerText = `R$ ${(data.dash.s || 0).toLocaleString('pt-BR', {minimumFractionDigits:2})}`; document.getElementById('v-ent').innerText = `R$ ${(data.dash.e || 0).toLocaleString('pt-BR', {minimumFractionDigits:2})}`; document.getElementById('v-sai').innerText = `R$ ${(data.dash.sa || 0).toLocaleString('pt-BR', {minimumFractionDigits:2})}`; }
 
-        // PRODUTOS & CATÁLOGOS (EXIBIÇÃO EM POST-ITS)
-        function addCat() { 
-            const emp = document.getElementById('c-emp').value.trim(); 
-            const pro = document.getElementById('c-pro').value.trim(); 
-            const pre = parseFloat(document.getElementById('c-pre').value); 
-            if(!emp || !pro || !pre) return; 
-            
-            const novoItem = { emp, pro, pre };
-            
-            if(db) {
-                db.ref('catalogo').push().set(novoItem);
-            } else { 
-                novoItem.id = 'cat_' + Date.now();
-                data.catalogo.push(novoItem);
-                atualizarLocalStorage('catalogo'); 
-                updateDrops(); 
-                renderFamilies(); 
-                renderEstatisticas(); 
-            } 
-            document.getElementById('c-emp').value=""; 
-            document.getElementById('c-pro').value=""; 
-            document.getElementById('c-pre').value=""; 
-            toggleBox('box-cfg-fam'); 
-        }
-
         function removeCatItem(id) {
             if(confirm("Deseja mesmo excluir este produto do catálogo de famílias?")) {
                 if(db) {
@@ -739,7 +910,7 @@
                 } else {
                     data.catalogo = data.catalogo.filter(c => c.id !== id);
                     atualizarLocalStorage('catalogo');
-                    updateDrops();
+                    updateDropsAllRows();
                     renderFamilies();
                     renderEstatisticas();
                 }
@@ -788,33 +959,6 @@
             } 
         }
 
-        function updateDrops() { const se = document.getElementById('e-item'); const sv = document.getElementById('v-item'); if(!se || !sv) return; se.innerHTML = sv.innerHTML = '<option value="">Escolha um item...</option>'; data.catalogo.forEach((c, i) => { const o = `<option value="${i}">${c.emp} » ${c.pro}</option>`; se.innerHTML += o; sv.innerHTML += o; }); }
-
-        // MOVIMENTAÇÕES DE ESTOQUE
-        function calcE() { const i = document.getElementById('e-item').value; const q = document.getElementById('e-qtd').value; if(i !== "" && q) document.getElementById('e-val').value = `R$ ${(data.catalogo[i].pre * q).toLocaleString('pt-BR', {minimumFractionDigits:2})}`; }
-        function addEstoque() { 
-            const i = document.getElementById('e-item').value; 
-            const q = parseInt(document.getElementById('e-qtd').value); 
-            if(i === "" || !q) return; 
-            const c = data.catalogo[i]; 
-            
-            const novoEstoque = { emp: c.emp, pro: c.pro, q, v: c.pre * q };
-            
-            if(db) {
-                db.ref('estoque').push().set(novoEstoque);
-            } else { 
-                novoEstoque.id = 'est_' + Date.now();
-                data.estoque.push(novoEstoque); 
-                atualizarLocalStorage('estoque'); 
-                renderEstoque(); 
-                renderEstatisticas(); 
-            }
-            registrarAcaoNoPainel(`Registrou entrada de estoque de ${q} un de "${c.pro}" da Família ${c.emp}`);
-            document.getElementById('e-qtd').value = ""; 
-            document.getElementById('e-val').value = ""; 
-            toggleBox('box-est-form'); 
-        }
-
         function removeEstoque(id) {
             if(confirm("Remover este registro de estoque permanente?")) {
                 if(db) {
@@ -836,31 +980,6 @@
             if(!t) return; 
             t.innerHTML = "<tr><th>Família</th><th>Produto</th><th>Quantidade</th><th>Total</th><th>Status</th><th>Ações</th></tr>"; 
             data.estoque.forEach(e => t.innerHTML += `<tr><td>${e.emp}</td><td><strong>${e.pro}</strong></td><td>${e.q} un</td><td>R$ ${e.v.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td><td><span class="badge ${e.q < 5 ? 'badge-low' : 'badge-ok'}">${e.q < 5 ? 'REPOSIÇÃO' : 'OK'}</span></td><td><button class="btn-table-delete" onclick="removeEstoque('${e.id}')"><i class="fas fa-trash-alt"></i></button></td></tr>`); 
-        }
-
-        // ENTRADA DE VENDAS
-        function calcV() { const i = document.getElementById('v-item').value; const q = document.getElementById('v-qtd').value; if(i !== "" && q) document.getElementById('v-val').value = `R$ ${(data.catalogo[i].pre * q).toLocaleString('pt-BR', {minimumFractionDigits:2})}`; }
-        function addVenda() { 
-            const i = document.getElementById('v-item').value; 
-            const q = parseInt(document.getElementById('v-qtd').value); 
-            if(i === "" || !q) return; 
-            const c = data.catalogo[i]; 
-            
-            const novaVenda = { emp: c.emp, pro: c.pro, q, v: c.pre * q };
-            
-            if(db) {
-                db.ref('vendas').push().set(novaVenda);
-            } else { 
-                novaVenda.id = 'ven_' + Date.now();
-                data.vendas.push(novaVenda); 
-                atualizarLocalStorage('vendas'); 
-                renderVendas(); 
-                renderEstatisticas(); 
-            }
-            registrarAcaoNoPainel(`Confirmou a venda de ${q} un de "${c.pro}" para a Família ${c.emp} (Total: R$ ${(c.pre * q).toLocaleString('pt-BR')})`);
-            document.getElementById('v-qtd').value = ""; 
-            document.getElementById('v-val').value = ""; 
-            toggleBox('box-ven-form'); 
         }
 
         function removeVenda(id) {
