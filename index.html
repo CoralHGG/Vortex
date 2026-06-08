@@ -179,9 +179,14 @@
             <div class="user-footer">
                 <div class="user-info-box">
                     <strong class="user-title" id="logged-name">Carregando...</strong>
-                    <div class="user-status-container">
-                        <span class="status-pulse-dot"></span>
-                        <span>Conectado</span>
+                    <div class="user-status-container" style="display: flex; justify-content: space-between; align-items: center; gap: 6px; font-size: 12px; color: #a3a3c2;">
+                        <div>
+                            <span class="status-pulse-dot"></span>
+                            <span>Conectado</span>
+                        </div>
+                        <span onclick="logout()" style="cursor: pointer; color: var(--danger); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">
+                            <i class="fas fa-sign-out-alt"></i> Sair
+                        </span>
                     </div>
                 </div>
             </div>
@@ -405,11 +410,10 @@
             renderMov();
         }
 
-        function ativarSincronizacaoFirebase() {
+        function activarSincronizacaoFirebase() {
             db.ref('membros').on('value', s => { 
                 const val = s.val();
                 data.membros = val ? Object.keys(val).map(k => ({...val[k], dbKey: k})) : [];
-                // Injeta a conta master se ela sumir do banco
                 if (!data.membros.some(m => m.dbKey === 'master_local' || m.nome.toLowerCase() === 'megan')) {
                     data.membros.unshift({ dbKey: "master_local", uid: "3461", nome: "Megan", senha: "1234", cargo: "Chefe", status: { online: false, lastSeen: 0 } });
                 }
@@ -461,6 +465,19 @@
             } else {
                 errBox.style.display = 'block'; 
             }
+        }
+
+        // --- FUNÇÃO DE DESLOGAR (LOGOUT) ---
+        function logout() {
+            if(db && currentUser && currentUser.dbKey !== 'master_local') {
+                db.ref('membros/' + currentUser.dbKey + '/status').set({ online: false, lastSeen: Date.now() });
+            }
+            currentUser = null;
+            document.getElementById('user-in').value = "";
+            document.getElementById('pass-in').value = "";
+            document.getElementById('main-panel').style.display = 'none';
+            document.getElementById('login-screen').style.display = 'flex';
+            renderMembros();
         }
 
         // --- SISTEMA DE CADASTRO E EDIÇÃO DE MEMBROS ---
