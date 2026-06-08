@@ -221,7 +221,7 @@
             <ul class="menu-list">
                 <li class="active" onclick="tab('dash')"><i class="fas fa-chart-pie"></i> Dashboard</li>
                 <li onclick="tab('mem')"><i class="fas fa-users"></i> Membros</li>
-                <li onclick="tab('est')"><i class="fas fa-box"></i> Estoque</li>
+                <li onclick="tab('enc')"><i class="fas fa-box"></i> Encomendas</li>
                 <li onclick="tab('ven')"><i class="fas fa-shopping-cart"></i> Vendas</li>
                 <li onclick="tab('mov')"><i class="fas fa-chart-line"></i> Movimentos</li>
                 <li onclick="tab('ger')"><i class="fas fa-user-shield"></i> Gerência</li>
@@ -299,23 +299,23 @@
                 </div>
             </section>
 
-            <section id="est" class="section">
-                <div class="collapsible-box" id="box-est-form">
-                    <div class="collapsible-header" onclick="toggleBox('box-est-form')">
-                        <span>Lançar Entrada no Estoque (Compras Multi-Itens)</span>
+            <section id="enc" class="section">
+                <div class="collapsible-box" id="box-enc-form">
+                    <div class="collapsible-header" onclick="toggleBox('box-enc-form')">
+                        <span>Lançar Entrada de Encomendas (Multi-Itens)</span>
                         <span class="icon-indicator">+</span>
                     </div>
                     <div class="collapsible-content">
-                        <div id="container-rows-estoque">
+                        <div id="container-rows-encomendas">
                             </div>
-                        <button type="button" class="button btn-add-row" onclick="addEstoqueRow()"><i class="fas fa-plus"></i> Adicionar Mais um Item</button>
+                        <button type="button" class="button btn-add-row" onclick="addEncomendaRow()"><i class="fas fa-plus"></i> Adicionar Mais um Item</button>
                         <br>
-                        <button style="margin-top: 5px;" onclick="submitEstoque()">REGISTRAR ENTRADA COMPLETA</button>
+                        <button style="margin-top: 5px;" onclick="submitEncomendas()">REGISTRAR ENCOMENDA COMPLETA</button>
                     </div>
                 </div>
                 <div class="box-list">
-                    <div class="box-title">Histórico de Itens em Estoque</div>
-                    <table id="tab-est"></table>
+                    <div class="box-title">Histórico de Itens em Encomendas</div>
+                    <table id="tab-enc"></table>
                 </div>
             </section>
 
@@ -351,7 +351,7 @@
                             </div>
                         </div>
                         <div class="chart-box">
-                            <h4 style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; color: #a3a3c2;">Estoque vs Vendas (Volume total)</h4>
+                            <h4 style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; color: #a3a3c2;">Encomendas vs Vendas (Volume total)</h4>
                             <div class="chart-container">
                                 <canvas id="chartProdutos"></canvas>
                             </div>
@@ -439,7 +439,7 @@
 
         let currentUser = null;
         let db = null;
-        let data = { membros: [], estoque: [], vendas: [], movimentos: [], catalogo: [], notas: [], dash: { s: 0, e: 0, sa: 0 } };
+        let data = { membros: [], encomendas: [], vendas: [], movimentos: [], catalogo: [], notas: [], dash: { s: 0, e: 0, sa: 0 } };
         
         let chartFinInstancia = null;
         let chartProdInstancia = null;
@@ -471,7 +471,7 @@
                 atualizarLocalStorage('membros');
             }
 
-            data.estoque = JSON.parse(localStorage.getItem('vortex_estoque')) || [];
+            data.encomendas = JSON.parse(localStorage.getItem('vortex_encomendas')) || [];
             data.vendas = JSON.parse(localStorage.getItem('vortex_vendas')) || [];
             data.movimentos = JSON.parse(localStorage.getItem('vortex_movimentos')) || [];
             data.catalogo = JSON.parse(localStorage.getItem('vortex_catalogo')) || [];
@@ -485,7 +485,7 @@
             renderDash();
             updateDropsAllRows();
             renderFamilies();
-            renderEstoque();
+            renderEncomendas();
             renderVendas();
             renderNotas();
             renderEstatisticas();
@@ -523,10 +523,10 @@
                 renderFamilies(); 
                 renderEstatisticas(); 
             });
-            db.ref('estoque').on('value', s => { 
+            db.ref('encomendas').on('value', s => { 
                 const val = s.val() || [];
-                data.estoque = Object.keys(val).map(k => ({...val[k], id: k}));
-                renderEstoque(); 
+                data.encomendas = Object.keys(val).map(k => ({...val[k], id: k}));
+                renderEncomendas(); 
                 renderEstatisticas(); 
             });
             db.ref('vendas').on('value', s => { 
@@ -543,18 +543,18 @@
 
         // --- MANIPULAÇÃO DINÂMICA DE MULTI-ITENS (FORMULÁRIOS) ---
         function resetFormulariosMultiplos() {
-            document.getElementById('container-rows-estoque').innerHTML = '';
+            document.getElementById('container-rows-encomendas').innerHTML = '';
             document.getElementById('container-rows-vendas').innerHTML = '';
             document.getElementById('container-rows-catalogo').innerHTML = '';
-            addEstoqueRow();
+            addEncomendaRow();
             addVendaRow();
             addCatalogoRow();
         }
 
-        // Estoque Dinâmico
-        function addEstoqueRow() {
-            const container = document.getElementById('container-rows-estoque');
-            const rowId = 'est_row_' + Date.now() + Math.random().toString(36).substr(2, 5);
+        // Encomendas Dinâmicas
+        function addEncomendaRow() {
+            const container = document.getElementById('container-rows-encomendas');
+            const rowId = 'enc_row_' + Date.now() + Math.random().toString(36).substr(2, 5);
             const div = document.createElement('div');
             div.className = 'dynamic-row';
             div.id = rowId;
@@ -580,31 +580,31 @@
             }
         }
 
-        function submitEstoque() {
-            const rows = document.querySelectorAll('#container-rows-estoque .dynamic-row');
+        function submitEncomendas() {
+            const rows = document.querySelectorAll('#container-rows-encomendas .dynamic-row');
             let adicionados = 0;
             rows.forEach(row => {
                 const idx = row.querySelector('.e-item-select').value;
                 const q = parseInt(row.querySelector('.e-qtd-input').value);
                 if(idx !== "" && q) {
                     const c = data.catalogo[idx];
-                    const novoEstoque = { emp: c.emp, pro: c.pro, q, v: c.pre * q };
+                    const novaEncomenda = { emp: c.emp, pro: c.pro, q, v: c.pre * q };
                     if(db) {
-                        db.ref('estoque').push().set(novoEstoque);
+                        db.ref('encomendas').push().set(novaEncomenda);
                     } else {
-                        novoEstoque.id = 'est_' + Date.now() + Math.random();
-                        data.estoque.push(novoEstoque);
+                        novaEncomenda.id = 'enc_' + Date.now() + Math.random();
+                        data.encomendas.push(novaEncomenda);
                     }
                     adicionados++;
                 }
             });
             if(adicionados > 0) {
-                if(!db) atualizarLocalStorage('estoque');
-                registrarAcaoNoPainel(`Registrou entrada em lote de ${adicionados} produto(s) no estoque.`);
-                renderEstoque();
+                if(!db) atualizarLocalStorage('encomendas');
+                registrarAcaoNoPainel(`Registrou entrada em lote de ${adicionados} produto(s) nas encomendas.`);
+                renderEncomendas();
                 renderEstatisticas();
                 resetFormulariosMultiplos();
-                toggleBox('box-est-form');
+                toggleBox('box-enc-form');
             }
         }
 
@@ -737,9 +737,10 @@
             const userName = currentUser ? currentUser.nome : "Sistema";
             const novoLog = {
                 user: userName,
-                txt: mensagem,
+                txt: message,
                 time: new Date().toLocaleTimeString('pt-BR') + ' - ' + new Date().toLocaleDateString('pt-BR')
             };
+            if(!data.movimentos) data.movimentos = [];
             data.movimentos.push(novoLog);
             if(db) {
                 db.ref('movimentos').set(data.movimentos);
@@ -883,7 +884,7 @@
         // --- INTERFACES VISUAIS ---
         function toggleBox(id) { const box = document.getElementById(id); box.classList.toggle('open'); const ind = box.querySelector('.icon-indicator'); if(ind) ind.innerText = box.classList.contains('open') ? '-' : '+'; }
         function toggleSidebar() { const side = document.getElementById('sidebar'); const main = document.getElementById('main-content'); const icon = document.getElementById('t-icon'); side.classList.toggle('collapsed'); if(side.classList.contains('collapsed')) { icon.className = 'fas fa-chevron-right'; main.classList.add('expanded'); } else { icon.className = 'fas fa-chevron-left'; main.classList.remove('expanded'); } }
-        function tab(id) { document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); document.querySelectorAll('.menu-list li').forEach(l => l.classList.remove('active')); document.getElementById(id).classList.add('active'); event.currentTarget.classList.add('active'); if(id === 'mov') { setTimeout(() => { renderEstatisticas(); renderLogs(); }, 50); } else if(id === 'ger') { setTimeout(() => { renderNotas(); }, 50); } else if(id === 'cfg') { setTimeout(() => { renderFamilies(); }, 50); } else if(id === 'est') { setTimeout(() => { renderEstoque(); }, 50); } else if(id === 'ven') { setTimeout(() => { renderVendas(); }, 50); } }
+        function tab(id) { document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); document.querySelectorAll('.menu-list li').forEach(l => l.classList.remove('active')); document.getElementById(id).classList.add('active'); event.currentTarget.classList.add('active'); if(id === 'mov') { setTimeout(() => { renderEstatisticas(); renderLogs(); }, 50); } else if(id === 'ger') { setTimeout(() => { renderNotas(); }, 50); } else if(id === 'cfg') { setTimeout(() => { renderFamilies(); }, 50); } else if(id === 'enc') { setTimeout(() => { renderEncomendas(); }, 50); } else if(id === 'ven') { setTimeout(() => { renderVendas(); }, 50); } }
 
         // FINANCEIRO & DASHBOARD
         function upDash() { 
@@ -959,27 +960,27 @@
             } 
         }
 
-        function removeEstoque(id) {
-            if(confirm("Remover este registro de estoque permanente?")) {
+        function removeEncomenda(id) {
+            if(confirm("Remover este registro de encomenda permanente?")) {
                 if(db) {
-                    db.ref('estoque/' + id).remove();
+                    db.ref('encomendas/' + id).remove();
                 } else {
-                    data.estoque = data.estoque.filter(e => e.id !== id);
-                    atualizarLocalStorage('estoque');
-                    renderEstoque();
+                    data.encomendas = data.encomendas.filter(e => e.id !== id);
+                    atualizarLocalStorage('encomendas');
+                    renderEncomendas();
                     renderEstatisticas();
                 }
-                registrarAcaoNoPainel(`Removeu um registro do histórico de estoque.`);
+                registrarAcaoNoPainel(`Removeu um registro do histórico de encomendas.`);
             }
         }
 
         function renderMembros() { const t = document.getElementById('t-membros'); if(!t) return; t.innerHTML = ""; data.membros.forEach(m => { const isOnline = m.dbKey === 'master_local' ? (currentUser && currentUser.dbKey === 'master_local') : (m.status && m.status.online); t.innerHTML += `<tr><td><strong>#${m.uid}</strong></td><td>${m.nome}</td><td>${m.cargo}</td><td><span style="font-family:monospace; opacity:0.7">${m.senha}</span></td><td><span class="status-dot ${isOnline ? 'online' : 'offline'}"></span>${isOnline ? 'Online' : 'Offline'}</td><td><button class="btn-warning" style="padding:4px 10px; font-size:12px;" onclick="prepararEdicaoMembro('${m.dbKey}')">Editar</button> ${m.dbKey !== 'master_local' ? `<button class="btn-danger" style="padding:4px 10px; font-size:12px;" onclick="delMem('${m.dbKey}')">Deletar</button>` : ''}</td></tr>`; }); }
         
-        function renderEstoque() { 
-            const t = document.getElementById('tab-est'); 
+        function renderEncomendas() { 
+            const t = document.getElementById('tab-enc'); 
             if(!t) return; 
             t.innerHTML = "<tr><th>Família</th><th>Produto</th><th>Quantidade</th><th>Total</th><th>Status</th><th>Ações</th></tr>"; 
-            data.estoque.forEach(e => t.innerHTML += `<tr><td>${e.emp}</td><td><strong>${e.pro}</strong></td><td>${e.q} un</td><td>R$ ${e.v.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td><td><span class="badge ${e.q < 5 ? 'badge-low' : 'badge-ok'}">${e.q < 5 ? 'REPOSIÇÃO' : 'OK'}</span></td><td><button class="btn-table-delete" onclick="removeEstoque('${e.id}')"><i class="fas fa-trash-alt"></i></button></td></tr>`); 
+            data.encomendas.forEach(e => t.innerHTML += `<tr><td>${e.emp}</td><td><strong>${e.pro}</strong></td><td>${e.q} un</td><td>R$ ${e.v.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td><td><span class="badge ${e.q < 5 ? 'badge-low' : 'badge-ok'}">${e.q < 5 ? 'REPOSIÇÃO' : 'OK'}</span></td><td><button class="btn-table-delete" onclick="removeEncomenda('${e.id}')"><i class="fas fa-trash-alt"></i></button></td></tr>`); 
         }
 
         function removeVenda(id) {
@@ -1010,7 +1011,7 @@
             if (!canvasFin || !canvasProd) return;
 
             let produtosObj = {};
-            data.estoque.forEach(e => {
+            data.encomendas.forEach(e => {
                 if(!produtosObj[e.pro]) produtosObj[e.pro] = { comprado: 0, vendido: 0 };
                 produtosObj[e.pro].comprado += e.q;
             });
@@ -1053,7 +1054,7 @@
                     labels: labelsProdutos.length ? labelsProdutos : ['Sem Registros'],
                     datasets: [
                         {
-                            label: 'Comprado (Estoque)',
+                            label: 'Encomendado (Volume)',
                             data: dadosComprados.length ? dadosComprados : [0],
                             backgroundColor: 'rgba(168, 85, 247, 0.5)',
                             borderColor: '#a855f7',
