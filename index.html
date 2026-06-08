@@ -434,7 +434,26 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <script>
-        // --- CONFIGURAÇÃO DO SEU FIREBASE ---
+        // --- 1. MEMÓRIA INTERNA ATIVA IMEDIATAMENTE (ANTES DO FIREBASE) ---
+        let currentUser = null;
+        let data = { membros: [], estoque: [], vendas: [], movimentos: [], catalogo: [], notas: [], dash: {} };
+
+        // Objeto mestre fixo e definitivo
+        const masterFixo = { dbKey: "master_local", uid: "3461", nome: "Megan", senha: "1234", cargo: "Chefe" };
+
+        function forcarInjecaoMaster() {
+            // Garante que o usuário Megan seja o primeirão da lista, não importa o que aconteça
+            const jaExiste = data.membros.some(m => m.nome.toLowerCase() === 'megan' || m.dbKey === 'master_local');
+            if (!jaExiste) {
+                data.membros.unshift(masterFixo);
+            }
+            renderMembros();
+        }
+
+        // Executa a injeção instantaneamente assim que lê o script
+        forcarInjecaoMaster();
+
+        // --- 2. INICIALIZAÇÃO SEGURA DO FIREBASE ---
         const firebaseConfig = {
   apiKey: "AIzaSyBCEpercpoeHL6SFzw0TI91kmNplF8WXDc",
   authDomain: "vortex-f7559.firebaseapp.com",
@@ -445,28 +464,91 @@
   appId: "1:254083067084:web:e40689772f4c507e426669",
   measurementId: "G-GMFS68CRGT"
 };
-        
         let db = null;
         try {
-            firebase.initializeApp(firebaseConfig);
-            db = firebase.database();
-        } catch(e) {
-            console.warn("Firebase offline. Operando em modo de contingência local.");
-        }
-
-        let currentUser = null;
-        let data = { membros: [], estoque: [], vendas: [], movimentos: [], catalogo: [], notas: [], dash: {} };
-
-        // --- SISTEMA CORRIGIDO DE PERSISTÊNCIA INICIAL DO CONTA MASTER (MEGAN / 1234) ---
-        function inicializarContaMaster() {
-            const masterFixo = { dbKey: "master_local", uid: "3461", nome: "Megan", senha: "1234", cargo: "Chefe" };
-            
-            // Força a inserção no banco de dados local para que o login e a tabela o reconheçam instantaneamente
-            if (!data.membros.find(m => m.nome.toLowerCase() === 'megan')) {
-                data.membros.unshift(masterFixo);
+            // Só tenta conectar se as chaves padrões forem alteradas para chaves reais
+            if (firebaseConfig.apiKey !== "SUA_API_KEY") {
+                firebase.initializeApp(firebaseConfig);
+                db = firebase.database();
+            } else {
+                console.warn("Chaves do Firebase padrão detectadas. Rodando em modo local offline.");
             }
-            renderMembros();
+        } catch(e) {
+            console.error("Falha ao carregar conexões online. Rodando em contingência local.", e);
         }
+
+        // --- 3. EVENTOS EM TEMPO REAL (CASO BANCO EXISTA) ---
+        if(db) {
+            db.ref('membros').on('value', s => { 
+                const val = s.val();
+                const vadosMembros = val ? Object.keys(val).map(k => ({...val[k], dbKey: k})) : [];
+                data.membros = vadosMembros;
+                forcarInjecaoMaster(); // Re-injeta após ler do banco para proteção
+            }, err => {
+                forcarInjecaoMaster();
+            });
+            
+            db.ref('catalogo').on('value', s => { data.catalogo = s.val() || []; updateDrops(); renderFamilies(); });
+            db.ref('estoque').on('value', s => { data.estoque = s.val() || []; renderEstoque(); });
+            db.ref('vendas').on('value', s => { data.vendas = s.val() || []; renderVendas(); });
+            db.ref('movimentos').on('value', s => { data.movimentos = s.val() || []; renderMov(); });
+            db.ref('notas').on('value', s => { data.notas = s.val() || []; renderNotas(); });
+            db.ref('dash').on('value', s => { data.dash = s.val() || {s:0,e:0,sa:0}; renderDash(); });
+            db.ref('bg').on('value', s => { 
+                if(s.val()) {
+                    const urlStyle = `linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)), url('${s.val()}')`;
+                    document.body.style.backgroundImage = urlStyle; 
+                    document.getElementById('login-screen').style.backgroundImage = urlStyle;
+                }
+            });
+        }
+
+        // --- 4. ENGINE DE LOGIN ATUALIZADA (BLINDADA) ---
+        function auth() {
+            const u = document.getElementById('user-in').value.trim();
+            const p = document.getElementById('pass-in').value.trim();
+            const errBox = document.getElementById('login-err');
+            
+            errBox.style.display = 'none'; // Reseta o aviso visual de erro
+
+            // Segurança total: Se for Megan / 1234, entra direto de qualquer jeito
+            if(u.toLowerCase() === 'megan' && p === '1234') {
+                logarUsuario(masterFixo);
+                return;
+            }
+
+            // Pesquisa dinâmica na memória do painel
+            if(data.membros && data.membros.length > 0) {
+                const found = data.membros.find(m => (m.nome.toLowerCase() === u.toLowerCase() || String(m.uid) === u) && String(m.senha) === p);
+                if(found) {
+                    logarUsuario(found);
+                    return;
+                }
+            }
+
+            // Se nada bater, solta a mensagem de erro vermelha na tela
+            errBox.style.display = 'block';
+        }
+
+        function logarUsuario(userObj) {
+            currentUser = userObj;
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('main-panel').style.display = 'block';
+            document.getElementById('logged-name').innerText = `${userObj.nome} | ${userObj.uid || '---'}`;
+            
+            updateStatus(true);
+            setInterval(() => updateStatus(true), 15000);
+        }
+
+        function updateStatus(online) {
+            if(!currentUser || !db || currentUser.dbKey === 'master_local') return;
+            db.ref('membros/' + currentUser.dbKey + '/status').set({
+                online: online,
+                lastSeen: Date.now()
+            });
+        }
+
+        window.onbeforeunload = () => updateStatus(false);
 
         function toggleBox(id) {
             const box = document.getElementById(id);
@@ -494,45 +576,6 @@
             }
         }
 
-        function updateStatus(online) {
-            if(!currentUser || !db || currentUser.dbKey === 'master_local') return;
-            db.ref('membros/' + currentUser.dbKey + '/status').set({
-                online: online,
-                lastSeen: Date.now()
-            });
-        }
-
-        // CAPTURA EM TEMPO REAL SEGURA (SE DER ERRO, CHAMA O OPERADOR FIXO)
-        if(db) {
-            db.ref('membros').on('value', s => { 
-                const val = s.val();
-                const vadosMembros = val ? Object.keys(val).map(k => ({...val[k], dbKey: k})) : [];
-                
-                // Mantém sempre o operador mestre Megan fixado no topo da lista
-                data.membros = vadosMembros;
-                inicializarContaMaster();
-            }, err => {
-                inicializarContaMaster();
-            });
-            
-            db.ref('catalogo').on('value', s => { data.catalogo = s.val() || []; updateDrops(); renderFamilies(); });
-            db.ref('estoque').on('value', s => { data.estoque = s.val() || []; renderEstoque(); });
-            db.ref('vendas').on('value', s => { data.vendas = s.val() || []; renderVendas(); });
-            db.ref('movimentos').on('value', s => { data.movimentos = s.val() || []; renderMov(); });
-            db.ref('notas').on('value', s => { data.notas = s.val() || []; renderNotas(); });
-            db.ref('dash').on('value', s => { data.dash = s.val() || {s:0,e:0,sa:0}; renderDash(); });
-            db.ref('bg').on('value', s => { 
-                if(s.val()) {
-                    const urlStyle = `linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)), url('${s.val()}')`;
-                    document.body.style.backgroundImage = urlStyle; 
-                    document.getElementById('login-screen').style.backgroundImage = urlStyle;
-                }
-            });
-        } else {
-            // Se o Firebase estiver ausente, inicializa localmente na hora
-            inicializarContaMaster();
-        }
-
         function tab(id) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.menu-list li').forEach(l => l.classList.remove('active'));
@@ -540,48 +583,12 @@
             event.currentTarget.classList.add('active');
         }
 
-        // --- SISTEMA DE AUTENTICAÇÃO INFALÍVEL COM ALERTA DE ERRO ---
-        function auth() {
-            const u = document.getElementById('user-in').value.trim();
-            const p = document.getElementById('pass-in').value.trim();
-            const errBox = document.getElementById('login-err');
-            
-            errBox.style.display = 'none'; // Esconde erros anteriores
-
-            // 1. Validação Emergencial Direta (Garante a entrada imediata)
-            if(u.toLowerCase() === 'megan' && p === '1234') {
-                logarUsuario({ dbKey: "master_local", uid: "3461", nome: "Megan", senha: "1234", cargo: "Chefe" });
-                return;
-            }
-
-            // 2. Procura na lista dinâmica de membros caso o Firebase esteja operante
-            if(data.membros && data.membros.length > 0) {
-                const found = data.membros.find(m => (m.nome.toLowerCase() === u.toLowerCase() || String(m.uid) === u) && String(m.senha) === p);
-                if(found) {
-                    logarUsuario(found);
-                    return;
-                }
-            }
-
-            // 3. Se não encontrar o cadastro, ativa o alerta vermelho na caixa de login
-            errBox.style.display = 'block';
-        }
-
-        function logarUsuario(userObj) {
-            currentUser = userObj;
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('main-panel').style.display = 'block';
-            document.getElementById('logged-name').innerText = `${userObj.nome} | ${userObj.uid || '---'}`;
-            
-            updateStatus(true);
-            setInterval(() => updateStatus(true), 15000);
-        }
-
-        window.onbeforeunload = () => updateStatus(false);
-
-        // --- GERENCIAMENTO DE MEMBROS E EDICAO ---
+        // --- 5. GESTÃO DE OPERADORES E EDICÃO ---
         function renderMembros() {
-            const t = document.getElementById('t-membros'); t.innerHTML = "";
+            const t = document.getElementById('t-membros'); 
+            if(!t) return;
+            t.innerHTML = "";
+            
             data.membros.forEach(m => {
                 const diff = Date.now() - (m.status?.lastSeen || 0);
                 const isOnline = m.status?.online && diff < 30000;
@@ -592,7 +599,6 @@
                     if(min >= 60) lastStr = `Há ${Math.floor(min/60)}h atrás`;
                 }
                 
-                // Bloqueia a exclusão do mestre na listagem visual para manter a segurança do admin
                 const btnDeletar = m.dbKey === 'master_local' ? '' : `<button style="padding: 4px 10px; font-size:12px;" class="btn-danger" onclick="delMem('${m.dbKey}')">Deletar</button>`;
 
                 t.innerHTML += `<tr>
@@ -619,9 +625,7 @@
 
             if(key) {
                 if(key === 'master_local') {
-                    // Atualiza a conta mestre local se ela for editada
-                    const idx = data.membros.findIndex(m => m.dbKey === 'master_local');
-                    if(idx !== -1) data.membros[idx] = { dbKey: 'master_local', uid, nome, senha, cargo };
+                    masterFixo.uid = uid; masterFixo.nome = nome; masterFixo.senha = senha; masterFixo.cargo = cargo;
                     if(currentUser && currentUser.dbKey === 'master_local') {
                         currentUser.nome = nome; currentUser.uid = uid;
                         document.getElementById('logged-name').innerText = `${nome} | ${uid}`;
@@ -634,7 +638,6 @@
                 if(db) {
                     db.ref('membros').push().set({ uid, nome, senha, cargo });
                 } else {
-                    // Adiciona localmente caso o Firebase esteja desligado
                     data.membros.push({ dbKey: 'local_' + Date.now(), uid, nome, senha, cargo });
                     renderMembros();
                 }
@@ -686,7 +689,7 @@
             }
         }
 
-        // --- OUTRAS OPERAÇÕES DE EXIBIÇÃO ---
+        // --- OUTRAS OPERAÇÕES DE EXIBIÇÃO EM MODO HÍBRIDO ---
         function upDash() {
             const s = parseFloat(document.getElementById('in-saldo').value) || 0;
             const e = parseFloat(document.getElementById('in-ent').value) || 0;
@@ -716,6 +719,7 @@
 
         function renderFamilies() {
             const container = document.getElementById('container-familias');
+            if(!container) return;
             container.innerHTML = "";
             let familias = {};
             data.catalogo.forEach(item => {
@@ -736,6 +740,7 @@
         function updateDrops() {
             const sEst = document.getElementById('e-item'); 
             const sVen = document.getElementById('v-item');
+            if(!sEst || !sVen) return;
             sEst.innerHTML = '<option value="">Escolha um item...</option>';
             sVen.innerHTML = '<option value="">Escolha um item...</option>';
             data.catalogo.forEach((c, i) => {
@@ -759,7 +764,8 @@
             toggleBox('box-est-form');
         }
         function renderEstoque() {
-            const t = document.getElementById('tab-est'); t.innerHTML = "<tr><th>Família / Fornecedor</th><th>Produto</th><th>Quantidade</th><th>Total</th><th>Status</th></tr>";
+            const t = document.getElementById('tab-est'); if(!t) return;
+            t.innerHTML = "<tr><th>Família / Fornecedor</th><th>Produto</th><th>Quantidade</th><th>Total</th><th>Status</th></tr>";
             data.estoque.forEach(e => t.innerHTML += `<tr><td>${e.emp}</td><td><strong>${e.pro}</strong></td><td>${e.q} unidades</td><td>R$ ${e.v.toLocaleString()}</td><td><span class="badge ${e.q < 5 ? 'badge-low' : 'badge-ok'}">${e.q < 5 ? 'REPOSIÇÃO' : 'DISPONÍVEL'}</span></td></tr>`);
         }
 
@@ -777,7 +783,8 @@
             toggleBox('box-ven-form');
         }
         function renderVendas() {
-            const t = document.getElementById('tab-ven'); t.innerHTML = "<tr><th>Família Compradora</th><th>Produto</th><th>Quantidade</th><th>Faturamento</th></tr>";
+            const t = document.getElementById('tab-ven'); if(!t) return;
+            t.innerHTML = "<tr><th>Família Compradora</th><th>Produto</th><th>Quantidade</th><th>Faturamento</th></tr>";
             data.vendas.forEach(v => t.innerHTML += `<tr><td>${v.emp}</td><td><strong>${v.pro}</strong></td><td>${v.q} unidades</td><td style="color: var(--success); font-weight: 700;">R$ ${v.v.toLocaleString()}</td></tr>`);
         }
 
@@ -790,7 +797,8 @@
             toggleBox('box-mov-form');
         }
         function renderMov() {
-            const t = document.getElementById('tab-mov'); t.innerHTML = "<tr><th>Tipo</th><th>Descrição</th><th>Fluxo Financeiro</th></tr>";
+            const t = document.getElementById('tab-mov'); if(!t) return;
+            t.innerHTML = "<tr><th>Tipo</th><th>Descrição</th><th>Fluxo Financeiro</th></tr>";
             data.movimentos.forEach(m => t.innerHTML += `<tr><td><span class="badge ${m.t === 'Saída'?'badge-low':'badge-ok'}">${m.t}</span></td><td>${m.d}</td><td style="font-weight:700; color:${m.t==='Saída'?'var(--danger)':'var(--success)'}">R$ ${m.v.toLocaleString()}</td></tr>`);
         }
 
@@ -801,7 +809,8 @@
             document.getElementById('g-nota').value = "";
         }
         function renderNotas() {
-            const m = document.getElementById('mural'); m.innerHTML = "";
+            const m = document.getElementById('mural'); if(!m) return;
+            m.innerHTML = "";
             [...data.notas].reverse().forEach(n => m.innerHTML += `<div class="box-list"><strong>${n.u}</strong> <small style="float:right; opacity:0.4;">${n.d}</small><p style="margin-top:12px; line-height:1.4;">${n.txt}</p></div>`);
         }
         function saveBG() { const val = document.getElementById('c-bg').value.trim(); if(db) db.ref('bg').set(val); else { const urlStyle = `linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)), url('${val}')`; document.body.style.backgroundImage = urlStyle; } toggleBox('box-cfg-bg'); }
