@@ -3,224 +3,267 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VORTEX - Painel Oficial</title>
+    <title>VORTEX | Management Panel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
     <style>
-        /* --- ESTILIZAÇÃO GLASSMORPHISM (TRANSPARENTE) --- */
         :root {
-            --cor-principal: #a855f7;
-            --cor-sucesso: #22c55e;
-            --cor-perigo: #ef4444;
-            --texto-claro: #f3f4f6;
-            --texto-escuro: #9ca3af;
-            --fundo-transparente: rgba(15, 12, 28, 0.78); 
-            --borda-transparente: rgba(255, 255, 255, 0.08);
-            --blur-efeito: blur(20px);
-            --largura-sidebar: 260px;
+            --primary: #a855f7;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --glass: rgba(15, 12, 28, 0.65);
+            --border: rgba(255, 255, 255, 0.1);
+            --blur: blur(15px);
+            --sidebar-w: 260px;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
 
         body {
-            color: var(--texto-claro);
-            min-height: 100vh;
             background-color: #0b0813;
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
+            color: #fff;
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             overflow: hidden;
-            transition: background-image 0.5s ease;
+            transition: 0.5s;
         }
 
-        /* --- TELA DE LOGIN --- */
+        /* --- LOGIN --- */
         #login-screen {
-            display: flex; flex-direction: column; width: 400px; padding: 40px;
-            background: var(--fundo-transparente); backdrop-filter: var(--blur-efeito);
-            border: 1px solid var(--borda-transparente); border-radius: 20px; text-align: center; z-index: 100;
+            background: var(--glass);
+            backdrop-filter: var(--blur);
+            padding: 50px;
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            text-align: center;
+            width: 400px;
+            z-index: 100;
         }
-        #login-screen h2 { font-size: 32px; letter-spacing: 5px; margin-bottom: 10px; }
-        .error-message { color: var(--cor-perigo); font-size: 13px; margin-bottom: 15px; display: none; }
 
-        /* --- ESTRUTURA DO PAINEL --- */
+        .input-group { margin-bottom: 20px; text-align: left; }
+        input, select, textarea {
+            width: 100%; padding: 14px; background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border); border-radius: 12px; color: #fff; outline: none;
+        }
+        input:focus { border-color: var(--primary); }
+
+        button {
+            width: 100%; padding: 14px; background: var(--primary);
+            border: none; border-radius: 12px; color: #fff; font-weight: 800; cursor: pointer;
+            transition: 0.3s;
+        }
+        button:hover { opacity: 0.8; transform: scale(1.02); }
+
+        /* --- LAYOUT PRINCIPAL --- */
         #main-panel { display: none; width: 100vw; height: 100vh; }
         .container { display: flex; width: 100%; height: 100%; }
 
-        /* --- SIDEBAR QUE ABRE E FECHA --- */
+        /* --- SIDEBAR DESIGN ORIGINAL --- */
         .sidebar {
-            width: var(--largura-sidebar); min-width: var(--largura-sidebar);
-            background: var(--fundo-transparente); backdrop-filter: var(--blur-efeito);
-            border-right: 1px solid var(--borda-transparente);
-            display: flex; flex-direction: column; padding: 25px; transition: all 0.4s ease;
-        }
-        .sidebar.hidden { margin-left: calc(-1 * var(--largura-sidebar)); opacity: 0; }
-
-        .logo-area { margin-bottom: 40px; }
-        .logo-area h2 { letter-spacing: 3px; font-weight: 800; }
-        .logo-area span { font-size: 10px; color: var(--texto-escuro); text-transform: uppercase; }
-
-        .menu-items { list-style: none; flex-grow: 1; }
-        .menu-items li { 
-            padding: 15px; margin-bottom: 10px; border-radius: 12px; cursor: pointer; 
-            color: var(--texto-escuro); transition: 0.3s; display: flex; align-items: center; gap: 12px;
-        }
-        .menu-items li:hover { background: rgba(255,255,255,0.05); color: #fff; }
-        .menu-items li.active { background: rgba(168, 85, 247, 0.2); border-left: 4px solid var(--cor-principal); color: #fff; }
-
-        /* --- ÁREA DE CONTEÚDO --- */
-        .main-content { flex-grow: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; }
-        .btn-toggle { 
-            background: var(--fundo-transparente); border: 1px solid var(--borda-transparente);
-            color: #fff; padding: 10px 15px; border-radius: 10px; cursor: pointer; width: fit-content; margin-bottom: 20px;
+            width: var(--sidebar-w);
+            background: var(--glass);
+            backdrop-filter: var(--blur);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 30px 20px;
+            transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
         }
 
-        .content-section { display: none; }
-        .content-section.active { display: block; }
+        .sidebar.collapsed { margin-left: calc(-1 * var(--sidebar-w)); }
 
-        /* --- CARDS E CAIXAS --- */
-        .grid-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 30px; }
-        .card { background: var(--fundo-transparente); padding: 25px; border-radius: 15px; border: 1px solid var(--borda-transparente); }
-        .card .valor { font-size: 24px; font-weight: 800; margin-top: 10px; }
+        .logo-area { margin-bottom: 50px; }
+        .logo-area h2 { font-weight: 800; letter-spacing: 4px; font-size: 26px; }
+        .logo-area span { font-size: 10px; opacity: 0.5; text-transform: uppercase; }
 
-        .box-manager { background: var(--fundo-transparente); padding: 25px; border-radius: 15px; border: 1px solid var(--borda-transparente); margin-bottom: 25px; }
-        .box-title { font-size: 18px; margin-bottom: 20px; border-bottom: 1px solid var(--borda-transparente); padding-bottom: 10px; }
-
-        input, select, textarea { 
-            width: 100%; padding: 12px; background: rgba(0,0,0,0.4); border: 1px solid var(--borda-transparente); 
-            border-radius: 8px; color: #fff; outline: none; margin-bottom: 10px;
+        .menu-list { list-style: none; flex-grow: 1; }
+        .menu-list li {
+            padding: 16px; margin-bottom: 8px; border-radius: 14px;
+            cursor: pointer; color: #94a3b8; display: flex; align-items: center; gap: 15px;
+            transition: 0.3s;
         }
-        button { background: var(--cor-principal); color: #fff; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 700; }
-        
+        .menu-list li i { font-size: 18px; }
+        .menu-list li:hover { background: rgba(255,255,255,0.05); color: #fff; }
+        .menu-list li.active { background: rgba(168, 85, 247, 0.2); color: #fff; border-left: 4px solid var(--primary); }
+
+        /* BOTÃO FLECHA (TOGGLE) */
+        .toggle-btn {
+            position: absolute; right: -15px; top: 50%;
+            width: 30px; height: 30px; background: var(--primary);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; z-index: 10; border: 2px solid #0b0813;
+        }
+
+        /* --- CONTEÚDO --- */
+        .main-content { flex-grow: 1; padding: 40px; overflow-y: auto; position: relative; }
+        .section { display: none; animation: fadeIn 0.5s ease; }
+        .section.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- CARDS GLASS --- */
+        .grid-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; margin-bottom: 40px; }
+        .card {
+            background: var(--glass); backdrop-filter: var(--blur);
+            padding: 30px; border-radius: 20px; border: 1px solid var(--border);
+        }
+        .card h4 { font-size: 12px; opacity: 0.5; text-transform: uppercase; margin-bottom: 15px; }
+        .card .value { font-size: 28px; font-weight: 800; }
+
+        .box {
+            background: var(--glass); backdrop-filter: var(--blur);
+            padding: 30px; border-radius: 20px; border: 1px solid var(--border); margin-bottom: 30px;
+        }
+
+        /* --- TABELAS --- */
         table { width: 100%; border-collapse: collapse; }
-        th, td { text-align: left; padding: 15px; border-bottom: 1px solid var(--borda-transparente); }
-        .badge { padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; }
-        .badge.sucesso { background: rgba(34, 197, 94, 0.2); color: var(--cor-sucesso); }
-        .badge.perigo { background: rgba(239, 68, 68, 0.2); color: var(--cor-perigo); }
+        th { text-align: left; padding: 15px; opacity: 0.5; font-size: 12px; text-transform: uppercase; }
+        td { padding: 18px 15px; border-bottom: 1px solid var(--border); font-size: 14px; }
 
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 8px; }
+        .online { background: var(--success); box-shadow: 0 0 10px var(--success); }
+        .offline { background: #64748b; }
+
+        .badge { padding: 5px 10px; border-radius: 8px; font-size: 11px; font-weight: bold; }
+        .badge-low { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+        .badge-ok { background: rgba(34, 197, 94, 0.2); color: var(--success); }
     </style>
 </head>
 <body>
 
     <div id="login-screen">
-        <h2>VORTEX</h2>
-        <p style="color: var(--texto-escuro); margin-bottom: 30px;">Acesso Restrito</p>
-        <div id="login-error" class="error-message">Acesso Negado!</div>
-        <input type="text" id="login-username" placeholder="Usuário">
-        <input type="password" id="login-password" placeholder="Senha">
-        <button onclick="executarLogin()">Entrar</button>
+        <div class="logo-area"><h2>VORTEX</h2><span>Acesso ao Sistema</span></div>
+        <div id="login-err" style="color: var(--danger); font-size: 12px; margin-bottom: 10px; display: none;">Credenciais Inválidas!</div>
+        <div class="input-group">
+            <input type="text" id="user-in" placeholder="Usuário">
+        </div>
+        <div class="input-group">
+            <input type="password" id="pass-in" placeholder="Senha">
+        </div>
+        <button onclick="auth()">ENTRAR NO PAINEL</button>
     </div>
 
     <div id="main-panel">
         <div class="container">
-            <nav class="sidebar" id="sidebar">
-                <div class="logo-area">
-                    <h2>VORTEX</h2>
-                    <span>Sistema de Gestão</span>
+            <aside class="sidebar" id="sidebar">
+                <div class="toggle-btn" onclick="toggleSidebar()">
+                    <i class="fas fa-chevron-left" id="t-icon"></i>
                 </div>
-                <ul class="menu-items">
-                    <li class="active" onclick="mudarAba('dashboard')">📊 Dashboard</li>
-                    <li onclick="mudarAba('membros')">👥 Membros</li>
-                    <li onclick="mudarAba('estoque')">📦 Estoque</li>
-                    <li onclick="mudarAba('movimentos')">💸 Movimentos</li>
-                    <li onclick="mudarAba('gerencia')">⚙️ Gerência</li>
-                    <li onclick="mudarAba('configuracao')">🛠️ Configuração</li>
+
+                <div class="logo-area"><h2>VORTEX</h2><span>Gestão Interna</span></div>
+                
+                <ul class="menu-list">
+                    <li class="active" onclick="tab('dash')"><i class="fas fa-chart-pie"></i> Dashboard</li>
+                    <li onclick="tab('mem')"><i class="fas fa-users"></i> Membros</li>
+                    <li onclick="tab('est')"><i class="fas fa-box"></i> Estoque</li>
+                    <li onclick="tab('mov')"><i class="fas fa-wallet"></i> Movimentos</li>
+                    <li onclick="tab('ger')"><i class="fas fa-user-shield"></i> Gerência</li>
+                    <li onclick="tab('cfg')"><i class="fas fa-cog"></i> Configuração</li>
                 </ul>
-                <div style="border-top: 1px solid var(--borda-transparente); padding-top: 20px;">
-                    <strong id="display-user">megan</strong><br>
-                    <span style="font-size: 12px; color: var(--texto-escuro);">Conectado Realtime</span>
+
+                <div class="user-footer" style="border-top: 1px solid var(--border); padding-top: 20px;">
+                    <strong id="logged-name">---</strong><br>
+                    <span style="font-size: 11px; opacity: 0.5;">Sessão Ativa</span>
                 </div>
-            </nav>
+            </aside>
 
             <main class="main-content">
-                <button class="btn-toggle" onclick="alternarSidebar()">☰ Abrir/Fechar Menu</button>
-
-                <section id="dashboard" class="content-section active">
-                    <div class="box-manager">
-                        <div class="box-title">Configurar Dashboard</div>
-                        <div style="display: flex; gap: 10px;">
-                            <input type="number" id="dash-saldo" placeholder="Saldo Atual">
-                            <input type="number" id="dash-entradas" placeholder="Entradas">
-                            <input type="number" id="dash-despesas" placeholder="Despesas">
+                
+                <section id="dash" class="section active">
+                    <div class="box">
+                        <h3>Controle do Dashboard</h3>
+                        <div style="display: flex; gap: 15px; margin-top: 15px;">
+                            <input type="number" id="in-saldo" placeholder="Saldo (R$)">
+                            <input type="number" id="in-ent" placeholder="Entradas">
+                            <input type="number" id="in-sai" placeholder="Saídas">
+                            <button style="width: 150px;" onclick="upDash()">SALVAR</button>
                         </div>
-                        <button onclick="salvarDashboard()">Atualizar Painel</button>
                     </div>
                     <div class="grid-cards">
-                        <div class="card" style="border-left: 5px solid var(--cor-principal);"><h3>Saldo Total</h3><div class="valor" id="v-saldo">R$ 0,00</div></div>
-                        <div class="card" style="border-left: 5px solid var(--cor-sucesso);"><h3>Entradas</h3><div class="valor" id="v-entradas">R$ 0,00</div></div>
-                        <div class="card" style="border-left: 5px solid var(--cor-perigo);"><h3>Despesas</h3><div class="valor" id="v-despesas">R$ 0,00</div></div>
+                        <div class="card"><h4>Saldo da Organização</h4><div class="value" id="v-saldo">R$ 0,00</div></div>
+                        <div class="card"><h4>Ganhos Semanais</h4><div class="value" style="color: var(--success)" id="v-ent">R$ 0,00</div></div>
+                        <div class="card"><h4>Gastos Totais</h4><div class="value" style="color: var(--danger)" id="v-sai">R$ 0,00</div></div>
                     </div>
                 </section>
 
-                <section id="estoque" class="content-section">
-                    <div class="box-manager">
-                        <div class="box-title">Registrar Entrada</div>
-                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                            <select id="est-item" style="flex: 2;" onchange="calcEstoque()"></select>
-                            <input type="number" id="est-qtd" style="flex: 1;" placeholder="Qtd" oninput="calcEstoque()">
-                            <input type="text" id="est-total" style="flex: 1;" readonly placeholder="Total R$">
-                            <button onclick="addEstoque()">Registrar</button>
+                <section id="mem" class="section">
+                    <div class="box">
+                        <h3>Novo Login / Membro</h3>
+                        <div style="display: flex; gap: 15px; margin-top: 15px;">
+                            <input type="text" id="m-nome" placeholder="Nome">
+                            <input type="text" id="m-pass" placeholder="Senha">
+                            <button onclick="addMembro()">CRIAR ACESSO</button>
                         </div>
                     </div>
-                    <div class="box-manager">
+                    <div class="box">
                         <table>
-                            <thead><tr><th>Empresa</th><th>Item</th><th>Qtd</th><th>Valor</th><th>Status</th></tr></thead>
-                            <tbody id="tab-estoque"></tbody>
+                            <thead><tr><th>Membro</th><th>Cargo</th><th>Status / Visto por último</th><th>Ação</th></tr></thead>
+                            <tbody id="t-membros"></tbody>
                         </table>
                     </div>
                 </section>
 
-                <section id="movimentos" class="content-section">
-                    <div class="box-manager">
-                        <div class="box-title">Lançar Movimentação de Dinheiro</div>
-                        <div style="display: flex; gap: 10px;">
-                            <select id="mov-tipo" style="flex: 1;"><option>Entrada</option><option>Saída</option><option>Venda de Produto</option></select>
-                            <input type="text" id="mov-desc" style="flex: 2;" placeholder="Descrição">
-                            <input type="number" id="mov-valor" style="flex: 1;" placeholder="R$">
-                            <button onclick="addMovimento()">Lançar</button>
+                <section id="est" class="section">
+                    <div class="box">
+                        <h3>Registrar Entrada de Item</h3>
+                        <div style="display: flex; gap: 15px; margin-top: 15px;">
+                            <select id="e-item" onchange="calcE()"></select>
+                            <input type="number" id="e-qtd" placeholder="Quantidade" oninput="calcE()">
+                            <input type="text" id="e-val" placeholder="R$ Total" readonly>
+                            <button onclick="addEstoque()">LANÇAR</button>
                         </div>
                     </div>
-                    <div class="box-manager">
-                        <table id="tab-movimentos"></table>
+                    <div class="box">
+                        <table id="tab-est"></table>
                     </div>
                 </section>
 
-                <section id="gerencia" class="content-section">
-                    <div class="box-manager">
-                        <div class="box-title">Mural de Notas e Decisões</div>
-                        <textarea id="nota-texto" rows="3" placeholder="Escreva aqui..."></textarea>
-                        <button onclick="addNota()">Publicar Nota</button>
-                    </div>
-                    <div id="mural-notas"></div>
-                </section>
-
-                <section id="configuracao" class="content-section">
-                    <div class="box-manager">
-                        <div class="box-title">Link da Foto de Fundo</div>
-                        <input type="text" id="cfg-bg" placeholder="Cole a URL da imagem aqui">
-                        <button onclick="salvarBG()">Aplicar e Salvar</button>
-                    </div>
-                    <div class="box-manager">
-                        <div class="box-title">Cadastrar Preços de Empresas</div>
-                        <div style="display: flex; gap: 10px;">
-                            <input type="text" id="cfg-emp" placeholder="Empresa">
-                            <input type="text" id="cfg-prod" placeholder="Produto">
-                            <input type="number" id="cfg-v" placeholder="Preço Unitário">
-                            <button onclick="addConfig()">Salvar no Catálogo</button>
+                <section id="mov" class="section">
+                    <div class="box">
+                        <h3>Lançar Financeiro</h3>
+                        <div style="display: flex; gap: 15px; margin-top: 15px;">
+                            <select id="mo-t"><option>Entrada</option><option>Saída</option></select>
+                            <input type="text" id="mo-d" placeholder="Descrição">
+                            <input type="number" id="mo-v" placeholder="Valor">
+                            <button onclick="addMov()">REGISTRAR</button>
                         </div>
+                    </div>
+                    <div class="box">
+                        <table id="tab-mov"></table>
                     </div>
                 </section>
 
-                <section id="membros" class="content-section">
-                    <div class="box-manager">
-                        <div class="box-title">Gerenciar Acessos</div>
+                <section id="ger" class="section">
+                    <div class="box">
+                        <h3>Mural de Decisões</h3>
+                        <textarea id="g-nota" placeholder="Escreva uma anotação importante..."></textarea>
+                        <button style="margin-top: 10px;" onclick="addNota()">PUBLICAR</button>
+                    </div>
+                    <div id="mural"></div>
+                </section>
+
+                <section id="cfg" class="section">
+                    <div class="box">
+                        <h3>Personalizar Fundo</h3>
+                        <input type="text" id="c-bg" placeholder="URL da Foto de Fundo">
+                        <button style="margin-top: 10px;" onclick="saveBG()">APLICAR</button>
+                    </div>
+                    <div class="box">
+                        <h3>Catálogo de Preços</h3>
                         <div style="display: flex; gap: 10px;">
-                            <input type="text" id="mem-nome" placeholder="Nome">
-                            <input type="password" id="mem-pass" placeholder="Senha">
-                            <button onclick="addMembro()">Criar Login</button>
+                            <input type="text" id="c-emp" placeholder="Empresa">
+                            <input type="text" id="c-pro" placeholder="Produto">
+                            <input type="number" id="c-pre" placeholder="Preço Unitário">
+                            <button onclick="addCat()">ADICIONAR</button>
                         </div>
                     </div>
-                    <div class="box-manager"><table id="tab-membros"></table></div>
                 </section>
 
             </main>
@@ -231,137 +274,200 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <script>
-        // --- COLE SEU FIREBASECONFIG ABAIXO ---
+        // --- CONFIGURAÇÃO FIREBASE (COLE A SUA AQUI) ---
         const firebaseConfig = {
-            apiKey: "AIzaSyBCEpercpoeHL6SFzw0TI91kmNplF8WXDc",
-            authDomain: "vortex-f7559.firebaseapp.com",
-            projectId: "vortex-f7559",
-            storageBucket: "vortex-f7559.firebasestorage.app",
-            messagingSenderId: "254083067084",
-            appId: "1:254083067084:web:e40689772f4c507e426669",
-            measurementId: "G-GMFS68CRGT"
-        };
+  apiKey: "AIzaSyBCEpercpoeHL6SFzw0TI91kmNplF8WXDc",
+  authDomain: "vortex-f7559.firebaseapp.com",
+  databaseURL: "https://vortex-f7559-default-rtdb.firebaseio.com",
+  projectId: "vortex-f7559",
+  storageBucket: "vortex-f7559.firebasestorage.app",
+  messagingSenderId: "254083067084",
+  appId: "1:254083067084:web:e40689772f4c507e426669",
+  measurementId: "G-GMFS68CRGT"
+};
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        let catalogo = [], membros = [], estoque = [], movimentos = [], dashboard = {}, notas = [];
+        let currentUser = null;
+        let data = { membros: [], estoque: [], movimentos: [], catalogo: [], notas: [], dash: {} };
 
-        // --- REALTIME LISTENERS ---
-        db.ref('catalogo').on('value', s => { catalogo = s.val() || []; atualizarDropdowns(); renderConfig(); });
-        db.ref('membros').on('value', s => { membros = s.val() || [{nome:'megan', senha:'1234'}]; renderMembros(); });
-        db.ref('estoque').on('value', s => { estoque = s.val() || []; renderEstoque(); });
-        db.ref('movimentos').on('value', s => { movimentos = s.val() || []; renderMovimentos(); });
-        db.ref('notas').on('value', s => { notas = s.val() || []; renderNotas(); });
-        db.ref('dashboard').on('value', s => { dashboard = s.val() || {s:0, e:0, d:0}; renderDash(); });
+        // --- SISTEMA DE STATUS REALTIME ---
+        function updateStatus(online) {
+            if(!currentUser) return;
+            db.ref('membros/' + currentUser.id + '/status').set({
+                online: online,
+                lastSeen: Date.now()
+            });
+        }
+
+        // --- LISTENERS ---
+        db.ref('membros').on('value', s => { 
+            const val = s.val();
+            data.membros = val ? Object.keys(val).map(k => ({...val[k], id: k})) : [];
+            renderMembros(); 
+        });
+        db.ref('catalogo').on('value', s => { data.catalogo = s.val() || []; updateDrops(); });
+        db.ref('estoque').on('value', s => { data.estoque = s.val() || []; renderEstoque(); });
+        db.ref('movimentos').on('value', s => { data.movimentos = s.val() || []; renderMov(); });
+        db.ref('notas').on('value', s => { data.notas = s.val() || []; renderNotas(); });
+        db.ref('dash').on('value', s => { data.dash = s.val() || {s:0,e:0,sa:0}; renderDash(); });
         db.ref('bg').on('value', s => { if(s.val()) document.body.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('${s.val()}')`; });
 
-        // --- FUNÇÕES DE INTERFACE ---
-        function alternarSidebar() { document.getElementById('sidebar').classList.toggle('hidden'); }
-        function mudarAba(id) {
-            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.menu-items li').forEach(l => l.classList.remove('active'));
+        // --- NAVEGAÇÃO ---
+        function tab(id) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.menu-list li').forEach(l => l.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             event.currentTarget.classList.add('active');
         }
 
-        // --- SISTEMA DE LOGIN ---
-        function executarLogin() {
-            const u = document.getElementById('login-username').value.toLowerCase();
-            const p = document.getElementById('login-password').value;
-            const user = membros.find(m => m.nome.toLowerCase() === u && m.senha === p);
-            if(user) {
+        function toggleSidebar() {
+            const side = document.getElementById('sidebar');
+            const icon = document.getElementById('t-icon');
+            side.classList.toggle('collapsed');
+            icon.className = side.classList.contains('collapsed') ? 'fas fa-chevron-right' : 'fas fa-chevron-left';
+        }
+
+        // --- AUTH ---
+        function auth() {
+            const u = document.getElementById('user-in').value.toLowerCase();
+            const p = document.getElementById('pass-in').value;
+            // No primeiro login, como o banco está vazio, permitimos 'megan'/'1234'
+            if(u === 'megan' && p === '1234' && data.membros.length === 0) {
+                const newMem = db.ref('membros').push();
+                newMem.set({ nome: 'megan', senha: '1234', cargo: 'Chefe' });
+                return;
+            }
+
+            const found = data.membros.find(m => m.nome.toLowerCase() === u && m.senha === p);
+            if(found) {
+                currentUser = found;
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('main-panel').style.display = 'block';
-                document.getElementById('display-user').innerText = user.nome;
-            } else { document.getElementById('login-error').style.display = 'block'; }
+                document.getElementById('logged-name').innerText = found.nome;
+                updateStatus(true);
+                // Heartbeat Status
+                setInterval(() => updateStatus(true), 10000);
+            } else {
+                document.getElementById('login-err').style.display = 'block';
+            }
         }
 
-        // --- LOGICA DE NEGOCIO ---
-        function salvarDashboard() {
-            const s = parseFloat(document.getElementById('dash-saldo').value) || 0;
-            const e = parseFloat(document.getElementById('dash-entradas').value) || 0;
-            const d = parseFloat(document.getElementById('dash-despesas').value) || 0;
-            db.ref('dashboard').set({s, e, d});
+        window.onbeforeunload = () => updateStatus(false);
+
+        // --- LOGICA ---
+        function renderMembros() {
+            const t = document.getElementById('t-membros');
+            t.innerHTML = "";
+            data.membros.forEach(m => {
+                const diff = Date.now() - (m.status?.lastSeen || 0);
+                const isOnline = m.status?.online && diff < 20000;
+                let lastStr = "Nunca";
+                if(m.status?.lastSeen) {
+                    const min = Math.floor(diff / 60000);
+                    lastStr = min < 1 ? "Agora" : `Há ${min} min`;
+                    if(min > 60) lastStr = `Há ${Math.floor(min/60)} horas`;
+                }
+
+                t.innerHTML += `<tr>
+                    <td>${m.nome}</td>
+                    <td>${m.cargo || 'Membro'}</td>
+                    <td>
+                        <span class="status-dot ${isOnline ? 'online' : 'offline'}"></span>
+                        ${isOnline ? 'Online' : lastStr}
+                    </td>
+                    <td><button style="padding: 5px; width: auto;" onclick="delMem('${m.id}')">Excluir</button></td>
+                </tr>`;
+            });
+        }
+
+        function addMembro() {
+            const n = document.getElementById('m-nome').value;
+            const p = document.getElementById('m-pass').value;
+            if(!n || !p) return;
+            db.ref('membros').push().set({ nome: n, senha: p, cargo: 'Membro' });
+            document.getElementById('m-nome').value = ""; document.getElementById('m-pass').value = "";
+        }
+
+        function delMem(id) { if(confirm("Excluir acesso?")) db.ref('membros/'+id).remove(); }
+
+        // Dash
+        function upDash() {
+            const s = parseFloat(document.getElementById('in-saldo').value) || 0;
+            const e = parseFloat(document.getElementById('in-ent').value) || 0;
+            const sa = parseFloat(document.getElementById('in-sai').value) || 0;
+            db.ref('dash').set({s, e, sa});
         }
         function renderDash() {
-            document.getElementById('v-saldo').innerText = `R$ ${dashboard.s.toLocaleString()}`;
-            document.getElementById('v-entradas').innerText = `R$ ${dashboard.e.toLocaleString()}`;
-            document.getElementById('v-despesas').innerText = `R$ ${dashboard.d.toLocaleString()}`;
+            document.getElementById('v-saldo').innerText = `R$ ${data.dash.s.toLocaleString()}`;
+            document.getElementById('v-ent').innerText = `R$ ${data.dash.e.toLocaleString()}`;
+            document.getElementById('v-sai').innerText = `R$ ${data.dash.sa.toLocaleString()}`;
         }
 
-        function addConfig() {
-            const emp = document.getElementById('cfg-emp').value;
-            const prod = document.getElementById('cfg-prod').value;
-            const v = parseFloat(document.getElementById('cfg-v').value);
-            catalogo.push({emp, prod, v});
-            db.ref('catalogo').set(catalogo);
+        // Estoque
+        function updateDrops() {
+            const s = document.getElementById('e-item');
+            s.innerHTML = '<option value="">Selecione...</option>';
+            data.catalogo.forEach((c, i) => s.innerHTML += `<option value="${i}">${c.emp} - ${c.pro}</option>`);
         }
-
-        function calcEstoque() {
-            const idx = document.getElementById('est-item').value;
-            const qtd = document.getElementById('est-qtd').value;
-            if(idx !== "" && qtd > 0) { document.getElementById('est-total').value = `R$ ${catalogo[idx].v * qtd}`; }
+        function calcE() {
+            const i = document.getElementById('e-item').value;
+            const q = document.getElementById('e-qtd').value;
+            if(i !== "" && q) document.getElementById('e-val').value = `R$ ${data.catalogo[i].pre * q}`;
         }
-
         function addEstoque() {
-            const idx = document.getElementById('est-item').value;
-            const qtd = parseInt(document.getElementById('est-qtd').value);
-            if(idx === "" || !qtd) return;
-            const item = catalogo[idx];
-            estoque.push({emp: item.emp, prod: item.prod, qtd, v: item.v * qtd, status: qtd < 5 ? 'perigo' : 'sucesso'});
-            db.ref('estoque').set(estoque);
-        }
-
-        function addMovimento() {
-            const t = document.getElementById('mov-tipo').value;
-            const desc = document.getElementById('mov-desc').value;
-            const v = parseFloat(document.getElementById('mov-valor').value);
-            movimentos.push({t, desc, v});
-            db.ref('movimentos').set(movimentos);
-            if(t === 'Saída') dashboard.s -= v; else dashboard.s += v;
-            db.ref('dashboard').set(dashboard);
-        }
-
-        function addNota() {
-            const texto = document.getElementById('nota-texto').value;
-            const autor = document.getElementById('display-user').innerText;
-            notas.push({texto, autor, data: new Date().toLocaleDateString()});
-            db.ref('notas').set(notas);
-            document.getElementById('nota-texto').value = "";
-        }
-
-        function salvarBG() { db.ref('bg').set(document.getElementById('cfg-bg').value); }
-        function addMembro() {
-            const nome = document.getElementById('mem-nome').value;
-            const senha = document.getElementById('mem-pass').value;
-            membros.push({nome, senha});
-            db.ref('membros').set(membros);
-        }
-
-        // --- RENDERERS ---
-        function atualizarDropdowns() {
-            const sel = document.getElementById('est-item');
-            sel.innerHTML = '<option value="">Selecione o Produto...</option>';
-            catalogo.forEach((c, i) => sel.innerHTML += `<option value="${i}">${c.emp} - ${c.prod}</option>`);
+            const i = document.getElementById('e-item').value;
+            const q = parseInt(document.getElementById('e-qtd').value);
+            if(i === "" || !q) return;
+            const item = data.catalogo[i];
+            data.estoque.push({ emp: item.emp, pro: item.pro, q, v: item.pre * q });
+            db.ref('estoque').set(data.estoque);
         }
         function renderEstoque() {
-            const t = document.getElementById('tab-estoque'); t.innerHTML = "";
-            estoque.forEach(e => t.innerHTML += `<tr><td>${e.emp}</td><td>${e.prod}</td><td>${e.qtd}</td><td>R$ ${e.v}</td><td><span class="badge ${e.status}">${e.status === 'perigo' ? 'BAIXO' : 'OK'}</span></td></tr>`);
+            const t = document.getElementById('tab-est');
+            t.innerHTML = "<tr><th>Empresa</th><th>Produto</th><th>Qtd</th><th>Total</th><th>Status</th></tr>";
+            data.estoque.forEach(e => t.innerHTML += `<tr><td>${e.emp}</td><td>${e.pro}</td><td>${e.q}</td><td>R$ ${e.v}</td><td><span class="badge ${e.q < 5 ? 'badge-low' : 'badge-ok'}">${e.q < 5 ? 'CRÍTICO' : 'OK'}</span></td></tr>`);
         }
-        function renderMovimentos() {
-            const t = document.getElementById('tab-movimentos'); t.innerHTML = "<tr><th>Tipo</th><th>Descrição</th><th>Valor</th></tr>";
-            movimentos.forEach(m => t.innerHTML += `<tr><td>${m.t}</td><td>${m.desc}</td><td style="color:${m.t==='Saída'?'#ef4444':'#22c55e'}">R$ ${m.v}</td></tr>`);
+
+        // Financeiro
+        function addMov() {
+            const t = document.getElementById('mo-t').value;
+            const d = document.getElementById('mo-d').value;
+            const v = parseFloat(document.getElementById('mo-v').value);
+            if(!d || !v) return;
+            data.movimentos.push({t, d, v});
+            db.ref('movimentos').set(data.movimentos);
+            if(t === 'Saída') data.dash.s -= v; else data.dash.s += v;
+            db.ref('dash').set(data.dash);
+        }
+        function renderMov() {
+            const t = document.getElementById('tab-mov');
+            t.innerHTML = "<tr><th>Tipo</th><th>Descrição</th><th>Valor</th></tr>";
+            data.movimentos.forEach(m => t.innerHTML += `<tr><td>${m.t}</td><td>${m.d}</td><td style="color:${m.t==='Saída'?'var(--danger)':'var(--success)'}">R$ ${m.v}</td></tr>`);
+        }
+
+        // Notas
+        function addNota() {
+            const n = document.getElementById('g-nota').value;
+            if(!n) return;
+            data.notas.push({ txt: n, u: currentUser.nome, d: new Date().toLocaleDateString() });
+            db.ref('notas').set(data.notas);
+            document.getElementById('g-nota').value = "";
         }
         function renderNotas() {
-            const m = document.getElementById('mural-notas'); m.innerHTML = "";
-            [...notas].reverse().forEach(n => m.innerHTML += `<div class="box-manager"><strong>${n.autor}</strong> - ${n.data}<br>${n.texto}</div>`);
+            const m = document.getElementById('mural'); m.innerHTML = "";
+            [...data.notas].reverse().forEach(n => m.innerHTML += `<div class="box"><strong>${n.u}</strong> <small style="opacity:0.5">${n.d}</small><p style="margin-top:10px">${n.txt}</p></div>`);
         }
-        function renderMembros() {
-            const t = document.getElementById('tab-membros'); t.innerHTML = "<tr><th>Usuário</th><th>Senha</th></tr>";
-            membros.forEach(m => t.innerHTML += `<tr><td>${m.nome}</td><td>***</td></tr>`);
-        }
-        function renderConfig() {
-            const t = document.getElementById('tab-config-corpo'); // Note: add this table if needed
+
+        // Config
+        function saveBG() { db.ref('bg').set(document.getElementById('c-bg').value); }
+        function addCat() {
+            const emp = document.getElementById('c-emp').value;
+            const pro = document.getElementById('c-pro').value;
+            const pre = parseFloat(document.getElementById('c-pre').value);
+            if(!emp || !pro || !pre) return;
+            data.catalogo.push({emp, pro, pre});
+            db.ref('catalogo').set(data.catalogo);
         }
     </script>
 </body>
