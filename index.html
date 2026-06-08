@@ -31,7 +31,7 @@
             overflow: hidden;
         }
 
-        /* --- TELA DE LOGIN ISOLADA --- */
+        /* --- TELA DE LOGIN --- */
         #login-screen {
             position: fixed; 
             top: 0; 
@@ -130,13 +130,14 @@
 
         .grid-families { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
         .family-card { background: rgba(20, 16, 38, 0.7); border: 1px solid var(--border); border-left: 4px solid var(--primary); padding: 20px; border-radius: 12px; }
-        
+        .family-item { display: flex; justify-content: space-between; margin-top: 10px; font-size: 14px; opacity: 0.9; }
+
         table { width: 100%; border-collapse: collapse; }
         th { text-align: left; padding: 12px 15px; opacity: 0.5; font-size: 11px; text-transform: uppercase; }
         td { padding: 16px 15px; border-bottom: 1px solid var(--border); font-size: 14px; }
 
         .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 8px; }
-        .online { background: var(--success); box-shadow: 0 0 8px var(--success); }
+        .online { background: var(--success); box-shadow: 0 0 10px var(--success); }
         .offline { background: #64748b; }
         .badge { padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; }
         .badge-low { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
@@ -353,12 +354,19 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <script>
-        // --- 1. MEMÓRIA LOCAL E INSTANCIAÇÃO DE DADOS MESTRES ---
+        // --- 1. CONFIGURAÇÃO DE MEMÓRIA E ACESSOS MESTRES ---
         let currentUser = null;
         let data = { membros: [], estoque: [], vendas: [], movimentos: [], catalogo: [], notas: [], dash: {} };
 
-        // Cadastro Mestre Padrão
-        const masterFixo = { dbKey: "master_local", uid: "3461", nome: "Megan", senha: "1234", cargo: "Chefe", status: { online: false, lastSeen: 0 } };
+        // Conta mestre local padrão
+        const masterFixo = { 
+            dbKey: "master_local", 
+            uid: "3461", 
+            nome: "Megan", 
+            senha: "1234", 
+            cargo: "Chefe", 
+            status: { online: false, lastSeen: 0 } 
+        };
 
         function forcarInjecaoMaster() {
             const jaExiste = data.membros.some(m => m.dbKey === 'master_local' || m.nome.toLowerCase() === 'megan');
@@ -368,7 +376,7 @@
             renderMembros();
         }
 
-        // --- 2. CONFIGURAÇÃO DO SEU FIREBASE ---
+        // --- 2. INSTANCIAÇÃO DO FIREBASE ---
         const firebaseConfig = {
   apiKey: "AIzaSyBCEpercpoeHL6SFzw0TI91kmNplF8WXDc",
   authDomain: "vortex-f7559.firebaseapp.com",
@@ -387,14 +395,20 @@
                 db = firebase.database();
             }
         } catch(e) {
-            console.warn("Rodando local.");
+            console.warn("Rodando localmente sem Firebase.");
         }
 
-        // Carrega os dados em tempo real se o Firebase estiver ligado
+        // Sincronização em tempo real (Firebase ativo)
         if(db) {
             db.ref('membros').on('value', s => { 
                 const val = s.val();
                 data.membros = val ? Object.keys(val).map(k => ({...val[k], dbKey: k})) : [];
+                
+                // Se você já estiver logado, garante que seu status online permaneça ativo na lista atualizada do servidor
+                if(currentUser) {
+                    const euNaLista = data.membros.find(m => m.dbKey === currentUser.dbKey || m.nome === currentUser.nome);
+                    if(euNaLista) euNaLista.status = { online: true, lastSeen: Date.now() };
+                }
                 forcarInjecaoMaster();
             }, () => { forcarInjecaoMaster(); });
             
@@ -412,10 +426,11 @@
                 }
             });
         } else {
+            // Inicialização pura local offline
             forcarInjecaoMaster();
         }
 
-        // --- 3. ENGINE DE LOGIN ---
+        // --- 3. MECANISMO DE LOGIN COM AVISO DE ERRO E STATUS ONLINE CORRIGIDO ---
         function auth() {
             const u = document.getElementById('user-in').value.trim();
             const p = document.getElementById('pass-in').value.trim();
@@ -423,6 +438,7 @@
             
             errBox.style.display = 'none';
 
+            // Procura o usuário combinando Nome ou ID e checando a Senha
             const found = data.membros.find(m => 
                 (m.nome.toLowerCase() === u.toLowerCase() || String(m.uid) === u) && String(m.senha) === p
             );
@@ -430,21 +446,21 @@
             if(found) {
                 logarUsuario(found);
             } else {
-                errBox.style.display = 'block';
+                errBox.style.display = 'block'; // Ativa o banner vermelho de erro na hora
             }
         }
 
         function logarUsuario(userObj) {
             currentUser = userObj;
             
-            // Simula status online na memória para exibição local imediata
+            // Força o status a ficar ONLINE na memória local imediatamente
             userObj.status = { online: true, lastSeen: Date.now() };
             
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('main-panel').style.display = 'block';
             document.getElementById('logged-name').innerText = `${userObj.nome} | ${userObj.uid || '---'}`;
             
-            renderMembros(); // Força atualização imediata da tabela com você Online
+            renderMembros(); // Atualiza a tabela para refletir seu status verde online
             updateStatus(true);
             setInterval(() => updateStatus(true), 15000);
         }
@@ -457,7 +473,7 @@
         }
         window.onbeforeunload = () => updateStatus(false);
 
-        // --- 4. GESTÃO DE MEMBROS ---
+        // --- 4. ENGINE COMPLETA: CADASTRAR, SALVAR E EDITAR OPERADORES ---
         function saveMembro() {
             const key = document.getElementById('m-key').value;
             const uid = document.getElementById('m-id').value.trim();
@@ -468,6 +484,7 @@
             if(!uid || !nome || !senha || !cargo) return;
 
             if(key) {
+                // Modo: Salvar Alterações de Membro Existente
                 if(key === 'master_local') {
                     masterFixo.uid = uid; masterFixo.nome = nome; masterFixo.senha = senha; masterFixo.cargo = cargo;
                     if(currentUser && currentUser.dbKey === 'master_local') {
@@ -479,13 +496,15 @@
                 } else {
                     const idx = data.membros.findIndex(m => m.dbKey === key);
                     if(idx !== -1) {
-                        const statusAntigo = data.membros[idx].status;
-                        data.membros[idx] = { dbKey: key, uid, nome, senha, cargo, status: statusAntigo };
+                        const statusAtual = data.membros[idx].status;
+                        data.membros[idx] = { dbKey: key, uid, nome, senha, cargo, status: statusAtual };
                     }
                 }
             } else {
+                // Modo: Cadastrar Novo Registro de Acesso
                 const novaKey = 'local_' + Date.now();
                 const novoMembro = { uid, nome, senha, cargo, status: { online: false, lastSeen: 0 } };
+                
                 if(db) {
                     db.ref('membros').push().set(novoMembro);
                 } else {
@@ -503,12 +522,14 @@
             const mem = data.membros.find(m => m.dbKey === key);
             if(!mem) return;
 
+            // Alimenta os campos de texto com os dados guardados
             document.getElementById('m-key').value = mem.dbKey;
             document.getElementById('m-id').value = mem.uid || '';
             document.getElementById('m-nome').value = mem.nome || '';
             document.getElementById('m-pass').value = mem.senha || '';
             document.getElementById('m-cargo').value = mem.cargo || '';
 
+            // Transforma o layout do formulário para o Modo de Edição
             document.getElementById('form-mem-title').innerText = "Editar Credenciais do Membro";
             document.getElementById('btn-save-mem').innerText = "SALVAR ALTERAÇÕES";
             document.getElementById('btn-cancel-edit').style.display = "inline-block";
@@ -546,7 +567,6 @@
             t.innerHTML = "";
             
             data.membros.forEach(m => {
-                // Checa se o status dele é ativo na memória interna ou servidor
                 const isOnline = m.status && m.status.online === true;
                 const btnDeletar = m.dbKey === 'master_local' ? '' : `<button style="padding: 4px 10px; font-size:12px;" class="btn-danger" onclick="delMem('${m.dbKey}')">Deletar</button>`;
 
@@ -564,23 +584,29 @@
             });
         }
 
-        // --- OUTRAS ABAS DO PAINEL ---
+        // --- 5. FUNÇÕES COMPLETAS DAS DEMAIS ABAS DO SISTEMA ---
         function toggleBox(id) { const box = document.getElementById(id); const ind = box.querySelector('.icon-indicator'); box.classList.toggle('open'); if(ind) ind.innerText = box.classList.contains('open') ? '-' : '+'; }
         function toggleSidebar() { const side = document.getElementById('sidebar'); const icon = document.getElementById('t-icon'); const mainContent = document.getElementById('main-content'); side.classList.toggle('collapsed'); if(side.classList.contains('collapsed')) { icon.className = 'fas fa-chevron-right'; mainContent.classList.add('expanded'); } else { icon.className = 'fas fa-chevron-left'; mainContent.classList.remove('expanded'); } }
         function tab(id) { document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); document.querySelectorAll('.menu-list li').forEach(l => l.classList.remove('active')); document.getElementById(id).classList.add('active'); event.currentTarget.classList.add('active'); }
+        
         function upDash() { const s = parseFloat(document.getElementById('in-saldo').value) || 0; const e = parseFloat(document.getElementById('in-ent').value) || 0; const sa = parseFloat(document.getElementById('in-sai').value) || 0; if(db) db.ref('dash').set({s, e, sa}); else { data.dash = {s,e,sa}; renderDash(); } toggleBox('box-dash-form'); }
         function renderDash() { document.getElementById('v-saldo').innerText = `R$ ${(data.dash.s || 0).toLocaleString('pt-BR', {minimumFractionDigits:2})}`; document.getElementById('v-ent').innerText = `R$ ${(data.dash.e || 0).toLocaleString('pt-BR', {minimumFractionDigits:2})}`; document.getElementById('v-sai').innerText = `R$ ${(data.dash.sa || 0).toLocaleString('pt-BR', {minimumFractionDigits:2})}`; }
+        
         function addCat() { const emp = document.getElementById('c-emp').value.trim(); const pro = document.getElementById('c-pro').value.trim(); const pre = parseFloat(document.getElementById('c-pre').value); if(!emp || !pro || !pre) return; data.catalogo.push({emp, pro, pre}); if(db) db.ref('catalogo').set(data.catalogo); else { updateDrops(); renderFamilies(); } document.getElementById('c-emp').value=""; document.getElementById('c-pro').value=""; document.getElementById('c-pre').value=""; toggleBox('box-cfg-fam'); }
-        function renderFamilies() { const container = document.getElementById('container-familias'); if(!container) return; container.innerHTML = ""; let familias = {}; data.catalogo.forEach(item => { if(!familias[item.emp]) familias[item.emp] = []; familias[item.emp].push(item); }); for(let nomeFam in familias) { let htmlCard = `<div class="family-card"><h4><i class="fas fa-boxes"></i> ${nomeFam}</h4>`; familias[nomeFam].forEach(p => { htmlCard += `<div class="family-item"><span>${p.pro}</span><strong>R$ ${p.pre.toLocaleString('pt-BR')}</strong></div>`; }); htmlCard += `</div>`; container.innerHTML += htmlCard; } }
+        function renderFamilies() { const container = document.getElementById('container-familias'); if(!container) return; container.innerHTML = ""; let familias = {}; data.catalogo.forEach(item => { if(!familias[item.emp]) familias[item.emp] = []; familias[item.emp].push(item); }); for(let nomeFam in familias) { let htmlCard = `<div class="family-card"><h4><i class="fas fa-boxes"></i> ${nomeFam}</h4>`; familias[nomeFam].forEach(p => { htmlCard += `<div class="family-item"><span>${p.pro}</span><strong>R$ ${p.pre.toLocaleString('pt-BR', {minimumFractionDigits:2})}</strong></div>`; }); htmlCard += `</div>`; container.innerHTML += htmlCard; } }
         function updateDrops() { const sEst = document.getElementById('e-item'); const sVen = document.getElementById('v-item'); if(!sEst || !sVen) return; sEst.innerHTML = '<option value="">Escolha um item...</option>'; sVen.innerHTML = '<option value="">Escolha um item...</option>'; data.catalogo.forEach((c, i) => { const opt = `<option value="${i}">${c.emp} » ${c.pro}</option>`; sEst.innerHTML += opt; sVen.innerHTML += opt; }); }
-        function calcE() { const i = document.getElementById('e-item').value; const q = document.getElementById('e-qtd').value; if(i !== "" && q) document.getElementById('e-val').value = `R$ ${(data.catalogo[i].pre * q).toLocaleString('pt-BR')}`; }
+        
+        function calcE() { const i = document.getElementById('e-item').value; const q = document.getElementById('e-qtd').value; if(i !== "" && q) document.getElementById('e-val').value = `R$ ${(data.catalogo[i].pre * q).toLocaleString('pt-BR', {minimumFractionDigits:2})}`; }
         function addEstoque() { const i = document.getElementById('e-item').value; const q = parseInt(document.getElementById('e-qtd').value); if(i === "" || !q) return; const item = data.catalogo[i]; data.estoque.push({ emp: item.emp, pro: item.pro, q, v: item.pre * q }); if(db) db.ref('estoque').set(data.estoque); else renderEstoque(); document.getElementById('e-qtd').value = ""; document.getElementById('e-val').value = ""; toggleBox('box-est-form'); }
-        function renderEstoque() { const t = document.getElementById('tab-est'); if(!t) return; t.innerHTML = "<tr><th>Família / Fornecedor</th><th>Produto</th><th>Quantidade</th><th>Total</th><th>Status</th></tr>"; data.estoque.forEach(e => t.innerHTML += `<tr><td>${e.emp}</td><td><strong>${e.pro}</strong></td><td>${e.q} unidades</td><td>R$ ${e.v.toLocaleString()}</td><td><span class="badge ${e.q < 5 ? 'badge-low' : 'badge-ok'}">${e.q < 5 ? 'REPOSIÇÃO' : 'DISPONÍVEL'}</span></td></tr>`); }
-        function calcV() { const i = document.getElementById('v-item').value; const q = document.getElementById('v-qtd').value; if(i !== "" && q) document.getElementById('v-val').value = `R$ ${(data.catalogo[i].pre * q).toLocaleString('pt-BR')}`; }
+        function renderEstoque() { const t = document.getElementById('tab-est'); if(!t) return; t.innerHTML = "<tr><th>Família / Fornecedor</th><th>Produto</th><th>Quantidade</th><th>Total</th><th>Status</th></tr>"; data.estoque.forEach(e => t.innerHTML += `<tr><td>${e.emp}</td><td><strong>${e.pro}</strong></td><td>${e.q} unidades</td><td>R$ ${e.v.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td><td><span class="badge ${e.q < 5 ? 'badge-low' : 'badge-ok'}">${e.q < 5 ? 'REPOSIÇÃO' : 'DISPONÍVEL'}</span></td></tr>`); }
+        
+        function calcV() { const i = document.getElementById('v-item').value; const q = document.getElementById('v-qtd').value; if(i !== "" && q) document.getElementById('v-val').value = `R$ ${(data.catalogo[i].pre * q).toLocaleString('pt-BR', {minimumFractionDigits:2})}`; }
         function addVenda() { const i = document.getElementById('v-item').value; const q = parseInt(document.getElementById('v-qtd').value); if(i === "" || !q) return; const item = data.catalogo[i]; data.vendas.push({ emp: item.emp, pro: item.pro, q, v: item.pre * q }); if(db) db.ref('vendas').set(data.vendas); else renderVendas(); document.getElementById('v-qtd').value = ""; document.getElementById('v-val').value = ""; toggleBox('box-ven-form'); }
-        function renderVendas() { const t = document.getElementById('tab-ven'); if(!t) return; t.innerHTML = "<tr><th>Família Compradora</th><th>Produto</th><th>Quantidade</th><th>Faturamento</th></tr>"; data.vendas.forEach(v => t.innerHTML += `<tr><td>${v.emp}</td><td><strong>${v.pro}</strong></td><td>${v.q} unidades</td><td style="color: var(--success); font-weight: 700;">R$ ${v.v.toLocaleString()}</td></tr>`); }
+        function renderVendas() { const t = document.getElementById('tab-ven'); if(!t) return; t.innerHTML = "<tr><th>Família Compradora</th><th>Produto</th><th>Quantidade</th><th>Faturamento</th></tr>"; data.vendas.forEach(v => t.innerHTML += `<tr><td>${v.emp}</td><td><strong>${v.pro}</strong></td><td>${v.q} unidades</td><td style="color: var(--success); font-weight: 700;">R$ ${v.v.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td></tr>`); }
+        
         function addMov() { const t = document.getElementById('mo-t').value; const d = document.getElementById('mo-d').value.trim(); const v = parseFloat(document.getElementById('mo-v').value); if(!d || !v) return; data.movimentos.push({t, d, v}); if(t === 'Saída') data.dash.s -= v; else data.dash.s += v; if(db) { db.ref('movimentos').set(data.movimentos); db.ref('dash').set(data.dash); } else { renderMov(); renderDash(); } toggleBox('box-mov-form'); }
-        function renderMov() { const t = document.getElementById('tab-mov'); if(!t) return; t.innerHTML = "<tr><th>Tipo</th><th>Descrição</th><th>Fluxo Financeiro</th></tr>"; data.movimentos.forEach(m => t.innerHTML += `<tr><td><span class="badge ${m.t === 'Saída'?'badge-low':'badge-ok'}">${m.t}</span></td><td>${m.d}</td><td style="font-weight:700; color:${m.t==='Saída'?'var(--danger)':'var(--success)'}">R$ ${m.v.toLocaleString()}</td></tr>`); }
+        function renderMov() { const t = document.getElementById('tab-mov'); if(!t) return; t.innerHTML = "<tr><th>Tipo</th><th>Descrição</th><th>Fluxo Financeiro</th></tr>"; data.movimentos.forEach(m => t.innerHTML += `<tr><td><span class="badge ${m.t === 'Saída'?'badge-low':'badge-ok'}">${m.t}</span></td><td>${m.d}</td><td style="font-weight:700; color:${m.t==='Saída'?'var(--danger)':'var(--success)'}">R$ ${m.v.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td></tr>`); }
+        
         function addNota() { const txt = document.getElementById('g-nota').value.trim(); if(!txt) return; data.notas.push({ txt, u: currentUser.nome, d: new Date().toLocaleDateString('pt-BR') }); if(db) db.ref('notas').set(data.notas); else renderNotas(); document.getElementById('g-nota').value = ""; }
         function renderNotas() { const m = document.getElementById('mural'); if(!m) return; m.innerHTML = ""; [...data.notas].reverse().forEach(n => m.innerHTML += `<div class="box-list"><strong>${n.u}</strong> <small style="float:right; opacity:0.4;">${n.d}</small><p style="margin-top:12px; line-height:1.4;">${n.txt}</p></div>`); }
         function saveBG() { const val = document.getElementById('c-bg').value.trim(); if(db) db.ref('bg').set(val); else { const urlStyle = `linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)), url('${val}')`; document.body.style.backgroundImage = urlStyle; } toggleBox('box-cfg-bg'); }
