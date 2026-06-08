@@ -40,7 +40,7 @@
         .login-box {
             background: var(--glass); backdrop-filter: var(--blur);
             padding: 50px; border-radius: 24px; border: 1px solid var(--border);
-            text-design: center; width: 400px; text-align: center;
+            width: 400px; text-align: center;
         }
 
         input, select, textarea {
@@ -59,7 +59,7 @@
         /* --- LAYOUT DO PAINEL --- */
         #main-panel { display: none; width: 100vw; height: 100vh; display: flex; width: 100%; }
 
-        /* --- SIDEBAR CORRIGIDA --- */
+        /* --- SIDEBAR --- */
         .sidebar {
             width: var(--sidebar-w); min-width: var(--sidebar-w);
             background: var(--glass); backdrop-filter: var(--blur);
@@ -79,13 +79,13 @@
 
         .menu-list { list-style: none; flex-grow: 1; }
         .menu-list li {
-            padding: 14px 16px; margin-bottom: 8px; border-radius: 12px;
+            padding: 12px 16px; margin-bottom: 6px; border-radius: 12px;
             cursor: pointer; color: #94a3b8; display: flex; align-items: center; gap: 15px; transition: 0.3s;
         }
         .menu-list li:hover { background: rgba(255,255,255,0.05); color: #fff; }
         .menu-list li.active { background: rgba(168, 85, 247, 0.15); color: #fff; border-left: 4px solid var(--primary); font-weight: 600; }
 
-        /* BOTÃO DE ABRE/FECHA (FLUTUANTE ADAPTADO) */
+        /* BOTÃO DE ABRE/FECHA (FLUTUANTE) */
         .toggle-btn {
             position: fixed; left: calc(var(--sidebar-w) - 15px); top: 35px;
             width: 32px; height: 32px; background: var(--primary);
@@ -167,6 +167,7 @@
                 <li class="active" onclick="tab('dash')"><i class="fas fa-chart-pie"></i> Dashboard</li>
                 <li onclick="tab('mem')"><i class="fas fa-users"></i> Membros</li>
                 <li onclick="tab('est')"><i class="fas fa-box"></i> Estoque</li>
+                <li onclick="tab('ven')"><i class="fas fa-shopping-cart"></i> Vendas</li>
                 <li onclick="tab('mov')"><i class="fas fa-wallet"></i> Movimentos</li>
                 <li onclick="tab('ger')"><i class="fas fa-user-shield"></i> Gerência</li>
                 <li onclick="tab('cfg')"><i class="fas fa-cog"></i> Configuração</li>
@@ -235,21 +236,42 @@
             <section id="est" class="section">
                 <div class="collapsible-box" id="box-est-form">
                     <div class="collapsible-header" onclick="toggleBox('box-est-form')">
-                        <span>Lançar Entrada no Estoque</span>
+                        <span>Lançar Entrada no Estoque (Compras)</span>
                         <span class="icon-indicator">+</span>
                     </div>
                     <div class="collapsible-content">
                         <div style="display: flex; gap: 15px;">
                             <select id="e-item" onchange="calcE()"></select>
                             <input type="number" id="e-qtd" placeholder="Quantidade" oninput="calcE()">
-                            <input type="text" id="e-val" placeholder="Custo Total Automatico" readonly>
+                            <input type="text" id="e-val" placeholder="Custo Total Automático" readonly>
                         </div>
                         <button style="margin-top: 15px;" onclick="addEstoque()">REGISTRAR ENTRADA</button>
                     </div>
                 </div>
                 <div class="box-list">
-                    <div class="box-title">Histórico de Itens</div>
+                    <div class="box-title">Histórico de Itens em Estoque</div>
                     <table id="tab-est"></table>
+                </div>
+            </section>
+
+            <section id="ven" class="section">
+                <div class="collapsible-box" id="box-ven-form">
+                    <div class="collapsible-header" onclick="toggleBox('box-ven-form')">
+                        <span>Registrar Nova Venda para Famílias</span>
+                        <span class="icon-indicator">+</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <div style="display: flex; gap: 15px;">
+                            <select id="v-item" onchange="calcV()"></select>
+                            <input type="number" id="v-qtd" placeholder="Quantidade Vendida" oninput="calcV()">
+                            <input type="text" id="v-val" placeholder="Faturamento Total Automático" readonly>
+                        </div>
+                        <button style="margin-top: 15px;" onclick="addVenda()">CONFIRMAR VENDA</button>
+                    </div>
+                </div>
+                <div class="box-list">
+                    <div class="box-title">Histórico de Vendas Realizadas</div>
+                    <table id="tab-ven"></table>
                 </div>
             </section>
 
@@ -302,7 +324,7 @@
                     </div>
                     <div class="collapsible-content">
                         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
-                            <input type="text" id="c-emp" placeholder="Nome da Família / Empresa">
+                            <input type="text" id="c-emp" placeholder="Nome da Família / Fornecedor">
                             <input type="text" id="c-pro" placeholder="Produto Comercializado">
                             <input type="number" id="c-pre" placeholder="Preço Unitário (R$)">
                         </div>
@@ -324,7 +346,7 @@
 
     <script>
         // --- CONFIGURAÇÃO DO SEU FIREBASE ---
-       const firebaseConfig = {
+        const firebaseConfig = {
   apiKey: "AIzaSyBCEpercpoeHL6SFzw0TI91kmNplF8WXDc",
   authDomain: "vortex-f7559.firebaseapp.com",
   databaseURL: "https://vortex-f7559-default-rtdb.firebaseio.com",
@@ -338,7 +360,7 @@
         const db = firebase.database();
 
         let currentUser = null;
-        let data = { membros: [], estoque: [], movimentos: [], catalogo: [], notas: [], dash: {} };
+        let data = { membros: [], estoque: [], vendas: [], movimentos: [], catalogo: [], notas: [], dash: {} };
 
         // --- SISTEMA DE EXPANDIR E RECOLHER (+ E -) ---
         function toggleBox(id) {
@@ -382,6 +404,7 @@
         });
         db.ref('catalogo').on('value', s => { data.catalogo = s.val() || []; updateDrops(); renderFamilies(); });
         db.ref('estoque').on('value', s => { data.estoque = s.val() || []; renderEstoque(); });
+        db.ref('vendas').on('value', s => { data.vendas = s.val() || []; renderVendas(); });
         db.ref('movimentos').on('value', s => { data.movimentos = s.val() || []; renderMov(); });
         db.ref('notas').on('value', s => { data.notas = s.val() || []; renderNotas(); });
         db.ref('dash').on('value', s => { data.dash = s.val() || {s:0,e:0,sa:0}; renderDash(); });
@@ -478,21 +501,17 @@
             toggleBox('box-cfg-fam');
         }
 
-        // CONSTRUTOR DE CAIXAS ESPECÍFICAS POR FAMÍLIA/EMPRESA
         function renderFamilies() {
             const container = document.getElementById('container-familias');
             container.innerHTML = "";
-            
-            // Agrupar itens por nome da família
             let familias = {};
             data.catalogo.forEach(item => {
                 if(!familias[item.emp]) familias[item.emp] = [];
                 familias[item.emp].push(item);
             });
 
-            // Gerar caixas visuais na tela
             for(let nomeFam in familias) {
-                let htmlCard = `<div class="family-card"><h4><i class="fas fa-gavel"></i> ${nomeFam}</h4>`;
+                let htmlCard = `<div class="family-card"><h4><i class="fas fa-boxes"></i> ${nomeFam}</h4>`;
                 familias[nomeFam].forEach(p => {
                     htmlCard += `<div class="family-item"><span>${p.pro}</span><strong>R$ ${p.pre.toLocaleString('pt-BR')}</strong></div>`;
                 });
@@ -502,9 +521,18 @@
         }
 
         function updateDrops() {
-            const s = document.getElementById('e-item'); s.innerHTML = '<option value="">Escolha um item...</option>';
-            data.catalogo.forEach((c, i) => s.innerHTML += `<option value="${i}">${c.emp} » ${c.pro}</option>`);
+            const sEst = document.getElementById('e-item'); 
+            const sVen = document.getElementById('v-item');
+            sEst.innerHTML = '<option value="">Escolha um item...</option>';
+            sVen.innerHTML = '<option value="">Escolha um item...</option>';
+            data.catalogo.forEach((c, i) => {
+                const opt = `<option value="${i}">${c.emp} » ${c.pro}</option>`;
+                sEst.innerHTML += opt;
+                sVen.innerHTML += opt;
+            });
         }
+
+        // Cálculos e Funções de Estoque (Compras)
         function calcE() {
             const i = document.getElementById('e-item').value; const q = document.getElementById('e-qtd').value;
             if(i !== "" && q) document.getElementById('e-val').value = `R$ ${(data.catalogo[i].pre * q).toLocaleString('pt-BR')}`;
@@ -515,13 +543,34 @@
             const item = data.catalogo[i];
             data.estoque.push({ emp: item.emp, pro: item.pro, q, v: item.pre * q });
             db.ref('estoque').set(data.estoque);
+            document.getElementById('e-qtd').value = ""; document.getElementById('e-val').value = "";
             toggleBox('box-est-form');
         }
         function renderEstoque() {
-            const t = document.getElementById('tab-est'); t.innerHTML = "<tr><th>Empresa</th><th>Produto</th><th>Quantidade</th><th>Total</th><th>Status</th></tr>";
+            const t = document.getElementById('tab-est'); t.innerHTML = "<tr><th>Família / Fornecedor</th><th>Produto</th><th>Quantidade</th><th>Total</th><th>Status</th></tr>";
             data.estoque.forEach(e => t.innerHTML += `<tr><td>${e.emp}</td><td><strong>${e.pro}</strong></td><td>${e.q} unidades</td><td>R$ ${e.v.toLocaleString()}</td><td><span class="badge ${e.q < 5 ? 'badge-low' : 'badge-ok'}">${e.q < 5 ? 'REPOSIÇÃO' : 'DISPONÍVEL'}</span></td></tr>`);
         }
 
+        // Cálculos e Funções de Vendas
+        function calcV() {
+            const i = document.getElementById('v-item').value; const q = document.getElementById('v-qtd').value;
+            if(i !== "" && q) document.getElementById('v-val').value = `R$ ${(data.catalogo[i].pre * q).toLocaleString('pt-BR')}`;
+        }
+        function addVenda() {
+            const i = document.getElementById('v-item').value; const q = parseInt(document.getElementById('v-qtd').value);
+            if(i === "" || !q) return;
+            const item = data.catalogo[i];
+            data.vendas.push({ emp: item.emp, pro: item.pro, q, v: item.pre * q });
+            db.ref('vendas').set(data.vendas);
+            document.getElementById('v-qtd').value = ""; document.getElementById('v-val').value = "";
+            toggleBox('box-ven-form');
+        }
+        function renderVendas() {
+            const t = document.getElementById('tab-ven'); t.innerHTML = "<tr><th>Família Compradora</th><th>Produto</th><th>Quantidade</th><th>Faturamento</th></tr>";
+            data.vendas.forEach(v => t.innerHTML += `<tr><td>${v.emp}</td><td><strong>${v.pro}</strong></td><td>${v.q} unidades</td><td style="color: var(--success); font-weight: 700;">R$ ${v.v.toLocaleString()}</td></tr>`);
+        }
+
+        // Movimentos Gerais
         function addMov() {
             const t = document.getElementById('mo-t').value; const d = document.getElementById('mo-d').value.trim(); const v = parseFloat(document.getElementById('mo-v').value);
             if(!d || !v) return;
