@@ -27,21 +27,30 @@
             background-attachment: fixed;
             color: #fff;
             height: 100vh;
-            display: flex;
+            width: 100vw;
             overflow: hidden;
-            transition: background 0.3s ease;
         }
 
-        /* --- LOGIN COM FUNDO ADAPTADO --- */
+        /* --- TELA DE LOGIN ISOLADA COM FUNDO DINÂMICO --- */
         #login-screen {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            display: flex; justify-content: center; align-items: center; z-index: 999;
-            background: transparent; /* Permite ver o fundo do body por trás */
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100vw; 
+            height: 100vh;
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            z-index: 9999;
+            background-color: #0b0813;
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
         }
         .login-box {
             background: var(--glass); backdrop-filter: var(--blur);
             padding: 50px; border-radius: 24px; border: 1px solid var(--border);
-            width: 400px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            width: 400px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.6);
         }
 
         input, select, textarea {
@@ -57,21 +66,23 @@
         button:hover { opacity: 0.9; transform: scale(1.02); }
         .btn-danger { background: var(--danger); }
 
-        /* --- LAYOUT DO PAINEL --- */
-        #main-panel { display: none; width: 100vw; height: 100vh; display: flex; width: 100%; }
+        /* --- LAYOUT DO PAINEL PRINCIPAL --- */
+        #main-panel { display: none; width: 100vw; height: 100vh; position: relative; }
 
-        /* --- SIDEBAR REVISADA --- */
+        /* --- SIDEBAR --- */
         .sidebar {
-            width: var(--sidebar-w); min-width: var(--sidebar-w);
+            width: var(--sidebar-w); 
+            height: 100vh;
             background: var(--glass); backdrop-filter: var(--blur);
             border-right: 1px solid var(--border); display: flex;
-            flex-direction: column; padding: 30px 20px; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative; z-index: 10;
+            flex-direction: column; padding: 30px 20px; 
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: absolute; top: 0; left: 0; z-index: 100;
         }
 
+        /* Recolhimento por translação pura para não espremer o conteúdo */
         .sidebar.collapsed {
-            margin-left: calc(-1 * var(--sidebar-w));
-            min-width: 0; width: 0; padding: 30px 0; overflow: hidden; border-right: none;
+            transform: translateX(-100%);
         }
 
         .logo-area { margin-bottom: 40px; padding: 0 10px; }
@@ -86,25 +97,82 @@
         .menu-list li:hover { background: rgba(255,255,255,0.05); color: #fff; }
         .menu-list li.active { background: rgba(168, 85, 247, 0.15); color: #fff; border-left: 4px solid var(--primary); font-weight: 600; }
 
-        /* BOTÃO DE ABRE/FECHA (FIXO SEGURO) */
-        .toggle-btn {
-            position: fixed; left: calc(var(--sidebar-w) - 16px); top: 35px;
-            width: 32px; height: 32px; background: var(--primary);
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; z-index: 999; border: 2px solid #0b0813; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        /* RODAPÉ PREMIUM DO USUÁRIO */
+        .user-footer {
+            border-top: 1px solid var(--border);
+            padding-top: 20px;
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .user-info-box {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            padding: 12px 15px;
+            border-radius: 14px;
+        }
+        .user-title {
+            font-weight: 700;
+            font-size: 15px;
+            color: #ffffff;
+            letter-spacing: 0.3px;
+            display: block;
+            margin-bottom: 3px;
+        }
+        .user-status-container {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: #a3a3c2;
+        }
+        .status-pulse-dot {
+            width: 7px;
+            height: 7px;
+            background-color: var(--success);
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 10px var(--success);
+            animation: pulseGlow 2s infinite;
+        }
+        @keyframes pulseGlow {
+            0% { transform: scale(0.9); opacity: 0.6; }
+            50% { transform: scale(1.1); opacity: 1; box-shadow: 0 0 14px var(--success); }
+            100% { transform: scale(0.9); opacity: 0.6; }
         }
 
-        /* --- CONTEÚDO PRINCIPAL COM PROTEÇÃO DE CORTE --- */
+        /* BOTÃO DE ABRE/FECHA FLUTUANTE AJUSTADO */
+        .toggle-btn {
+            position: absolute; 
+            left: calc(var(--sidebar-w) - 16px); 
+            top: 35px;
+            width: 32px; height: 32px; background: var(--primary);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; z-index: 101; border: 2px solid #0b0813; 
+            transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* --- CONTEÚDO PRINCIPAL TOTALMENTE ESTÁVEL --- */
         .main-content { 
-            flex-grow: 1; 
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
             padding: 40px; 
-            padding-left: 60px; /* Garante que o conteúdo não fique embaixo do botão flutuante */
+            padding-left: calc(var(--sidebar-w) + 40px); 
             overflow-y: auto; 
             background: transparent; 
-            width: 100%;
-            max-width: 100%;
             transition: padding-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1;
         }
+        
+        /* Quando a barra fechar, o conteúdo ganha espaçamento padrão sem se mexer de forma errada */
+        .main-content.expanded {
+            padding-left: 60px;
+        }
+
         .section { display: none; animation: fadeIn 0.4s ease; width: 100%; }
         .section.active { display: block; }
 
@@ -170,6 +238,10 @@
     </div>
 
     <div id="main-panel">
+        <div class="toggle-btn" id="toggle-btn" onclick="toggleSidebar()">
+            <i class="fas fa-chevron-left" id="t-icon"></i>
+        </div>
+
         <aside class="sidebar" id="sidebar">
             <div class="logo-area"><h2>VORTEX</h2><span>Gestão em Nuvem</span></div>
             
@@ -183,16 +255,18 @@
                 <li onclick="tab('cfg')"><i class="fas fa-cog"></i> Configuração</li>
             </ul>
 
-            <div class="user-footer" style="border-top: 1px solid var(--border); padding-top: 20px;">
-                <strong id="logged-name">---</strong><br>
-                <span style="font-size: 11px; opacity: 0.5;">Acesso Autorizado</span>
+            <div class="user-footer">
+                <div class="user-info-box">
+                    <strong class="user-title" id="logged-name">Carregando...</strong>
+                    <div class="user-status-container">
+                        <span class="status-pulse-dot"></span>
+                        <span>Conectado</span>
+                    </div>
+                </div>
             </div>
         </aside>
 
         <main class="main-content" id="main-content">
-            <div class="toggle-btn" id="toggle-btn" onclick="toggleSidebar()">
-                <i class="fas fa-chevron-left" id="t-icon"></i>
-            </div>
             
             <section id="dash" class="section active">
                 <div class="collapsible-box" id="box-dash-form">
@@ -380,7 +454,7 @@
             indicator.innerText = box.classList.contains('open') ? '-' : '+';
         }
 
-        // --- CONTROLE DE ABERTURA DA BARRA LATERAL (CORRIGIDO) ---
+        // --- CONTROLE DE ABERTURA DA BARRA LATERAL (ESTÁVEL) ---
         function toggleSidebar() {
             const side = document.getElementById('sidebar');
             const icon = document.getElementById('t-icon');
@@ -392,11 +466,11 @@
             if(side.classList.contains('collapsed')) {
                 icon.className = 'fas fa-chevron-right';
                 btn.style.left = '15px';
-                mainContent.style.paddingLeft = '60px'; // Recua o conteúdo para não ser sobreposto
+                mainContent.classList.add('expanded');
             } else {
                 icon.className = 'fas fa-chevron-left';
                 btn.style.left = '244px';
-                mainContent.style.paddingLeft = '60px';
+                mainContent.classList.remove('expanded');
             }
         }
 
@@ -422,10 +496,12 @@
         db.ref('notas').on('value', s => { data.notas = s.val() || []; renderNotas(); });
         db.ref('dash').on('value', s => { data.dash = s.val() || {s:0,e:0,sa:0}; renderDash(); });
         
-        // Aplica o plano de fundo em todo o body (afeta painel e tela de login)
+        // Sincroniza o background tanto no body quanto na tela de login isolada
         db.ref('bg').on('value', s => { 
             if(s.val()) {
-                document.body.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)), url('${s.val()}')`; 
+                const urlStyle = `linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)), url('${s.val()}')`;
+                document.body.style.backgroundImage = urlStyle; 
+                document.getElementById('login-screen').style.backgroundImage = urlStyle;
             }
         });
 
@@ -443,7 +519,7 @@
             const p = document.getElementById('pass-in').value;
 
             if(u.toLowerCase() === 'megan' && p === '1234' && data.membros.length === 0) {
-                db.ref('membros').push().set({ uid: "001", nome: 'megan', senha: '1234', cargo: 'Chefe' });
+                db.ref('membros').push().set({ uid: "3461", nome: 'Megan', senha: '1234', cargo: 'Chefe' });
                 return;
             }
 
@@ -451,8 +527,10 @@
             if(found) {
                 currentUser = found;
                 document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('main-panel').style.display = 'flex';
-                document.getElementById('logged-name').innerText = found.nome;
+                document.getElementById('main-panel').style.display = 'block';
+                
+                document.getElementById('logged-name').innerText = `${found.nome} | ${found.uid || '---'}`;
+                
                 updateStatus(true);
                 setInterval(() => updateStatus(true), 15000);
             } else {
