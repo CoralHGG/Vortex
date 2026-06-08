@@ -68,8 +68,8 @@
         .btn-add-row:hover { background: rgba(168, 85, 247, 0.1); color: #fff; border-color: var(--primary); }
 
         .dynamic-row { display: flex; gap: 15px; margin-bottom: 12px; align-items: center; animation: fadeIn 0.3s ease; }
-        .btn-remove-row { background: transparent; color: var(--danger); padding: 10px; font-size: 16px; }
-        .btn-remove-row:hover { background: rgba(239, 68, 68, 0.1); }
+        .btn-remove-row { background: transparent; color: var(--danger); padding: 10px; font-size: 16px; border: none; }
+        .btn-remove-row:hover { background: rgba(239, 68, 68, 0.1); border-radius: 8px; }
 
         /* --- PAINEL PRINCIPAL --- */
         #main-panel { display: none; width: 100vw; height: 100vh; position: relative; }
@@ -191,7 +191,7 @@
         .note-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.04); padding-top: 10px; font-size: 11px; opacity: 0.5; }
 
         .btn-table-delete {
-            background: transparent; color: var(--danger); padding: 4px 8px; border-radius: 6px; font-size: 13px; transition: 0.2s;
+            background: transparent; color: var(--danger); padding: 4px 8px; border-radius: 6px; font-size: 13px; transition: 0.2s; border: none; cursor: pointer;
         }
         .btn-table-delete:hover { background: rgba(239, 68, 68, 0.15); transform: scale(1.05); }
     </style>
@@ -302,10 +302,18 @@
             <section id="enc" class="section">
                 <div class="collapsible-box" id="box-enc-form">
                     <div class="collapsible-header" onclick="toggleBox('box-enc-form')">
-                        <span>Lançar Entrada de Encomendas (Multi-Itens)</span>
+                        <span>Lançar Entrada de Encomendas (Em Lote)</span>
                         <span class="icon-indicator">+</span>
                     </div>
                     <div class="collapsible-content">
+                        <div style="margin-bottom: 20px;">
+                            <label style="font-size: 12px; text-transform: uppercase; opacity: 0.6; display: block; margin-bottom: 8px;">Família / Fornecedor</label>
+                            <select id="e-global-family" onchange="updateEncomendasProductsDropdowns()">
+                                <option value="">Escolha a Família primeiro...</option>
+                            </select>
+                        </div>
+
+                        <label style="font-size: 12px; text-transform: uppercase; opacity: 0.6; display: block; margin-bottom: 8px;">Itens Recebidos desta Família</label>
                         <div id="container-rows-encomendas">
                             </div>
                         <button type="button" class="button btn-add-row" onclick="addEncomendaRow()"><i class="fas fa-plus"></i> Adicionar Mais um Item</button>
@@ -322,10 +330,18 @@
             <section id="ven" class="section">
                 <div class="collapsible-box" id="box-ven-form">
                     <div class="collapsible-header" onclick="toggleBox('box-ven-form')">
-                        <span>Registrar Nova Venda para Famílias (Multi-Itens)</span>
+                        <span>Registrar Nova Venda para Famílias (Em Lote)</span>
                         <span class="icon-indicator">+</span>
                     </div>
                     <div class="collapsible-content">
+                        <div style="margin-bottom: 20px;">
+                            <label style="font-size: 12px; text-transform: uppercase; opacity: 0.6; display: block; margin-bottom: 8px;">Família / Fornecedor</label>
+                            <select id="v-global-family" onchange="updateVendasProductsDropdowns()">
+                                <option value="">Escolha a Família primeiro...</option>
+                            </select>
+                        </div>
+
+                        <label style="font-size: 12px; text-transform: uppercase; opacity: 0.6; display: block; margin-bottom: 8px;">Produtos Vendidos desta Família</label>
                         <div id="container-rows-vendas">
                             </div>
                         <button type="button" class="button btn-add-row" onclick="addVendaRow()"><i class="fas fa-plus"></i> Adicionar Mais um Item</button>
@@ -489,7 +505,7 @@
 
             renderMembros();
             renderDash();
-            updateDropsAllRows();
+            updateGlobalFamilyDropdowns();
             renderFamilies();
             renderEncomendas();
             renderVendas();
@@ -525,7 +541,7 @@
             db.ref('catalogo').on('value', s => { 
                 const val = s.val() || [];
                 data.catalogo = Object.keys(val).map(k => ({...val[k], id: k}));
-                updateDropsAllRows(); 
+                updateGlobalFamilyDropdowns(); 
                 renderFamilies(); 
                 renderEstatisticas(); 
             });
@@ -547,18 +563,83 @@
             db.ref('bg').on('value', s => { if(s.val()) aplicasPlanoDeFundo(s.val()); });
         }
 
-        // --- MANIPULAÇÃO DINÂMICA DE MULTI-ITENS (FORMULÁRIOS) ---
+        // --- ATUALIZAÇÃO DOS MENUS DE SELEÇÃO E FILTROS DE FAMÍLIA ---
+        function updateGlobalFamilyDropdowns() {
+            const eSelect = document.getElementById('e-global-family');
+            const vSelect = document.getElementById('v-global-family');
+            if(!eSelect || !vSelect) return;
+
+            // Pega nomes únicos de famílias registradas no catálogo
+            let familiasUnicas = [...new Set(data.catalogo.map(c => c.emp))].sort();
+
+            let optionsHtml = '<option value="">Escolha a Família primeiro...</option>';
+            familiasUnicas.forEach(f => {
+                optionsHtml += `<option value="${f}">${f}</option>`;
+            });
+
+            const eVal = eSelect.value;
+            const vVal = vSelect.value;
+
+            eSelect.innerHTML = optionsHtml;
+            vSelect.innerHTML = optionsHtml;
+
+            eSelect.value = familiasUnicas.includes(eVal) ? eVal : "";
+            vSelect.value = familiasUnicas.includes(vVal) ? vVal : "";
+
+            updateEncomendasProductsDropdowns();
+            updateVendasProductsDropdowns();
+        }
+
+        function updateEncomendasProductsDropdowns() {
+            const fam = document.getElementById('e-global-family').value;
+            document.querySelectorAll('#container-rows-encomendas .dynamic-row').forEach(row => {
+                const select = row.querySelector('.e-item-select');
+                populateProductsDropdownByFamily(select, fam);
+                calcRowE(row.id);
+            });
+        }
+
+        function updateVendasProductsDropdowns() {
+            const fam = document.getElementById('v-global-family').value;
+            document.querySelectorAll('#container-rows-vendas .dynamic-row').forEach(row => {
+                const select = row.querySelector('.v-item-select');
+                populateProductsDropdownByFamily(select, fam);
+                calcRowV(row.id);
+            });
+        }
+
+        function populateProductsDropdownByFamily(selectElement, familiaSelecionada) {
+            if(!selectElement) return;
+            if(!familiaSelecionada) {
+                selectElement.innerHTML = '<option value="">Escolha a Família acima...</option>';
+                return;
+            }
+            let atual = selectElement.value;
+            selectElement.innerHTML = '<option value="">Escolha o item...</option>';
+            
+            data.catalogo.forEach((c, i) => {
+                if(c.emp === familiaSelecionada) {
+                    selectElement.innerHTML += `<option value="${i}">${c.pro}</option>`;
+                }
+            });
+            selectElement.value = atual;
+        }
+
+
+        // --- MANIPULAÇÃO DINÂMICA DE MULTI-ITENS CORRIGIDA ---
         function resetFormulariosMultiplos() {
             document.getElementById('container-rows-encomendas').innerHTML = '';
             document.getElementById('container-rows-vendas').innerHTML = '';
             document.getElementById('container-rows-catalogo').innerHTML = '';
             document.getElementById('c-global-family').value = '';
+            if(document.getElementById('e-global-family')) document.getElementById('e-global-family').value = '';
+            if(document.getElementById('v-global-family')) document.getElementById('v-global-family').value = '';
             addEncomendaRow();
             addVendaRow();
             addCatalogoRow();
         }
 
-        // Encomendas Dinâmicas
+        // Aba Encomendas (Entrega) Dinâmica
         function addEncomendaRow() {
             const container = document.getElementById('container-rows-encomendas');
             const rowId = 'enc_row_' + Date.now() + Math.random().toString(36).substr(2, 5);
@@ -566,17 +647,19 @@
             div.className = 'dynamic-row';
             div.id = rowId;
             div.innerHTML = `
-                <select class="e-item-select" onchange="calcRowE('${rowId}')"></select>
-                <input type="number" class="e-qtd-input" placeholder="Quantidade" oninput="calcRowE('${rowId}')">
-                <input type="text" class="e-val-input" placeholder="Custo Automático" readonly>
+                <select class="e-item-select" onchange="calcRowE('${rowId}')" style="flex: 2;"></select>
+                <input type="number" class="e-qtd-input" placeholder="Quantidade" oninput="calcRowE('${rowId}')" style="flex: 1;">
+                <input type="text" class="e-val-input" placeholder="Custo Auto" readonly style="flex: 1;">
                 <button type="button" class="btn-remove-row" onclick="removeFormRow('${rowId}')"><i class="fas fa-times"></i></button>
             `;
             container.appendChild(div);
-            populateSelectWithOptions(div.querySelector('.e-item-select'));
+            const fam = document.getElementById('e-global-family') ? document.getElementById('e-global-family').value : "";
+            populateProductsDropdownByFamily(div.querySelector('.e-item-select'), fam);
         }
 
         function calcRowE(rowId) {
             const row = document.getElementById(rowId);
+            if(!row) return;
             const select = row.querySelector('.e-item-select').value;
             const qtd = row.querySelector('.e-qtd-input').value;
             if(select !== "" && qtd) {
@@ -588,6 +671,12 @@
         }
 
         function submitEncomendas() {
+            const famGlobal = document.getElementById('e-global-family').value;
+            if(!famGlobal) {
+                alert("Por favor, selecione uma Família/Fornecedor no topo antes de salvar!");
+                return;
+            }
+
             const rows = document.querySelectorAll('#container-rows-encomendas .dynamic-row');
             let adicionados = 0;
             rows.forEach(row => {
@@ -595,7 +684,7 @@
                 const q = parseInt(row.querySelector('.e-qtd-input').value);
                 if(idx !== "" && q) {
                     const c = data.catalogo[idx];
-                    const novaEncomenda = { emp: c.emp, pro: c.pro, q, v: c.pre * q };
+                    const novaEncomenda = { emp: famGlobal, pro: c.pro, q, v: c.pre * q };
                     if(db) {
                         db.ref('encomendas').push().set(novaEncomenda);
                     } else {
@@ -607,7 +696,7 @@
             });
             if(adicionados > 0) {
                 if(!db) atualizarLocalStorage('encomendas');
-                registrarAcaoNoPainel(`Registrou entrada em lote de ${adicionados} produto(s) nas encomendas.`);
+                registrarAcaoNoPainel(`Registrou entrada de ${adicionados} item(ns) de encomendas da família '${famGlobal}'.`);
                 renderEncomendas();
                 renderEstatisticas();
                 resetFormulariosMultiplos();
@@ -615,7 +704,7 @@
             }
         }
 
-        // Vendas Dinâmicas
+        // Aba Vendas Dinâmica
         function addVendaRow() {
             const container = document.getElementById('container-rows-vendas');
             const rowId = 'ven_row_' + Date.now() + Math.random().toString(36).substr(2, 5);
@@ -623,17 +712,19 @@
             div.className = 'dynamic-row';
             div.id = rowId;
             div.innerHTML = `
-                <select class="v-item-select" onchange="calcRowV('${rowId}')"></select>
-                <input type="number" class="v-qtd-input" placeholder="Quantidade Vendida" oninput="calcRowV('${rowId}')">
-                <input type="text" class="v-val-input" placeholder="Faturamento Automático" readonly>
+                <select class="v-item-select" onchange="calcRowV('${rowId}')" style="flex: 2;"></select>
+                <input type="number" class="v-qtd-input" placeholder="Quantidade" oninput="calcRowV('${rowId}')" style="flex: 1;">
+                <input type="text" class="v-val-input" placeholder="Faturamento Auto" readonly style="flex: 1;">
                 <button type="button" class="btn-remove-row" onclick="removeFormRow('${rowId}')"><i class="fas fa-times"></i></button>
             `;
             container.appendChild(div);
-            populateSelectWithOptions(div.querySelector('.v-item-select'));
+            const fam = document.getElementById('v-global-family') ? document.getElementById('v-global-family').value : "";
+            populateProductsDropdownByFamily(div.querySelector('.v-item-select'), fam);
         }
 
         function calcRowV(rowId) {
             const row = document.getElementById(rowId);
+            if(!row) return;
             const select = row.querySelector('.v-item-select').value;
             const qtd = row.querySelector('.v-qtd-input').value;
             if(select !== "" && qtd) {
@@ -645,6 +736,12 @@
         }
 
         function submitVendas() {
+            const famGlobal = document.getElementById('v-global-family').value;
+            if(!famGlobal) {
+                alert("Por favor, selecione uma Família/Fornecedor no topo antes de salvar!");
+                return;
+            }
+
             const rows = document.querySelectorAll('#container-rows-vendas .dynamic-row');
             let adicionados = 0;
             rows.forEach(row => {
@@ -652,7 +749,7 @@
                 const q = parseInt(row.querySelector('.v-qtd-input').value);
                 if(idx !== "" && q) {
                     const c = data.catalogo[idx];
-                    const novaVenda = { emp: c.emp, pro: c.pro, q, v: c.pre * q };
+                    const novaVenda = { emp: famGlobal, pro: c.pro, q, v: c.pre * q };
                     if(db) {
                         db.ref('vendas').push().set(novaVenda);
                     } else {
@@ -664,7 +761,7 @@
             });
             if(adicionados > 0) {
                 if(!db) atualizarLocalStorage('vendas');
-                registrarAcaoNoPainel(`Confirmou o envio de uma venda em lote com ${adicionados} item(ns).`);
+                registrarAcaoNoPainel(`Confirmou a venda de ${adicionados} item(ns) da família '${famGlobal}'.`);
                 renderVendas();
                 renderEstatisticas();
                 resetFormulariosMultiplos();
@@ -672,7 +769,7 @@
             }
         }
 
-        // Catálogo/Configuração Dinâmica (CORRIGIDO: Apenas Produto e Valor por linha)
+        // Catálogo/Configuração Dinâmica
         function addCatalogoRow() {
             const container = document.getElementById('container-rows-catalogo');
             const rowId = 'cat_row_' + Date.now() + Math.random().toString(36).substr(2, 5);
@@ -713,7 +810,7 @@
             if(adicionados > 0) {
                 if(!db) {
                     atualizarLocalStorage('catalogo');
-                    updateDropsAllRows();
+                    updateGlobalFamilyDropdowns();
                     renderFamilies();
                     renderEstatisticas();
                 }
@@ -726,22 +823,6 @@
         function removeFormRow(rowId) {
             const row = document.getElementById(rowId);
             if(row) row.remove();
-        }
-
-        function populateSelectWithOptions(selectElement) {
-            if(!selectElement) return;
-            selectElement.innerHTML = '<option value="">Escolha um item...</option>';
-            data.catalogo.forEach((c, i) => {
-                selectElement.innerHTML += `<option value="${i}">${c.emp} » ${c.pro}</option>`;
-            });
-        }
-
-        function updateDropsAllRows() {
-            document.querySelectorAll('.e-item-select, .v-item-select').forEach(select => {
-                const valorAtual = select.value;
-                populateSelectWithOptions(select);
-                select.value = valorAtual;
-            });
         }
 
         // --- SISTEMA DE REGISTRO DE LOGS AUTOMÁTICOS ---
@@ -923,7 +1004,7 @@
                 } else {
                     data.catalogo = data.catalogo.filter(c => c.id !== id);
                     atualizarLocalStorage('catalogo');
-                    updateDropsAllRows();
+                    updateGlobalFamilyDropdowns();
                     renderFamilies();
                     renderEstatisticas();
                 }
