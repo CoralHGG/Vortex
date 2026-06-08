@@ -152,8 +152,8 @@
             <div id="login-err" style="color: var(--danger); background: rgba(239, 64, 64, 0.1); border: 1px solid rgba(239, 64, 64, 0.2); padding: 10px; border-radius: 10px; font-size: 13px; margin-bottom: 20px; display: none;">
                 Usuário ou senha incorretos! Verifique os dados.
             </div>
-            <input type="text" id="user-in" placeholder="Usuário/ID" style="margin-bottom: 15px;">
-            <input type="password" id="pass-in" placeholder="Senha" style="margin-bottom: 25px;">
+            <input type="text" id="user-in" placeholder="Usuário/ID (Ex: Megan ou 3461)">
+            <input type="password" id="pass-in" placeholder="Senha (Ex: 1234)">
             <button style="width: 100%;" onclick="auth()">ENTRAR NO SISTEMA</button>
         </div>
     </div>
@@ -354,66 +354,71 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <script>
-        // --- 1. CONFIGURAÇÃO DE MEMÓRIA E ACESSOS MESTRES ---
-        let currentUser = null;
-        let data = { membros: [], estoque: [], vendas: [], movimentos: [], catalogo: [], notas: [], dash: {} };
+        // Mude para TRUE apenas se você configurou as chaves reais abaixo
+        const usarFirebase = false; 
 
-        // Conta mestre local padrão pré-injetada como garantia absoluta de login
-        const masterFixo = { 
-            dbKey: "master_local", 
-            uid: "3461", 
-            nome: "Megan", 
-            senha: "1234", 
-            cargo: "Chefe", 
-            status: { online: false, lastSeen: 0 } 
+        const firebaseConfig = {
+            apiKey: "SUA_API_KEY",
+            authDomain: "SEU_PROJETO.firebaseapp.com",
+            databaseURL: "https://SEU_PROJETO-default-rtdb.firebaseio.com",
+            projectId: "SEU_PROJETO",
+            storageBucket: "SEU_PROJETO.appspot.com",
+            messagingSenderId: "SEU_ID",
+            appId: "SEU_APP_ID"
         };
 
-        function forcarInjecaoMaster() {
-            const jaExiste = data.membros.some(m => m.dbKey === 'master_local' || m.nome.toLowerCase() === 'megan');
-            if (!jaExiste) {
-                data.membros.unshift(masterFixo);
-            }
-            renderMembros();
-        }
+        // --- ESTRUTURA DE BANCO DE DADOS INTEGRADO ---
+        let currentUser = null;
+        let data = { 
+            membros: [
+                { dbKey: "master_local", uid: "3461", nome: "Megan", senha: "1234", cargo: "Chefe", status: { online: false, lastSeen: 0 } }
+            ], 
+            estoque: [], vendas: [], movimentos: [], catalogo: [], notas: [], 
+            dash: { s: 0, e: 0, sa: 0 } 
+        };
 
-        // Executa imediatamente para garantir que o array não esteja vazio no primeiro carregamento
-        data.membros = [masterFixo];
-
-        // --- 2. INSTANCIAÇÃO DO FIREBASE ---
-        const firebaseConfig = {
-  apiKey: "AIzaSyBCEpercpoeHL6SFzw0TI91kmNplF8WXDc",
-  authDomain: "vortex-f7559.firebaseapp.com",
-  databaseURL: "https://vortex-f7559-default-rtdb.firebaseio.com",
-  projectId: "vortex-f7559",
-  storageBucket: "vortex-f7559.firebasestorage.app",
-  messagingSenderId: "254083067084",
-  appId: "1:254083067084:web:e40689772f4c507e426669",
-  measurementId: "G-GMFS68CRGT"
-};
-        
         let db = null;
-        try {
-            if (firebaseConfig.apiKey !== "SUA_API_KEY") {
-                firebase.initializeApp(firebaseConfig);
-                db = firebase.database();
+
+        // Inicializador seguro do sistema
+        window.onload = function() {
+            if (usarFirebase && firebaseConfig.apiKey !== "SUA_API_KEY") {
+                try {
+                    firebase.initializeApp(firebaseConfig);
+                    db = firebase.database();
+                    ativarSincronizacaoFirebase();
+                } catch(e) {
+                    console.error("Erro ao conectar no Firebase. Executando modo Offline seguro.");
+                    configurarModoLocal();
+                }
+            } else {
+                configurarModoLocal();
             }
-        } catch(e) {
-            console.warn("Rodando localmente.");
+        };
+
+        function configurarModoLocal() {
+            renderMembros();
+            renderDash();
+            updateDrops();
+            renderFamilies();
+            renderEstoque();
+            renderVendas();
+            renderMov();
         }
 
-        // Sincronização em tempo real (Firebase ativo)
-        if(db) {
+        function ativarSincronizacaoFirebase() {
             db.ref('membros').on('value', s => { 
                 const val = s.val();
                 data.membros = val ? Object.keys(val).map(k => ({...val[k], dbKey: k})) : [];
-                
-                if(currentUser) {
-                    const euNaLista = data.membros.find(m => m.dbKey === currentUser.dbKey || m.nome === currentUser.nome);
-                    if(euNaLista) euNaLista.status = { online: true, lastSeen: Date.now() };
+                // Injeta a conta master se ela sumir do banco
+                if (!data.membros.some(m => m.dbKey === 'master_local' || m.nome.toLowerCase() === 'megan')) {
+                    data.membros.unshift({ dbKey: "master_local", uid: "3461", nome: "Megan", senha: "1234", cargo: "Chefe", status: { online: false, lastSeen: 0 } });
                 }
-                forcarInjecaoMaster();
-            }, () => { forcarInjecaoMaster(); });
-            
+                if(currentUser) {
+                    const eu = data.membros.find(m => m.dbKey === currentUser.dbKey || m.nome === currentUser.nome);
+                    if(eu) eu.status = { online: true, lastSeen: Date.now() };
+                }
+                renderMembros();
+            });
             db.ref('catalogo').on('value', s => { data.catalogo = s.val() || []; updateDrops(); renderFamilies(); });
             db.ref('estoque').on('value', s => { data.estoque = s.val() || []; renderEstoque(); });
             db.ref('vendas').on('value', s => { data.vendas = s.val() || []; renderVendas(); });
@@ -422,16 +427,14 @@
             db.ref('dash').on('value', s => { data.dash = s.val() || {s:0,e:0,sa:0}; renderDash(); });
             db.ref('bg').on('value', s => { 
                 if(s.val()) {
-                    const styleBg = `linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)), url('${s.val()}')`;
-                    document.body.style.backgroundImage = styleBg; 
-                    document.getElementById('login-screen').style.backgroundImage = styleBg;
+                    const urlStyle = `linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)), url('${s.val()}')`;
+                    document.body.style.backgroundImage = urlStyle;
+                    document.getElementById('login-screen').style.backgroundImage = urlStyle;
                 }
             });
-        } else {
-            forcarInjecaoMaster();
         }
 
-        // --- 3. MECANISMO DE LOGIN ATUALIZADO (BLINDADO) ---
+        // --- MECANISMO DE AUTENTICAÇÃO ---
         function auth() {
             const u = document.getElementById('user-in').value.trim();
             const p = document.getElementById('pass-in').value.trim();
@@ -439,45 +442,28 @@
             
             errBox.style.display = 'none';
 
-            // Garante que a conta master esteja disponível na lista de verificação se nada carregou ainda
-            if (data.membros.length === 0) {
-                data.membros.push(masterFixo);
-            }
-
-            // Procura combinando o Nome ou ID e checando a Senha
             const found = data.membros.find(m => 
                 (m.nome.toLowerCase() === u.toLowerCase() || String(m.uid) === u) && String(m.senha) === p
             );
 
             if(found) {
-                logarUsuario(found);
+                currentUser = found;
+                currentUser.status = { online: true, lastSeen: Date.now() };
+                
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('main-panel').style.display = 'block';
+                document.getElementById('logged-name').innerText = `${currentUser.nome} | ${currentUser.uid}`;
+                
+                renderMembros();
+                if(db && currentUser.dbKey !== 'master_local') {
+                    db.ref('membros/' + currentUser.dbKey + '/status').set({ online: true, lastSeen: Date.now() });
+                }
             } else {
                 errBox.style.display = 'block'; 
             }
         }
 
-        function logarUsuario(userObj) {
-            currentUser = userObj;
-            userObj.status = { online: true, lastSeen: Date.now() };
-            
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('main-panel').style.display = 'block';
-            document.getElementById('logged-name').innerText = `${userObj.nome} | ${userObj.uid || '---'}`;
-            
-            renderMembros(); 
-            updateStatus(true);
-            setInterval(() => updateStatus(true), 15000);
-        }
-
-        function updateStatus(online) {
-            if(!currentUser) return;
-            currentUser.status = { online: online, lastSeen: Date.now() };
-            if(!db || currentUser.dbKey === 'master_local') return;
-            db.ref('membros/' + currentUser.dbKey + '/status').set({ online: online, lastSeen: Date.now() });
-        }
-        window.onbeforeunload = () => updateStatus(false);
-
-        // --- 4. ENGINE DE CADASTRO, EXCLUSÃO E EDIÇÃO ---
+        // --- SISTEMA DE CADASTRO E EDIÇÃO DE MEMBROS ---
         function saveMembro() {
             const key = document.getElementById('m-key').value;
             const uid = document.getElementById('m-id').value.trim();
@@ -489,53 +475,42 @@
 
             if(key) {
                 if(key === 'master_local') {
-                    masterFixo.uid = uid; masterFixo.nome = nome; masterFixo.senha = senha; masterFixo.cargo = cargo;
+                    data.membros[0] = { dbKey: "master_local", uid, nome, senha, cargo, status: { online: true, lastSeen: Date.now() } };
                     if(currentUser && currentUser.dbKey === 'master_local') {
-                        currentUser.nome = nome; currentUser.uid = uid;
                         document.getElementById('logged-name').innerText = `${nome} | ${uid}`;
                     }
                 } else if(db) {
                     db.ref('membros/' + key).update({ uid, nome, senha, cargo });
                 } else {
                     const idx = data.membros.findIndex(m => m.dbKey === key);
-                    if(idx !== -1) {
-                        const statusAtual = data.membros[idx].status;
-                        data.membros[idx] = { dbKey: key, uid, nome, senha, cargo, status: statusAtual };
-                    }
+                    if(idx !== -1) data.membros[idx] = { dbKey: key, uid, nome, senha, cargo, status: data.membros[idx].status };
                 }
             } else {
-                const novaKey = 'local_' + Date.now();
-                const novoMembro = { uid, nome, senha, cargo, status: { online: false, lastSeen: 0 } };
-                
+                const novo = { uid, nome, senha, cargo, status: { online: false, lastSeen: 0 } };
                 if(db) {
-                    db.ref('membros').push().set(novoMembro);
+                    db.ref('membros').push().set(novo);
                 } else {
-                    novoMembro.dbKey = novaKey;
-                    data.membros.push(novoMembro);
+                    novo.dbKey = 'local_' + Date.now();
+                    data.membros.push(novo);
                 }
             }
-
-            renderMembros();
             cancelarEdicaoMembro();
+            renderMembros();
             toggleBox('box-mem-form');
         }
 
         function prepararEdicaoMembro(key) {
             const mem = data.membros.find(m => m.dbKey === key);
             if(!mem) return;
-
             document.getElementById('m-key').value = mem.dbKey;
-            document.getElementById('m-id').value = mem.uid || '';
-            document.getElementById('m-nome').value = mem.nome || '';
-            document.getElementById('m-pass').value = mem.senha || '';
-            document.getElementById('m-cargo').value = mem.cargo || '';
-
+            document.getElementById('m-id').value = mem.uid;
+            document.getElementById('m-nome').value = mem.nome;
+            document.getElementById('m-pass').value = mem.senha;
+            document.getElementById('m-cargo').value = mem.cargo;
             document.getElementById('form-mem-title').innerText = "Editar Credenciais do Membro";
             document.getElementById('btn-save-mem').innerText = "SALVAR ALTERAÇÕES";
             document.getElementById('btn-cancel-edit').style.display = "inline-block";
-
-            const box = document.getElementById('box-mem-form');
-            if(!box.classList.contains('open')) toggleBox('box-mem-form');
+            if(!document.getElementById('box-mem-form').classList.contains('open')) toggleBox('box-mem-form');
         }
 
         function cancelarEdicaoMembro() {
@@ -544,72 +519,68 @@
             document.getElementById('m-nome').value = "";
             document.getElementById('m-pass').value = "";
             document.getElementById('m-cargo').value = "";
-
             document.getElementById('form-mem-title').innerText = "Cadastrar Novo Membro / Acesso";
             document.getElementById('btn-save-mem').innerText = "SALVAR NOVO MEMBRO";
             document.getElementById('btn-cancel-edit').style.display = "none";
         }
 
-        function delMem(k) { 
-            if(confirm("Remover este acesso definitivamente?")) {
-                if(db && k !== 'master_local') {
-                    db.ref('membros/'+k).remove();
-                } else {
-                    data.membros = data.membros.filter(m => m.dbKey !== k);
-                    renderMembros();
-                }
+        function delMem(k) {
+            if(confirm("Remover este acesso?")) {
+                if(db && k !== 'master_local') db.ref('membros/'+k).remove();
+                else { data.membros = data.membros.filter(m => m.dbKey !== k); renderMembros(); }
             }
         }
 
         function renderMembros() {
-            const t = document.getElementById('t-membros'); 
-            if(!t) return;
-            t.innerHTML = "";
-            
+            const t = document.getElementById('t-membros'); if(!t) return; t.innerHTML = "";
             data.membros.forEach(m => {
-                const isOnline = m.status && m.status.online === true;
-                const btnDeletar = m.dbKey === 'master_local' ? '' : `<button style="padding: 4px 10px; font-size:12px;" class="btn-danger" onclick="delMem('${m.dbKey}')">Deletar</button>`;
-
+                const isOnline = m.dbKey === 'master_local' ? (currentUser && currentUser.dbKey === 'master_local') : (m.status && m.status.online);
                 t.innerHTML += `<tr>
-                    <td><strong>#${m.uid || '---'}</strong></td>
+                    <td><strong>#${m.uid}</strong></td>
                     <td>${m.nome}</td>
-                    <td>${m.cargo || 'Operador'}</td>
-                    <td><span style="font-family: monospace; opacity: 0.7;">${m.senha}</span></td>
-                    <td><span class="status-dot ${isOnline ? 'online' : 'offline'}"></span>${isOnline ? 'Online' : 'Desconectado'}</td>
+                    <td>${m.cargo}</td>
+                    <td><span style="font-family:monospace; opacity:0.7">${m.senha}</span></td>
+                    <td><span class="status-dot ${isOnline ? 'online' : 'offline'}"></span>${isOnline ? 'Online' : 'Offline'}</td>
                     <td>
-                        <button style="padding: 4px 10px; font-size:12px; margin-right: 5px;" class="btn-warning" onclick="prepararEdicaoMembro('${m.dbKey}')">Editar</button>
-                        ${btnDeletar}
+                        <button class="btn-warning" style="padding:4px 10px; font-size:12px;" onclick="prepararEdicaoMembro('${m.dbKey}')">Editar</button>
+                        ${m.dbKey !== 'master_local' ? `<button class="btn-danger" style="padding:4px 10px; font-size:12px;" onclick="delMem('${m.dbKey}')">Deletar</button>` : ''}
                     </td>
                 </tr>`;
             });
         }
 
-        // --- 5. OUTRAS ABAS E LÓGICAS INTERNAS DO PAINEL ---
-        function toggleBox(id) { const box = document.getElementById(id); const ind = box.querySelector('.icon-indicator'); box.classList.toggle('open'); if(ind) ind.innerText = box.classList.contains('open') ? '-' : '+'; }
-        function toggleSidebar() { const side = document.getElementById('sidebar'); const icon = document.getElementById('t-icon'); const mainContent = document.getElementById('main-content'); side.classList.toggle('collapsed'); if(side.classList.contains('collapsed')) { icon.className = 'fas fa-chevron-right'; mainContent.classList.add('expanded'); } else { icon.className = 'fas fa-chevron-left'; mainContent.classList.remove('expanded'); } }
+        // --- SISTEMA DE CORPO E INTERFACES ---
+        function toggleBox(id) { const box = document.getElementById(id); box.classList.toggle('open'); const ind = box.querySelector('.icon-indicator'); if(ind) ind.innerText = box.classList.contains('open') ? '-' : '+'; }
+        function toggleSidebar() { const side = document.getElementById('sidebar'); const main = document.getElementById('main-content'); const icon = document.getElementById('t-icon'); side.classList.toggle('collapsed'); if(side.classList.contains('collapsed')) { icon.className = 'fas fa-chevron-right'; main.classList.add('expanded'); } else { icon.className = 'fas fa-chevron-left'; main.classList.remove('expanded'); } }
         function tab(id) { document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); document.querySelectorAll('.menu-list li').forEach(l => l.classList.remove('active')); document.getElementById(id).classList.add('active'); event.currentTarget.classList.add('active'); }
-        
+
+        // FINANCEIRO & DASHBOARD
         function upDash() { const s = parseFloat(document.getElementById('in-saldo').value) || 0; const e = parseFloat(document.getElementById('in-ent').value) || 0; const sa = parseFloat(document.getElementById('in-sai').value) || 0; if(db) db.ref('dash').set({s, e, sa}); else { data.dash = {s,e,sa}; renderDash(); } toggleBox('box-dash-form'); }
         function renderDash() { document.getElementById('v-saldo').innerText = `R$ ${(data.dash.s || 0).toLocaleString('pt-BR', {minimumFractionDigits:2})}`; document.getElementById('v-ent').innerText = `R$ ${(data.dash.e || 0).toLocaleString('pt-BR', {minimumFractionDigits:2})}`; document.getElementById('v-sai').innerText = `R$ ${(data.dash.sa || 0).toLocaleString('pt-BR', {minimumFractionDigits:2})}`; }
-        
+
+        // PRODUTOS & CATÁLOGOS
         function addCat() { const emp = document.getElementById('c-emp').value.trim(); const pro = document.getElementById('c-pro').value.trim(); const pre = parseFloat(document.getElementById('c-pre').value); if(!emp || !pro || !pre) return; data.catalogo.push({emp, pro, pre}); if(db) db.ref('catalogo').set(data.catalogo); else { updateDrops(); renderFamilies(); } document.getElementById('c-emp').value=""; document.getElementById('c-pro').value=""; document.getElementById('c-pre').value=""; toggleBox('box-cfg-fam'); }
-        function renderFamilies() { const container = document.getElementById('container-familias'); if(!container) return; container.innerHTML = ""; let familias = {}; data.catalogo.forEach(item => { if(!familias[item.emp]) familias[item.emp] = []; familias[item.emp].push(item); }); for(let nomeFam in familias) { let htmlCard = `<div class="family-card"><h4><i class="fas fa-boxes"></i> ${nomeFam}</h4>`; familias[nomeFam].forEach(p => { htmlCard += `<div class="family-item"><span>${p.pro}</span><strong>R$ ${p.pre.toLocaleString('pt-BR', {minimumFractionDigits:2})}</strong></div>`; }); htmlCard += `</div>`; container.innerHTML += htmlCard; } }
-        function updateDrops() { const sEst = document.getElementById('e-item'); const sVen = document.getElementById('v-item'); if(!sEst || !sVen) return; sEst.innerHTML = '<option value="">Escolha um item...</option>'; sVen.innerHTML = '<option value="">Escolha um item...</option>'; data.catalogo.forEach((c, i) => { const opt = `<option value="${i}">${c.emp} » ${c.pro}</option>`; sEst.innerHTML += opt; sVen.innerHTML += opt; }); }
-        
+        function renderFamilies() { const container = document.getElementById('container-familias'); if(!container) return; container.innerHTML = ""; let fams = {}; data.catalogo.forEach(c => { if(!fams[c.emp]) fams[c.emp] = []; fams[c.emp].push(c); }); for(let f in fams) { let card = `<div class="family-card"><h4><i class="fas fa-boxes"></i> ${f}</h4>`; fams[f].forEach(p => { card += `<div class="family-item"><span>${p.pro}</span><strong>R$ ${p.pre.toLocaleString('pt-BR', {minimumFractionDigits:2})}</strong></div>`; }); card += `</div>`; container.innerHTML += card; } }
+        function updateDrops() { const se = document.getElementById('e-item'); const sv = document.getElementById('v-item'); if(!se || !sv) return; se.innerHTML = sv.innerHTML = '<option value="">Escolha um item...</option>'; data.catalogo.forEach((c, i) => { const o = `<option value="${i}">${c.emp} » ${c.pro}</option>`; se.innerHTML += o; sv.innerHTML += o; }); }
+
+        // MOVIMENTAÇÕES DE ESTOQUE
         function calcE() { const i = document.getElementById('e-item').value; const q = document.getElementById('e-qtd').value; if(i !== "" && q) document.getElementById('e-val').value = `R$ ${(data.catalogo[i].pre * q).toLocaleString('pt-BR', {minimumFractionDigits:2})}`; }
-        function addEstoque() { const i = document.getElementById('e-item').value; const q = parseInt(document.getElementById('e-qtd').value); if(i === "" || !q) return; const item = data.catalogo[i]; data.estoque.push({ emp: item.emp, pro: item.pro, q, v: item.pre * q }); if(db) db.ref('estoque').set(data.estoque); else renderEstoque(); document.getElementById('e-qtd').value = ""; document.getElementById('e-val').value = ""; toggleBox('box-est-form'); }
-        function renderEstoque() { const t = document.getElementById('tab-est'); if(!t) return; t.innerHTML = "<tr><th>Família / Fornecedor</th><th>Produto</th><th>Quantidade</th><th>Total</th><th>Status</th></tr>"; data.estoque.forEach(e => t.innerHTML += `<tr><td>${e.emp}</td><td><strong>${e.pro}</strong></td><td>${e.q} unidades</td><td>R$ ${e.v.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td><td><span class="badge ${e.q < 5 ? 'badge-low' : 'badge-ok'}">${e.q < 5 ? 'REPOSIÇÃO' : 'DISPONÍVEL'}</span></td></tr>`); }
-        
+        function addEstoque() { const i = document.getElementById('e-item').value; const q = parseInt(document.getElementById('e-qtd').value); if(i === "" || !q) return; const c = data.catalogo[i]; data.estoque.push({ emp: c.emp, pro: c.pro, q, v: c.pre * q }); if(db) db.ref('estoque').set(data.estoque); else renderEstoque(); document.getElementById('e-qtd').value = ""; document.getElementById('e-val').value = ""; toggleBox('box-est-form'); }
+        function renderEstoque() { const t = document.getElementById('tab-est'); if(!t) return; t.innerHTML = "<tr><th>Fornecedor</th><th>Produto</th><th>Quantidade</th><th>Total</th><th>Status</th></tr>"; data.estoque.forEach(e => t.innerHTML += `<tr><td>${e.emp}</td><td><strong>${e.pro}</strong></td><td>${e.q} un</td><td>R$ ${e.v.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td><td><span class="badge ${e.q < 5 ? 'badge-low' : 'badge-ok'}">${e.q < 5 ? 'REPOSIÇÃO' : 'OK'}</span></td></tr>`); }
+
+        // ENTRADA DE VENDAS
         function calcV() { const i = document.getElementById('v-item').value; const q = document.getElementById('v-qtd').value; if(i !== "" && q) document.getElementById('v-val').value = `R$ ${(data.catalogo[i].pre * q).toLocaleString('pt-BR', {minimumFractionDigits:2})}`; }
-        function addVenda() { const i = document.getElementById('v-item').value; const q = parseInt(document.getElementById('v-qtd').value); if(i === "" || !q) return; const item = data.catalogo[i]; data.vendas.push({ emp: item.emp, pro: item.pro, q, v: item.pre * q }); if(db) db.ref('vendas').set(data.vendas); else renderVendas(); document.getElementById('v-qtd').value = ""; document.getElementById('v-val').value = ""; toggleBox('box-ven-form'); }
-        function renderVendas() { const t = document.getElementById('tab-ven'); if(!t) return; t.innerHTML = "<tr><th>Família Compradora</th><th>Produto</th><th>Quantidade</th><th>Faturamento</th></tr>"; data.vendas.forEach(v => t.innerHTML += `<tr><td>${v.emp}</td><td><strong>${v.pro}</strong></td><td>${v.q} unidades</td><td style="color: var(--success); font-weight: 700;">R$ ${v.v.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td></tr>`); }
-        
-        function addMov() { const t = document.getElementById('mo-t').value; const d = document.getElementById('mo-d').value.trim(); const v = parseFloat(document.getElementById('mo-v').value); if(!d || !v) return; data.movimentos.push({t, d, v}); if(t === 'Saída') data.dash.s -= v; else data.dash.s += v; if(db) { db.ref('movimentos').set(data.movimentos); db.ref('dash').set(data.dash); } else { renderMov(); renderDash(); } toggleBox('box-mov-form'); }
-        function renderMov() { const t = document.getElementById('tab-mov'); if(!t) return; t.innerHTML = "<tr><th>Tipo</th><th>Descrição</th><th>Fluxo Financeiro</th></tr>"; data.movimentos.forEach(m => t.innerHTML += `<tr><td><span class="badge ${m.t === 'Saída'?'badge-low':'badge-ok'}">${m.t}</span></td><td>${m.d}</td><td style="font-weight:700; color:${m.t==='Saída'?'var(--danger)':'var(--success)'}">R$ ${m.v.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td></tr>`); }
-        
+        function addVenda() { const i = document.getElementById('v-item').value; const q = parseInt(document.getElementById('v-qtd').value); if(i === "" || !q) return; const c = data.catalogo[i]; data.vendas.push({ emp: c.emp, pro: c.pro, q, v: c.pre * q }); if(db) db.ref('vendas').set(data.vendas); else renderVendas(); document.getElementById('v-qtd').value = ""; document.getElementById('v-val').value = ""; toggleBox('box-ven-form'); }
+        function renderVendas() { const t = document.getElementById('tab-ven'); if(!t) return; t.innerHTML = "<tr><th>Família</th><th>Produto</th><th>Qtd</th><th>Faturamento</th></tr>"; data.vendas.forEach(v => t.innerHTML += `<tr><td>${v.emp}</td><td><strong>${v.pro}</strong></td><td>${v.q} un</td><td style="color:var(--success); font-weight:700">R$ ${v.v.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td></tr>`); }
+
+        // CAIXA REGISTRADORA (MOVIMENTOS)
+        function addMov() { const t = document.getElementById('mo-t').value; const d = document.getElementById('mo-d').value.trim(); const v = parseFloat(document.getElementById('mo-v').value); if(!d || !v) return; data.movimentos.push({t, d, v}); if(t === 'Saída') data.dash.s -= v; else data.dash.s += v; if(db) { db.ref('movimentos').set(data.movimentos); db.ref('dash').set(data.dash); } else { renderMov(); renderDash(); } document.getElementById('mo-d').value=""; document.getElementById('mo-v').value=""; toggleBox('box-mov-form'); }
+        function renderMov() { const t = document.getElementById('tab-mov'); if(!t) return; t.innerHTML = "<tr><th>Tipo</th><th>Descrição</th><th>Valor</th></tr>"; data.movimentos.forEach(m => t.innerHTML += `<tr><td><span class="badge ${m.t === 'Saída'?'badge-low':'badge-ok'}">${m.t}</span></td><td>${m.d}</td><td style="font-weight:700; color:${m.t==='Saída'?'var(--danger)':'var(--success)'}">R$ ${m.v.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td></tr>`); }
+
+        // MURAL DE AVISOS & PLANO DE FUNDO
         function addNota() { const txt = document.getElementById('g-nota').value.trim(); if(!txt) return; data.notas.push({ txt, u: currentUser.nome, d: new Date().toLocaleDateString('pt-BR') }); if(db) db.ref('notas').set(data.notas); else renderNotas(); document.getElementById('g-nota').value = ""; }
-        function renderNotas() { const m = document.getElementById('mural'); if(!m) return; m.innerHTML = ""; [...data.notas].reverse().forEach(n => m.innerHTML += `<div class="box-list"><strong>${n.u}</strong> <small style="float:right; opacity:0.4;">${n.d}</small><p style="margin-top:12px; line-height:1.4;">${n.txt}</p></div>`); }
-        function saveBG() { const val = document.getElementById('c-bg').value.trim(); if(db) db.ref('bg').set(val); else { const urlStyle = `linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)), url('${val}')`; document.body.style.backgroundImage = urlStyle; } toggleBox('box-cfg-bg'); }
+        function renderNotas() { const m = document.getElementById('mural'); if(!m) return; m.innerHTML = ""; [...data.notas].reverse().forEach(n => m.innerHTML += `<div class="box-list"><strong>${n.u}</strong><small style="float:right; opacity:0.4">${n.d}</small><p style="margin-top:12px; line-height:1.4">${n.txt}</p></div>`); }
+        function saveBG() { const val = document.getElementById('c-bg').value.trim(); if(db) db.ref('bg').set(val); else { const style = `linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)), url('${val}')`; document.body.style.backgroundImage = style; document.getElementById('login-screen').style.backgroundImage = style; } toggleBox('box-cfg-bg'); }
     </script>
 </body>
 </html>
