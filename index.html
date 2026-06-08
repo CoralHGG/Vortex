@@ -358,7 +358,7 @@
         let currentUser = null;
         let data = { membros: [], estoque: [], vendas: [], movimentos: [], catalogo: [], notas: [], dash: {} };
 
-        // Conta mestre local padrão
+        // Conta mestre local padrão pré-injetada como garantia absoluta de login
         const masterFixo = { 
             dbKey: "master_local", 
             uid: "3461", 
@@ -375,6 +375,9 @@
             }
             renderMembros();
         }
+
+        // Executa imediatamente para garantir que o array não esteja vazio no primeiro carregamento
+        data.membros = [masterFixo];
 
         // --- 2. INSTANCIAÇÃO DO FIREBASE ---
         const firebaseConfig = {
@@ -395,7 +398,7 @@
                 db = firebase.database();
             }
         } catch(e) {
-            console.warn("Rodando localmente sem Firebase.");
+            console.warn("Rodando localmente.");
         }
 
         // Sincronização em tempo real (Firebase ativo)
@@ -404,7 +407,6 @@
                 const val = s.val();
                 data.membros = val ? Object.keys(val).map(k => ({...val[k], dbKey: k})) : [];
                 
-                // Se você já estiver logado, garante que seu status online permaneça ativo na lista atualizada do servidor
                 if(currentUser) {
                     const euNaLista = data.membros.find(m => m.dbKey === currentUser.dbKey || m.nome === currentUser.nome);
                     if(euNaLista) euNaLista.status = { online: true, lastSeen: Date.now() };
@@ -426,11 +428,10 @@
                 }
             });
         } else {
-            // Inicialização pura local offline
             forcarInjecaoMaster();
         }
 
-        // --- 3. MECANISMO DE LOGIN COM AVISO DE ERRO E STATUS ONLINE CORRIGIDO ---
+        // --- 3. MECANISMO DE LOGIN ATUALIZADO (BLINDADO) ---
         function auth() {
             const u = document.getElementById('user-in').value.trim();
             const p = document.getElementById('pass-in').value.trim();
@@ -438,7 +439,12 @@
             
             errBox.style.display = 'none';
 
-            // Procura o usuário combinando Nome ou ID e checando a Senha
+            // Garante que a conta master esteja disponível na lista de verificação se nada carregou ainda
+            if (data.membros.length === 0) {
+                data.membros.push(masterFixo);
+            }
+
+            // Procura combinando o Nome ou ID e checando a Senha
             const found = data.membros.find(m => 
                 (m.nome.toLowerCase() === u.toLowerCase() || String(m.uid) === u) && String(m.senha) === p
             );
@@ -446,21 +452,19 @@
             if(found) {
                 logarUsuario(found);
             } else {
-                errBox.style.display = 'block'; // Ativa o banner vermelho de erro na hora
+                errBox.style.display = 'block'; 
             }
         }
 
         function logarUsuario(userObj) {
             currentUser = userObj;
-            
-            // Força o status a ficar ONLINE na memória local imediatamente
             userObj.status = { online: true, lastSeen: Date.now() };
             
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('main-panel').style.display = 'block';
             document.getElementById('logged-name').innerText = `${userObj.nome} | ${userObj.uid || '---'}`;
             
-            renderMembros(); // Atualiza a tabela para refletir seu status verde online
+            renderMembros(); 
             updateStatus(true);
             setInterval(() => updateStatus(true), 15000);
         }
@@ -473,7 +477,7 @@
         }
         window.onbeforeunload = () => updateStatus(false);
 
-        // --- 4. ENGINE COMPLETA: CADASTRAR, SALVAR E EDITAR OPERADORES ---
+        // --- 4. ENGINE DE CADASTRO, EXCLUSÃO E EDIÇÃO ---
         function saveMembro() {
             const key = document.getElementById('m-key').value;
             const uid = document.getElementById('m-id').value.trim();
@@ -484,7 +488,6 @@
             if(!uid || !nome || !senha || !cargo) return;
 
             if(key) {
-                // Modo: Salvar Alterações de Membro Existente
                 if(key === 'master_local') {
                     masterFixo.uid = uid; masterFixo.nome = nome; masterFixo.senha = senha; masterFixo.cargo = cargo;
                     if(currentUser && currentUser.dbKey === 'master_local') {
@@ -501,7 +504,6 @@
                     }
                 }
             } else {
-                // Modo: Cadastrar Novo Registro de Acesso
                 const novaKey = 'local_' + Date.now();
                 const novoMembro = { uid, nome, senha, cargo, status: { online: false, lastSeen: 0 } };
                 
@@ -522,14 +524,12 @@
             const mem = data.membros.find(m => m.dbKey === key);
             if(!mem) return;
 
-            // Alimenta os campos de texto com os dados guardados
             document.getElementById('m-key').value = mem.dbKey;
             document.getElementById('m-id').value = mem.uid || '';
             document.getElementById('m-nome').value = mem.nome || '';
             document.getElementById('m-pass').value = mem.senha || '';
             document.getElementById('m-cargo').value = mem.cargo || '';
 
-            // Transforma o layout do formulário para o Modo de Edição
             document.getElementById('form-mem-title').innerText = "Editar Credenciais do Membro";
             document.getElementById('btn-save-mem').innerText = "SALVAR ALTERAÇÕES";
             document.getElementById('btn-cancel-edit').style.display = "inline-block";
@@ -584,7 +584,7 @@
             });
         }
 
-        // --- 5. FUNÇÕES COMPLETAS DAS DEMAIS ABAS DO SISTEMA ---
+        // --- 5. OUTRAS ABAS E LÓGICAS INTERNAS DO PAINEL ---
         function toggleBox(id) { const box = document.getElementById(id); const ind = box.querySelector('.icon-indicator'); box.classList.toggle('open'); if(ind) ind.innerText = box.classList.contains('open') ? '-' : '+'; }
         function toggleSidebar() { const side = document.getElementById('sidebar'); const icon = document.getElementById('t-icon'); const mainContent = document.getElementById('main-content'); side.classList.toggle('collapsed'); if(side.classList.contains('collapsed')) { icon.className = 'fas fa-chevron-right'; mainContent.classList.add('expanded'); } else { icon.className = 'fas fa-chevron-left'; mainContent.classList.remove('expanded'); } }
         function tab(id) { document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); document.querySelectorAll('.menu-list li').forEach(l => l.classList.remove('active')); document.getElementById(id).classList.add('active'); event.currentTarget.classList.add('active'); }
