@@ -50,7 +50,7 @@
             width: 400px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.6);
         }
 
-        input, select, text area {
+        input, select, textarea {
             width: 100%; padding: 14px; background: rgba(0,0,0,0.4);
             border: 1px solid var(--border); border-radius: 12px; color: #fff; outline: none; font-size: 14px;
         }
@@ -408,7 +408,7 @@
             data.vendas = JSON.parse(localStorage.getItem('vortex_vendas')) || [];
             data.movimentos = JSON.parse(localStorage.getItem('vortex_movimentos')) || [];
             data.catalogo = JSON.parse(localStorage.getItem('vortex_catalogo')) || [];
-            data.notas = JSON.parse(localStorage.getItem('vortex_notas')) || [];
+            data.notes = JSON.parse(localStorage.getItem('vortex_notas')) || [];
             data.dash = JSON.parse(localStorage.getItem('vortex_dash')) || { s: 0, e: 0, sa: 0 };
 
             const bgSalvo = localStorage.getItem('vortex_bg');
@@ -589,7 +589,7 @@
         function calcE() { const i = document.getElementById('e-item').value; const q = document.getElementById('e-qtd').value; if(i !== "" && q) document.getElementById('e-val').value = `R$ ${(data.catalogo[i].pre * q).toLocaleString('pt-BR', {minimumFractionDigits:2})}`; }
         function addEstoque() { const i = document.getElementById('e-item').value; const q = parseInt(document.getElementById('e-qtd').value); if(i === "" || !q) return; const c = data.catalogo[i]; data.estoque.push({ emp: c.emp, pro: c.pro, q, v: c.pre * q }); if(db) db.ref('estoque').set(data.estoque); else { atualizarLocalStorage('estoque'); renderEstoque(); } document.getElementById('e-qtd').value = ""; document.getElementById('e-val').value = ""; toggleBox('box-est-form'); }
         function renderMembros() { const t = document.getElementById('t-membros'); if(!t) return; t.innerHTML = ""; data.membros.forEach(m => { const isOnline = m.dbKey === 'master_local' ? (currentUser && currentUser.dbKey === 'master_local') : (m.status && m.status.online); t.innerHTML += `<tr><td><strong>#${m.uid}</strong></td><td>${m.nome}</td><td>${m.cargo}</td><td><span style="font-family:monospace; opacity:0.7">${m.senha}</span></td><td><span class="status-dot ${isOnline ? 'online' : 'offline'}"></span>${isOnline ? 'Online' : 'Offline'}</td><td><button class="btn-warning" style="padding:4px 10px; font-size:12px;" onclick="prepararEdicaoMembro('${m.dbKey}')">Editar</button> ${m.dbKey !== 'master_local' ? `<button class="btn-danger" style="padding:4px 10px; font-size:12px;" onclick="delMem('${m.dbKey}')">Deletar</button>` : ''}</td></tr>`; }); }
-        function renderEstoque() { const t = document.getElementById('tab-est'); if(!t) return; t.innerHTML = "<tr><th>Fornecedor</th><th>Produto</th><th>Quantidade</th><th>Total</th><th>Status</th></tr>"; data.estoque.forEach(e => t.innerHTML += `<tr><td>${e.emp}</td><td><strong>${e.pro}</strong></td><td>${e.q} un</td><td>R$ ${e.v.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td><td><span class="badge ${e.q < 5 ? 'badge-low' : 'badge-ok'}">${e.q < 5 ? 'REPOSIÇÃO' : 'OK'}</span></td></tr>`); }
+        function renderEstoque() { const t = document.getElementById('tab-est'); if(!t) return; t.innerHTML = "<tr><th>Família</th><th>Produto</th><th>Quantidade</th><th>Total</th><th>Status</th></tr>"; data.estoque.forEach(e => t.innerHTML += `<tr><td>${e.emp}</td><td><strong>${e.pro}</strong></td><td>${e.q} un</td><td>R$ ${e.v.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td><td><span class="badge ${e.q < 5 ? 'badge-low' : 'badge-ok'}">${e.q < 5 ? 'REPOSIÇÃO' : 'OK'}</span></td></tr>`); }
 
         // ENTRADA DE VENDAS
         function calcV() { const i = document.getElementById('v-item').value; const q = document.getElementById('v-qtd').value; if(i !== "" && q) document.getElementById('v-val').value = `R$ ${(data.catalogo[i].pre * q).toLocaleString('pt-BR', {minimumFractionDigits:2})}`; }
