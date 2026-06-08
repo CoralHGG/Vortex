@@ -31,7 +31,7 @@
             overflow: hidden;
         }
 
-        /* --- TELA DE LOGIN ISOLADA COM FUNDO DINÂMICO --- */
+        /* --- TELA DE LOGIN ISOLADA --- */
         #login-screen {
             position: fixed; 
             top: 0; 
@@ -43,9 +43,6 @@
             align-items: center; 
             z-index: 9999;
             background-color: #0b0813;
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
         }
         .login-box {
             background: var(--glass); backdrop-filter: var(--blur);
@@ -67,23 +64,18 @@
         .btn-danger { background: var(--danger); }
         .btn-warning { background: #eab308; color: #000; }
 
-        /* --- LAYOUT DO PAINEL PRINCIPAL --- */
+        /* --- PAINEL PRINCIPAL --- */
         #main-panel { display: none; width: 100vw; height: 100vh; position: relative; }
 
-        /* --- SIDEBAR --- */
         .sidebar {
-            width: var(--sidebar-w); 
-            height: 100vh;
+            width: var(--sidebar-w); height: 100vh;
             background: var(--glass); backdrop-filter: var(--blur);
             border-right: 1px solid var(--border); display: flex;
             flex-direction: column; padding: 30px 20px; 
             transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             position: absolute; top: 0; left: 0; z-index: 100;
         }
-
-        .sidebar.collapsed {
-            transform: translateX(-100%);
-        }
+        .sidebar.collapsed { transform: translateX(-100%); }
 
         .logo-area { margin-bottom: 40px; padding: 0 10px; }
         .logo-area h2 { font-weight: 800; letter-spacing: 4px; font-size: 24px; }
@@ -97,127 +89,54 @@
         .menu-list li:hover { background: rgba(255,255,255,0.05); color: #fff; }
         .menu-list li.active { background: rgba(168, 85, 247, 0.15); color: #fff; border-left: 4px solid var(--primary); font-weight: 600; }
 
-        /* RODAPÉ PREMIUM DO USUÁRIO */
-        .user-footer {
-            border-top: 1px solid var(--border);
-            padding-top: 20px;
-            margin-top: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        .user-info-box {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.04);
-            padding: 12px 15px;
-            border-radius: 14px;
-        }
-        .user-title {
-            font-weight: 700;
-            font-size: 15px;
-            color: #ffffff;
-            letter-spacing: 0.3px;
-            display: block;
-            margin-bottom: 3px;
-        }
-        .user-status-container {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 12px;
-            color: #a3a3c2;
-        }
-        .status-pulse-dot {
-            width: 7px;
-            height: 7px;
-            background-color: var(--success);
-            border-radius: 50%;
-            display: inline-block;
-            box-shadow: 0 0 10px var(--success);
-            animation: pulseGlow 2s infinite;
-        }
-        @keyframes pulseGlow {
-            0% { transform: scale(0.9); opacity: 0.6; }
-            50% { transform: scale(1.1); opacity: 1; box-shadow: 0 0 14px var(--success); }
-            100% { transform: scale(0.9); opacity: 0.6; }
-        }
+        .user-footer { border-top: 1px solid var(--border); padding-top: 20px; margin-top: 20px; display: flex; flex-direction: column; gap: 5px; }
+        .user-info-box { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.04); padding: 12px 15px; border-radius: 14px; }
+        .user-title { font-weight: 700; font-size: 15px; color: #ffffff; letter-spacing: 0.3px; display: block; margin-bottom: 3px; }
+        
+        .user-status-container { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #a3a3c2; }
+        .status-pulse-dot { width: 7px; height: 7px; background-color: var(--success); border-radius: 50%; display: inline-block; box-shadow: 0 0 10px var(--success); animation: pulseGlow 2s infinite; }
+        @keyframes pulseGlow { 0% { transform: scale(0.9); opacity: 0.6; } 50% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(0.9); opacity: 0.6; } }
 
-        /* BOTÃO DE ABRE/FECHA FLUTUANTE */
         .toggle-btn {
-            position: absolute; 
-            left: calc(var(--sidebar-w) - 16px); 
-            top: 35px;
+            position: absolute; left: calc(var(--sidebar-w) - 16px); top: 35px;
             width: 32px; height: 32px; background: var(--primary);
             border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; z-index: 101; border: 2px solid #0b0813; 
-            transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer; z-index: 101; border: 2px solid #0b0813; transition: left 0.4s;
         }
 
-        /* --- CONTEÚDO PRINCIPAL ESTÁVEL --- */
         .main-content { 
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            padding: 40px; 
-            padding-left: calc(var(--sidebar-w) + 40px); 
-            overflow-y: auto; 
-            background: transparent; 
-            transition: padding-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 1;
+            position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; padding: 40px; 
+            padding-left: calc(var(--sidebar-w) + 40px); overflow-y: auto; background: transparent; transition: padding-left 0.4s; z-index: 1;
         }
-        
-        .main-content.expanded {
-            padding-left: 60px;
-        }
+        .main-content.expanded { padding-left: 60px; }
 
         .section { display: none; animation: fadeIn 0.4s ease; width: 100%; }
         .section.active { display: block; }
-
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- DESIGN DE FORMULÁRIO COM + E - --- */
-        .collapsible-box {
-            background: var(--glass); backdrop-filter: var(--blur);
-            border: 1px solid var(--border); border-radius: 16px; margin-bottom: 25px; overflow: hidden;
-            width: 100%;
-        }
-        .collapsible-header {
-            padding: 20px; background: rgba(255,255,255,0.02); cursor: pointer;
-            display: flex; justify-content: space-between; align-items: center; font-weight: 600;
-            border-bottom: 1px solid transparent; transition: 0.2s;
-        }
+        .collapsible-box { background: var(--glass); backdrop-filter: var(--blur); border: 1px solid var(--border); border-radius: 16px; margin-bottom: 25px; overflow: hidden; width: 100%; }
+        .collapsible-header { padding: 20px; background: rgba(255,255,255,0.02); cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: 600; }
         .collapsible-header:hover { background: rgba(255,255,255,0.05); }
-        .collapsible-header .icon-indicator {
-            font-size: 18px; color: var(--primary); font-weight: 800;
-        }
-        .collapsible-content { padding: 0 20px; max-height: 0; overflow: hidden; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .collapsible-content { padding: 0 20px; max-height: 0; overflow: hidden; transition: all 0.3s ease; }
         .collapsible-box.open .collapsible-content { padding: 20px; max-height: 500px; border-top: 1px solid var(--border); }
 
-        /* --- CARDS --- */
         .grid-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 25px; margin-bottom: 35px; }
         .card { background: var(--glass); backdrop-filter: var(--blur); padding: 25px; border-radius: 16px; border: 1px solid var(--border); }
-        .card h4 { font-size: 11px; opacity: 0.5; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 1px; }
+        .card h4 { font-size: 11px; opacity: 0.5; text-transform: uppercase; margin-bottom: 10px; }
         .card .value { font-size: 26px; font-weight: 700; }
 
-        /* BOX PADRAO PARA LISTAS */
         .box-list { background: var(--glass); backdrop-filter: var(--blur); border: 1px solid var(--border); padding: 25px; border-radius: 16px; margin-bottom: 25px; width: 100%; overflow-x: auto; }
         .box-title { font-size: 16px; font-weight: 600; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
 
-        /* GRID PARA EXIBIR AS FAMILIAS SALVAS */
-        .grid-families { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px; }
+        .grid-families { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
         .family-card { background: rgba(20, 16, 38, 0.7); border: 1px solid var(--border); border-left: 4px solid var(--primary); padding: 20px; border-radius: 12px; }
-        .family-card h4 { font-size: 18px; color: #fff; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 5px; }
-        .family-item { display: flex; justify-content: space-between; padding: 6px 0; font-size: 14px; opacity: 0.9; }
-
-        /* --- TABELAS RESPONSIVAS --- */
-        table { width: 100%; border-collapse: collapse; min-width: 500px; }
+        
+        table { width: 100%; border-collapse: collapse; }
         th { text-align: left; padding: 12px 15px; opacity: 0.5; font-size: 11px; text-transform: uppercase; }
         td { padding: 16px 15px; border-bottom: 1px solid var(--border); font-size: 14px; }
 
         .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 8px; }
-        .online { background: var(--success); box-shadow: 0 0 8px var(--success); }
+        .online { background: var(--success); }
         .offline { background: #64748b; }
         .badge { padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; }
         .badge-low { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
@@ -434,26 +353,22 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <script>
-        // --- 1. MEMÓRIA INTERNA ATIVA IMEDIATAMENTE (ANTES DO FIREBASE) ---
+        // --- 1. MEMÓRIA LOCAL E INSTANCIAÇÃO DE DADOS MESTRES ---
         let currentUser = null;
         let data = { membros: [], estoque: [], vendas: [], movimentos: [], catalogo: [], notas: [], dash: {} };
 
-        // Objeto mestre fixo e definitivo
+        // Cadastro Mestre Padrão
         const masterFixo = { dbKey: "master_local", uid: "3461", nome: "Megan", senha: "1234", cargo: "Chefe" };
 
         function forcarInjecaoMaster() {
-            // Garante que o usuário Megan seja o primeirão da lista, não importa o que aconteça
-            const jaExiste = data.membros.some(m => m.nome.toLowerCase() === 'megan' || m.dbKey === 'master_local');
+            const jaExiste = data.membros.some(m => m.dbKey === 'master_local' || m.nome.toLowerCase() === 'megan');
             if (!jaExiste) {
                 data.membros.unshift(masterFixo);
             }
             renderMembros();
         }
 
-        // Executa a injeção instantaneamente assim que lê o script
-        forcarInjecaoMaster();
-
-        // --- 2. INICIALIZAÇÃO SEGURA DO FIREBASE ---
+        // --- 2. CONFIGURAÇÃO DO SEU FIREBASE (SÓ ATIVA SE PARAR DE USAR 'SUA_API_KEY') ---
         const firebaseConfig = {
   apiKey: "AIzaSyBCEpercpoeHL6SFzw0TI91kmNplF8WXDc",
   authDomain: "vortex-f7559.firebaseapp.com",
@@ -464,29 +379,24 @@
   appId: "1:254083067084:web:e40689772f4c507e426669",
   measurementId: "G-GMFS68CRGT"
 };
+        
         let db = null;
         try {
-            // Só tenta conectar se as chaves padrões forem alteradas para chaves reais
             if (firebaseConfig.apiKey !== "SUA_API_KEY") {
                 firebase.initializeApp(firebaseConfig);
                 db = firebase.database();
-            } else {
-                console.warn("Chaves do Firebase padrão detectadas. Rodando em modo local offline.");
             }
         } catch(e) {
-            console.error("Falha ao carregar conexões online. Rodando em contingência local.", e);
+            console.warn("Rodando local.");
         }
 
-        // --- 3. EVENTOS EM TEMPO REAL (CASO BANCO EXISTA) ---
+        // Carrega os dados em tempo real se o Firebase estiver ligado
         if(db) {
             db.ref('membros').on('value', s => { 
                 const val = s.val();
-                const vadosMembros = val ? Object.keys(val).map(k => ({...val[k], dbKey: k})) : [];
-                data.membros = vadosMembros;
-                forcarInjecaoMaster(); // Re-injeta após ler do banco para proteção
-            }, err => {
+                data.membros = val ? Object.keys(val).map(k => ({...val[k], dbKey: k})) : [];
                 forcarInjecaoMaster();
-            });
+            }, () => { forcarInjecaoMaster(); });
             
             db.ref('catalogo').on('value', s => { data.catalogo = s.val() || []; updateDrops(); renderFamilies(); });
             db.ref('estoque').on('value', s => { data.estoque = s.val() || []; renderEstoque(); });
@@ -496,38 +406,34 @@
             db.ref('dash').on('value', s => { data.dash = s.val() || {s:0,e:0,sa:0}; renderDash(); });
             db.ref('bg').on('value', s => { 
                 if(s.val()) {
-                    const urlStyle = `linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)), url('${s.val()}')`;
-                    document.body.style.backgroundImage = urlStyle; 
-                    document.getElementById('login-screen').style.backgroundImage = urlStyle;
+                    const styleBg = `linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)), url('${s.val()}')`;
+                    document.body.style.backgroundImage = styleBg; 
+                    document.getElementById('login-screen').style.backgroundImage = styleBg;
                 }
             });
+        } else {
+            // Inicialização imediata local
+            forcarInjecaoMaster();
         }
 
-        // --- 4. ENGINE DE LOGIN ATUALIZADA (BLINDADA) ---
+        // --- 3. CORREÇÃO DO SISTEMA DE LOGIN (AVISA ERRO NA HORA) ---
         function auth() {
             const u = document.getElementById('user-in').value.trim();
             const p = document.getElementById('pass-in').value.trim();
             const errBox = document.getElementById('login-err');
             
-            errBox.style.display = 'none'; // Reseta o aviso visual de erro
+            errBox.style.display = 'none';
 
-            // Segurança total: Se for Megan / 1234, entra direto de qualquer jeito
-            if(u.toLowerCase() === 'megan' && p === '1234') {
-                logarUsuario(masterFixo);
-                return;
+            // Busca na lista atualizada
+            const found = data.membros.find(m => 
+                (m.nome.toLowerCase() === u.toLowerCase() || String(m.uid) === u) && String(m.senha) === p
+            );
+
+            if(found) {
+                logarUsuario(found);
+            } else {
+                errBox.style.display = 'block'; // Mostra o alerta vermelho se errar
             }
-
-            // Pesquisa dinâmica na memória do painel
-            if(data.membros && data.membros.length > 0) {
-                const found = data.membros.find(m => (m.nome.toLowerCase() === u.toLowerCase() || String(m.uid) === u) && String(m.senha) === p);
-                if(found) {
-                    logarUsuario(found);
-                    return;
-                }
-            }
-
-            // Se nada bater, solta a mensagem de erro vermelha na tela
-            errBox.style.display = 'block';
         }
 
         function logarUsuario(userObj) {
@@ -542,107 +448,41 @@
 
         function updateStatus(online) {
             if(!currentUser || !db || currentUser.dbKey === 'master_local') return;
-            db.ref('membros/' + currentUser.dbKey + '/status').set({
-                online: online,
-                lastSeen: Date.now()
-            });
+            db.ref('membros/' + currentUser.dbKey + '/status').set({ online: online, lastSeen: Date.now() });
         }
-
         window.onbeforeunload = () => updateStatus(false);
 
-        function toggleBox(id) {
-            const box = document.getElementById(id);
-            const indicator = box.querySelector('.icon-indicator');
-            box.classList.toggle('open');
-            indicator.innerText = box.classList.contains('open') ? '-' : '+';
-        }
-
-        function toggleSidebar() {
-            const side = document.getElementById('sidebar');
-            const icon = document.getElementById('t-icon');
-            const btn = document.getElementById('toggle-btn');
-            const mainContent = document.getElementById('main-content');
-            
-            side.classList.toggle('collapsed');
-            
-            if(side.classList.contains('collapsed')) {
-                icon.className = 'fas fa-chevron-right';
-                btn.style.left = '15px';
-                mainContent.classList.add('expanded');
-            } else {
-                icon.className = 'fas fa-chevron-left';
-                btn.style.left = '244px';
-                mainContent.classList.remove('expanded');
-            }
-        }
-
-        function tab(id) {
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.menu-list li').forEach(l => l.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            event.currentTarget.classList.add('active');
-        }
-
-        // --- 5. GESTÃO DE OPERADORES E EDICÃO ---
-        function renderMembros() {
-            const t = document.getElementById('t-membros'); 
-            if(!t) return;
-            t.innerHTML = "";
-            
-            data.membros.forEach(m => {
-                const diff = Date.now() - (m.status?.lastSeen || 0);
-                const isOnline = m.status?.online && diff < 30000;
-                let lastStr = "Desconectado";
-                if(m.status?.lastSeen) {
-                    const min = Math.floor(diff / 60000);
-                    lastStr = min < 1 ? "Agora" : `Há ${min}m atrás`;
-                    if(min >= 60) lastStr = `Há ${Math.floor(min/60)}h atrás`;
-                }
-                
-                const btnDeletar = m.dbKey === 'master_local' ? '' : `<button style="padding: 4px 10px; font-size:12px;" class="btn-danger" onclick="delMem('${m.dbKey}')">Deletar</button>`;
-
-                t.innerHTML += `<tr>
-                    <td><strong>#${m.uid || '---'}</strong></td>
-                    <td>${m.nome}</td>
-                    <td>${m.cargo || 'Operador'}</td>
-                    <td><span style="font-family: monospace; opacity: 0.7;">${m.senha}</span></td>
-                    <td><span class="status-dot ${isOnline ? 'online' : 'offline'}"></span>${isOnline ? 'Online' : lastStr}</td>
-                    <td>
-                        <button style="padding: 4px 10px; font-size:12px; margin-right: 5px;" class="btn-warning" onclick="prepararEdicaoMembro('${m.dbKey}')">Editar</button>
-                        ${btnDeletar}
-                    </td>
-                </tr>`;
-            });
-        }
-
+        // --- 4. SISTEMA DE SALVAR E EDITAR MEMBROS TOTALMENTE CORRIGIDO ---
         function saveMembro() {
             const key = document.getElementById('m-key').value;
             const uid = document.getElementById('m-id').value.trim();
             const nome = document.getElementById('m-nome').value.trim();
             const senha = document.getElementById('m-pass').value.trim();
             const cargo = document.getElementById('m-cargo').value.trim();
+            
             if(!uid || !nome || !senha || !cargo) return;
 
             if(key) {
+                // Modo Edição
                 if(key === 'master_local') {
                     masterFixo.uid = uid; masterFixo.nome = nome; masterFixo.senha = senha; masterFixo.cargo = cargo;
-                    if(currentUser && currentUser.dbKey === 'master_local') {
-                        currentUser.nome = nome; currentUser.uid = uid;
-                        document.getElementById('logged-name').innerText = `${nome} | ${uid}`;
-                    }
-                    renderMembros();
                 } else if(db) {
                     db.ref('membros/' + key).update({ uid, nome, senha, cargo });
+                } else {
+                    const idx = data.membros.findIndex(m => m.dbKey === key);
+                    if(idx !== -1) data.membros[idx] = { dbKey: key, uid, nome, senha, cargo };
                 }
             } else {
+                // Modo Criação/Novo Login
+                const novaKey = 'local_' + Date.now();
                 if(db) {
                     db.ref('membros').push().set({ uid, nome, senha, cargo });
                 } else {
-                    data.membros.push({ dbKey: 'local_' + Date.now(), uid, nome, senha, cargo });
-                    renderMembros();
+                    data.membros.push({ dbKey: novaKey, uid, nome, senha, cargo });
                 }
             }
 
+            renderMembros();
             cancelarEdicaoMembro();
             toggleBox('box-mem-form');
         }
@@ -663,7 +503,6 @@
 
             const box = document.getElementById('box-mem-form');
             if(!box.classList.contains('open')) toggleBox('box-mem-form');
-            window.scrollTo({ top: box.offsetTop - 20, behavior: 'smooth' });
         }
 
         function cancelarEdicaoMembro() {
@@ -677,7 +516,7 @@
             document.getElementById('btn-save-mem').innerText = "SALVAR NOVO MEMBRO";
             document.getElementById('btn-cancel-edit').style.display = "none";
         }
-        
+
         function delMem(k) { 
             if(confirm("Remover este acesso definitivamente?")) {
                 if(db && k !== 'master_local') {
@@ -689,130 +528,49 @@
             }
         }
 
-        // --- OUTRAS OPERAÇÕES DE EXIBIÇÃO EM MODO HÍBRIDO ---
-        function upDash() {
-            const s = parseFloat(document.getElementById('in-saldo').value) || 0;
-            const e = parseFloat(document.getElementById('in-ent').value) || 0;
-            const sa = parseFloat(document.getElementById('in-sai').value) || 0;
-            if(db) db.ref('dash').set({s, e, sa});
-            else { data.dash = {s,e,sa}; renderDash(); }
-            toggleBox('box-dash-form');
-        }
-        function renderDash() {
-            document.getElementById('v-saldo').innerText = `R$ ${(data.dash.s || 0).toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
-            document.getElementById('v-ent').innerText = `R$ ${(data.dash.e || 0).toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
-            document.getElementById('v-sai').innerText = `R$ ${(data.dash.sa || 0).toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
-        }
+        function renderMembros() {
+            const t = document.getElementById('t-membros'); 
+            if(!t) return;
+            t.innerHTML = "";
+            
+            data.membros.forEach(m => {
+                const diff = Date.now() - (m.status?.lastSeen || 0);
+                const isOnline = m.status?.online && diff < 30000;
+                const btnDeletar = m.dbKey === 'master_local' ? '' : `<button style="padding: 4px 10px; font-size:12px;" class="btn-danger" onclick="delMem('${m.dbKey}')">Deletar</button>`;
 
-        function addCat() {
-            const emp = document.getElementById('c-emp').value.trim();
-            const pro = document.getElementById('c-pro').value.trim();
-            const pre = parseFloat(document.getElementById('c-pre').value);
-            if(!emp || !pro || !pre) return;
-
-            data.catalogo.push({emp, pro, pre});
-            if(db) db.ref('catalogo').set(data.catalogo);
-            else { updateDrops(); renderFamilies(); }
-            document.getElementById('c-emp').value=""; document.getElementById('c-pro').value=""; document.getElementById('c-pre').value="";
-            toggleBox('box-cfg-fam');
-        }
-
-        function renderFamilies() {
-            const container = document.getElementById('container-familias');
-            if(!container) return;
-            container.innerHTML = "";
-            let familias = {};
-            data.catalogo.forEach(item => {
-                if(!familias[item.emp]) familias[item.emp] = [];
-                familias[item.emp].push(item);
-            });
-
-            for(let nomeFam in familias) {
-                let htmlCard = `<div class="family-card"><h4><i class="fas fa-boxes"></i> ${nomeFam}</h4>`;
-                familias[nomeFam].forEach(p => {
-                    htmlCard += `<div class="family-item"><span>${p.pro}</span><strong>R$ ${p.pre.toLocaleString('pt-BR')}</strong></div>`;
-                });
-                htmlCard += `</div>`;
-                container.innerHTML += htmlCard;
-            }
-        }
-
-        function updateDrops() {
-            const sEst = document.getElementById('e-item'); 
-            const sVen = document.getElementById('v-item');
-            if(!sEst || !sVen) return;
-            sEst.innerHTML = '<option value="">Escolha um item...</option>';
-            sVen.innerHTML = '<option value="">Escolha um item...</option>';
-            data.catalogo.forEach((c, i) => {
-                const opt = `<option value="${i}">${c.emp} » ${c.pro}</option>`;
-                sEst.innerHTML += opt;
-                sVen.innerHTML += opt;
+                t.innerHTML += `<tr>
+                    <td><strong>#${m.uid || '---'}</strong></td>
+                    <td>${m.nome}</td>
+                    <td>${m.cargo || 'Operador'}</td>
+                    <td><span style="font-family: monospace; opacity: 0.7;">${m.senha}</span></td>
+                    <td><span class="status-dot ${isOnline ? 'online' : 'offline'}"></span>${isOnline ? 'Online' : 'Desconectado'}</td>
+                    <td>
+                        <button style="padding: 4px 10px; font-size:12px; margin-right: 5px;" class="btn-warning" onclick="prepararEdicaoMembro('${m.dbKey}')">Editar</button>
+                        ${btnDeletar}
+                    </td>
+                </tr>`;
             });
         }
 
-        function calcE() {
-            const i = document.getElementById('e-item').value; const q = document.getElementById('e-qtd').value;
-            if(i !== "" && q) document.getElementById('e-val').value = `R$ ${(data.catalogo[i].pre * q).toLocaleString('pt-BR')}`;
-        }
-        function addEstoque() {
-            const i = document.getElementById('e-item').value; const q = parseInt(document.getElementById('e-qtd').value);
-            if(i === "" || !q) return;
-            const item = data.catalogo[i];
-            data.estoque.push({ emp: item.emp, pro: item.pro, q, v: item.pre * q });
-            if(db) db.ref('estoque').set(data.estoque); else renderEstoque();
-            document.getElementById('e-qtd').value = ""; document.getElementById('e-val').value = "";
-            toggleBox('box-est-form');
-        }
-        function renderEstoque() {
-            const t = document.getElementById('tab-est'); if(!t) return;
-            t.innerHTML = "<tr><th>Família / Fornecedor</th><th>Produto</th><th>Quantidade</th><th>Total</th><th>Status</th></tr>";
-            data.estoque.forEach(e => t.innerHTML += `<tr><td>${e.emp}</td><td><strong>${e.pro}</strong></td><td>${e.q} unidades</td><td>R$ ${e.v.toLocaleString()}</td><td><span class="badge ${e.q < 5 ? 'badge-low' : 'badge-ok'}">${e.q < 5 ? 'REPOSIÇÃO' : 'DISPONÍVEL'}</span></td></tr>`);
-        }
-
-        function calcV() {
-            const i = document.getElementById('v-item').value; const q = document.getElementById('v-qtd').value;
-            if(i !== "" && q) document.getElementById('v-val').value = `R$ ${(data.catalogo[i].pre * q).toLocaleString('pt-BR')}`;
-        }
-        function addVenda() {
-            const i = document.getElementById('v-item').value; const q = parseInt(document.getElementById('v-qtd').value);
-            if(i === "" || !q) return;
-            const item = data.catalogo[i];
-            data.vendas.push({ emp: item.emp, pro: item.pro, q, v: item.pre * q });
-            if(db) db.ref('vendas').set(data.vendas); else renderVendas();
-            document.getElementById('v-qtd').value = ""; document.getElementById('v-val').value = "";
-            toggleBox('box-ven-form');
-        }
-        function renderVendas() {
-            const t = document.getElementById('tab-ven'); if(!t) return;
-            t.innerHTML = "<tr><th>Família Compradora</th><th>Produto</th><th>Quantidade</th><th>Faturamento</th></tr>";
-            data.vendas.forEach(v => t.innerHTML += `<tr><td>${v.emp}</td><td><strong>${v.pro}</strong></td><td>${v.q} unidades</td><td style="color: var(--success); font-weight: 700;">R$ ${v.v.toLocaleString()}</td></tr>`);
-        }
-
-        function addMov() {
-            const t = document.getElementById('mo-t').value; const d = document.getElementById('mo-d').value.trim(); const v = parseFloat(document.getElementById('mo-v').value);
-            if(!d || !v) return;
-            data.movimentos.push({t, d, v});
-            if(t === 'Saída') data.dash.s -= v; else data.dash.s += v;
-            if(db) { db.ref('movimentos').set(data.movimentos); db.ref('dash').set(data.dash); } else { renderMov(); renderDash(); }
-            toggleBox('box-mov-form');
-        }
-        function renderMov() {
-            const t = document.getElementById('tab-mov'); if(!t) return;
-            t.innerHTML = "<tr><th>Tipo</th><th>Descrição</th><th>Fluxo Financeiro</th></tr>";
-            data.movimentos.forEach(m => t.innerHTML += `<tr><td><span class="badge ${m.t === 'Saída'?'badge-low':'badge-ok'}">${m.t}</span></td><td>${m.d}</td><td style="font-weight:700; color:${m.t==='Saída'?'var(--danger)':'var(--success)'}">R$ ${m.v.toLocaleString()}</td></tr>`);
-        }
-
-        function addNota() {
-            const txt = document.getElementById('g-nota').value.trim(); if(!txt) return;
-            data.notas.push({ txt, u: currentUser.nome, d: new Date().toLocaleDateString('pt-BR') });
-            if(db) db.ref('notas').set(data.notas); else renderNotas();
-            document.getElementById('g-nota').value = "";
-        }
-        function renderNotas() {
-            const m = document.getElementById('mural'); if(!m) return;
-            m.innerHTML = "";
-            [...data.notas].reverse().forEach(n => m.innerHTML += `<div class="box-list"><strong>${n.u}</strong> <small style="float:right; opacity:0.4;">${n.d}</small><p style="margin-top:12px; line-height:1.4;">${n.txt}</p></div>`);
-        }
+        // --- OUTRAS ABAS DO PAINEL ---
+        function toggleBox(id) { const box = document.getElementById(id); const ind = box.querySelector('.icon-indicator'); box.classList.toggle('open'); if(ind) ind.innerText = box.classList.contains('open') ? '-' : '+'; }
+        function toggleSidebar() { const side = document.getElementById('sidebar'); const icon = document.getElementById('t-icon'); const mainContent = document.getElementById('main-content'); side.classList.toggle('collapsed'); if(side.classList.contains('collapsed')) { icon.className = 'fas fa-chevron-right'; mainContent.classList.add('expanded'); } else { icon.className = 'fas fa-chevron-left'; mainContent.classList.remove('expanded'); } }
+        function tab(id) { document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); document.querySelectorAll('.menu-list li').forEach(l => l.classList.remove('active')); document.getElementById(id).classList.add('active'); event.currentTarget.classList.add('active'); }
+        function upDash() { const s = parseFloat(document.getElementById('in-saldo').value) || 0; const e = parseFloat(document.getElementById('in-ent').value) || 0; const sa = parseFloat(document.getElementById('in-sai').value) || 0; if(db) db.ref('dash').set({s, e, sa}); else { data.dash = {s,e,sa}; renderDash(); } toggleBox('box-dash-form'); }
+        function renderDash() { document.getElementById('v-saldo').innerText = `R$ ${(data.dash.s || 0).toLocaleString('pt-BR', {minimumFractionDigits:2})}`; document.getElementById('v-ent').innerText = `R$ ${(data.dash.e || 0).toLocaleString('pt-BR', {minimumFractionDigits:2})}`; document.getElementById('v-sai').innerText = `R$ ${(data.dash.sa || 0).toLocaleString('pt-BR', {minimumFractionDigits:2})}`; }
+        function addCat() { const emp = document.getElementById('c-emp').value.trim(); const pro = document.getElementById('c-pro').value.trim(); const pre = parseFloat(document.getElementById('c-pre').value); if(!emp || !pro || !pre) return; data.catalogo.push({emp, pro, pre}); if(db) db.ref('catalogo').set(data.catalogo); else { updateDrops(); renderFamilies(); } document.getElementById('c-emp').value=""; document.getElementById('c-pro').value=""; document.getElementById('c-pre').value=""; toggleBox('box-cfg-fam'); }
+        function renderFamilies() { const container = document.getElementById('container-familias'); if(!container) return; container.innerHTML = ""; let familias = {}; data.catalogo.forEach(item => { if(!familias[item.emp]) familias[item.emp] = []; familias[item.emp].push(item); }); for(let nomeFam in familias) { let htmlCard = `<div class="family-card"><h4><i class="fas fa-boxes"></i> ${nomeFam}</h4>`; familias[nomeFam].forEach(p => { htmlCard += `<div class="family-item"><span>${p.pro}</span><strong>R$ ${p.pre.toLocaleString('pt-BR')}</strong></div>`; }); htmlCard += `</div>`; container.innerHTML += htmlCard; } }
+        function updateDrops() { const sEst = document.getElementById('e-item'); const sVen = document.getElementById('v-item'); if(!sEst || !sVen) return; sEst.innerHTML = '<option value="">Escolha um item...</option>'; sVen.innerHTML = '<option value="">Escolha um item...</option>'; data.catalogo.forEach((c, i) => { const opt = `<option value="${i}">${c.emp} » ${c.pro}</option>`; sEst.innerHTML += opt; sVen.innerHTML += opt; }); }
+        function calcE() { const i = document.getElementById('e-item').value; const q = document.getElementById('e-qtd').value; if(i !== "" && q) document.getElementById('e-val').value = `R$ ${(data.catalogo[i].pre * q).toLocaleString('pt-BR')}`; }
+        function addEstoque() { const i = document.getElementById('e-item').value; const q = parseInt(document.getElementById('e-qtd').value); if(i === "" || !q) return; const item = data.catalogo[i]; data.estoque.push({ emp: item.emp, pro: item.pro, q, v: item.pre * q }); if(db) db.ref('estoque').set(data.estoque); else renderEstoque(); document.getElementById('e-qtd').value = ""; document.getElementById('e-val').value = ""; toggleBox('box-est-form'); }
+        function renderEstoque() { const t = document.getElementById('tab-est'); if(!t) return; t.innerHTML = "<tr><th>Família / Fornecedor</th><th>Produto</th><th>Quantidade</th><th>Total</th><th>Status</th></tr>"; data.estoque.forEach(e => t.innerHTML += `<tr><td>${e.emp}</td><td><strong>${e.pro}</strong></td><td>${e.q} unidades</td><td>R$ ${e.v.toLocaleString()}</td><td><span class="badge ${e.q < 5 ? 'badge-low' : 'badge-ok'}">${e.q < 5 ? 'REPOSIÇÃO' : 'DISPONÍVEL'}</span></td></tr>`); }
+        function calcV() { const i = document.getElementById('v-item').value; const q = document.getElementById('v-qtd').value; if(i !== "" && q) document.getElementById('v-val').value = `R$ ${(data.catalogo[i].pre * q).toLocaleString('pt-BR')}`; }
+        function addVenda() { const i = document.getElementById('v-item').value; const q = parseInt(document.getElementById('v-qtd').value); if(i === "" || !q) return; const item = data.catalogo[i]; data.vendas.push({ emp: item.emp, pro: item.pro, q, v: item.pre * q }); if(db) db.ref('vendas').set(data.vendas); else renderVendas(); document.getElementById('v-qtd').value = ""; document.getElementById('v-val').value = ""; toggleBox('box-ven-form'); }
+        function renderVendas() { const t = document.getElementById('tab-ven'); if(!t) return; t.innerHTML = "<tr><th>Família Compradora</th><th>Produto</th><th>Quantidade</th><th>Faturamento</th></tr>"; data.vendas.forEach(v => t.innerHTML += `<tr><td>${v.emp}</td><td><strong>${v.pro}</strong></td><td>${v.q} unidades</td><td style="color: var(--success); font-weight: 700;">R$ ${v.v.toLocaleString()}</td></tr>`); }
+        function addMov() { const t = document.getElementById('mo-t').value; const d = document.getElementById('mo-d').value.trim(); const v = parseFloat(document.getElementById('mo-v').value); if(!d || !v) return; data.movimentos.push({t, d, v}); if(t === 'Saída') data.dash.s -= v; else data.dash.s += v; if(db) { db.ref('movimentos').set(data.movimentos); db.ref('dash').set(data.dash); } else { renderMov(); renderDash(); } toggleBox('box-mov-form'); }
+        function renderMov() { const t = document.getElementById('tab-mov'); if(!t) return; t.innerHTML = "<tr><th>Tipo</th><th>Descrição</th><th>Fluxo Financeiro</th></tr>"; data.movimentos.forEach(m => t.innerHTML += `<tr><td><span class="badge ${m.t === 'Saída'?'badge-low':'badge-ok'}">${m.t}</span></td><td>${m.d}</td><td style="font-weight:700; color:${m.t==='Saída'?'var(--danger)':'var(--success)'}">R$ ${m.v.toLocaleString()}</td></tr>`); }
+        function addNota() { const txt = document.getElementById('g-nota').value.trim(); if(!txt) return; data.notas.push({ txt, u: currentUser.nome, d: new Date().toLocaleDateString('pt-BR') }); if(db) db.ref('notas').set(data.notas); else renderNotas(); document.getElementById('g-nota').value = ""; }
+        function renderNotas() { const m = document.getElementById('mural'); if(!m) return; m.innerHTML = ""; [...data.notas].reverse().forEach(n => m.innerHTML += `<div class="box-list"><strong>${n.u}</strong> <small style="float:right; opacity:0.4;">${n.d}</small><p style="margin-top:12px; line-height:1.4;">${n.txt}</p></div>`); }
         function saveBG() { const val = document.getElementById('c-bg').value.trim(); if(db) db.ref('bg').set(val); else { const urlStyle = `linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)), url('${val}')`; document.body.style.backgroundImage = urlStyle; } toggleBox('box-cfg-bg'); }
     </script>
 </body>
