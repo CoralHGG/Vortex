@@ -143,7 +143,7 @@
             flex-wrap: wrap;
         }
 
-        /* GRIDS DE 3 COLUNAS */
+        /* GRIDS */
         .families-grid-container, .notes-grid-container, .finance-cards-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -162,7 +162,7 @@
             .families-grid-container, .notes-grid-container, .finance-cards-grid { grid-template-columns: 1fr; }
         }
 
-        /* CARD FINANCEIRO COMPACTO */
+        /* CARD FINANCEIRO */
         .fin-card {
             background: var(--card);
             border: 1px solid var(--border);
@@ -177,7 +177,7 @@
         .fin-card-info p { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
         .fin-card-icon { width: 45px; height: 45px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
 
-        /* BOX DE CONTRASTE PADRÃO */
+        /* BOX DE CONTRASTE */
         .info-box-wrapper {
             background: var(--card);
             border: 1px solid var(--border);
@@ -193,7 +193,7 @@
             margin-top: 0; 
         }
 
-        /* ESTILOS DE FORMULÁRIO EM LINHA */
+        /* FORMULÁRIO EM LINHA */
         .form-row {
             display: flex;
             gap: 10px;
@@ -212,7 +212,6 @@
             height: 45px;
         }
 
-        /* HISTÓRICO DE NOTA */
         .note-card-header {
             display: flex;
             justify-content: space-between;
@@ -222,7 +221,7 @@
             margin-bottom: 15px;
         }
 
-        /* BOX COLAPSÁVEL DE LINK NO RODAPÉ */
+        /* BOX COLAPSÁVEL */
         .collapsible-wrapper {
             background: rgba(15, 12, 28, 0.85);
             border: 1px solid var(--border);
@@ -394,7 +393,7 @@
                         </div>
                         <div class="form-group">
                             <label for="fin-desc">Descrição / Motivo</label>
-                            <input type="text" id="fin-desc" placeholder="Ex: Recebimento de Carga ou Compra de Peças">
+                            <input type="text" id="fin-desc" placeholder="Ex: Entrada de capital oficial">
                         </div>
                         <button onclick="registrarMovimentacaoBancaria()"><i class="fas fa-check"></i> Executar</button>
                     </div>
@@ -503,15 +502,12 @@
             anotacoes: [
                 { id: 1, titulo: "Aviso de Reunião", conteudo: "Reunião geral com os líderes no próximo domingo às 20h." }
             ],
-            // BANCO DA CONTABILIDADE
+            // BANCO DA CONTABILIDADE RESETADO (TOTALMENTE ZERADO)
             financeiro: {
-                saldoAtual: 15000.00,
-                totalEntradas: 20000.00,
-                totalSaidas: 5000.00,
-                historico: [
-                    { operador: "Megan", tipo: "ENTRADA", descricao: "Balanço Inicial de Caixa", valor: 20000.00, resultante: 20000.00 },
-                    { operador: "Megan", tipo: "SAIDA", descricao: "Compra de insumos metalúrgicos", valor: 5000.00, resultante: 15000.00 }
-                ]
+                saldoAtual: 0.00,
+                totalEntradas: 0.00,
+                totalSaidas: 0.00,
+                historico: []
             },
             config: { bgLogin: "", bgPanel: "" }
         };
@@ -525,17 +521,15 @@
             renderProdutos(); 
             renderBoxesFamilias();
             renderMuralAnotacoes();
-            renderContabilidadeDashboard(); // Inicializa os dados bancários
+            renderContabilidadeDashboard();
         };
 
-        // --- SISTEMA DE CONTABILIDADE FINANCEIRA (DASHBOARD) ---
+        // --- SISTEMA DE CONTABILIDADE FINANCEIRA ---
         function renderContabilidadeDashboard() {
-            // Atualiza os cards visuais superiores
             document.getElementById('banco-saldo').innerText = `R$ ${db.financeiro.saldoAtual.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
             document.getElementById('banco-entradas').innerText = `R$ ${db.financeiro.totalEntradas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
             document.getElementById('banco-saidas').innerText = `R$ ${db.financeiro.totalSaidas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
 
-            // Atualiza as colunas de registros abaixo
             const tbody = document.getElementById('t-financeiro-corpo');
             if(!tbody) return;
             tbody.innerHTML = "";
@@ -545,7 +539,6 @@
                 return;
             }
 
-            // Inverte o histórico para mostrar os mais recentes no topo
             [...db.financeiro.historico].reverse().forEach(mov => {
                 const corValor = mov.tipo === "ENTRADA" ? "var(--success)" : "var(--danger)";
                 const prefixo = mov.tipo === "ENTRADA" ? "+ R$" : "- R$";
@@ -566,7 +559,6 @@
         }
 
         function registrarMovimentacaoBancaria() {
-            // Verifica se tem usuário autenticado no sistema para vincular o log
             if(!usuarioLogado) {
                 alert("Erro crítico: Você precisa estar logado para efetuar transações!");
                 return;
@@ -583,7 +575,6 @@
                 return;
             }
 
-            // Cálculos dinâmicos matemáticos baseados na operação escolhida
             if(tipo === "ENTRADA") {
                 db.financeiro.saldoAtual += valor;
                 db.financeiro.totalEntradas += valor;
@@ -592,7 +583,6 @@
                 db.financeiro.totalSaidas += valor;
             }
 
-            // Salva o registro conectando com o login ativo obtido de usuarioLogado.nome
             db.financeiro.historico.push({
                 operador: usuarioLogado.nome,
                 tipo: tipo,
@@ -601,15 +591,12 @@
                 resultante: db.financeiro.saldoAtual
             });
 
-            // Limpa os inputs
             valorIn.value = "";
             descIn.value = "";
-
-            // Renderiza novamente a contabilidade com os novos valores
             renderContabilidadeDashboard();
         }
 
-        // --- SISTEMA DO MURAL DE ANOTAÇÕES (ABA IMPORTANTE) ---
+        // --- OUTROS SISTEMAS (MURAL, PRODUTOS, MENUS) ---
         function renderMuralAnotacoes() {
             const grid = document.getElementById('grid-mural-notas'); if(!grid) return; grid.innerHTML = "";
             if(db.anotacoes.length === 0) { grid.innerHTML = `<p style="color: #64748b; font-style: italic; grid-column: span 3; margin-top: 10px;">O mural está vazio por enquanto.</p>`; return; }
@@ -621,12 +608,10 @@
             const tIn = document.getElementById('nota-titulo'); const cIn = document.getElementById('nota-conteudo');
             const t = tIn.value.trim(); const c = cIn.value.trim();
             if(!t || !c) { alert("Preencha o título e o conteúdo!"); return; }
-            db.anotacoes.push({ id: Date.now(), titulo: t, conteudo: c });
-            tIn.value = ""; cIn.value = ""; renderMuralAnotacoes();
+            db.anotacoes.push({ id: Date.now(), titulo: t, conteudo: c }); tIn.value = ""; cIn.value = ""; renderMuralAnotacoes();
         }
         function removerNota(id) { db.anotacoes = db.anotacoes.filter(n => n.id !== id); renderMuralAnotacoes(); }
 
-        // --- PRODUTOS VORTEX ---
         function renderProdutos() {
             const tbody = document.getElementById('t-produtos-corpo'); if(!tbody) return; tbody.innerHTML = "";
             if(db.produtos.length === 0) { tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: #64748b; font-style: italic;">Nenhum produto registrado.</td></tr>`; return; }
@@ -640,7 +625,6 @@
         }
         function removerProduto(id) { db.produtos = db.produtos.filter(p => p.id !== id); renderProdutos(); }
 
-        // --- SISTEMA DE FAMÍLIAS ---
         function renderBoxesFamilias() {
             const grid = document.getElementById('grid-caixas-familias'); if(!grid) return; grid.innerHTML = "";
             const nomesFamilias = Object.keys(db.familias); if(nomesFamilias.length === 0) return;
@@ -663,7 +647,6 @@
             if(db.familias[nomeFamilia].length === 0) { delete db.familias[nomeFamilia]; } renderBoxesFamilias();
         }
 
-        // --- SISTEMAS DE BASE ---
         function toggleConfigBox() {
             const content = document.getElementById('box-toggle-content'); const icon = document.getElementById('box-toggle-icon');
             if (content.classList.contains('open')) { content.style.maxHeight = '0px'; content.classList.remove('open'); icon.className = 'fas fa-plus'; } 
@@ -696,7 +679,7 @@
                 document.getElementById('login-screen').style.display = 'none'; document.getElementById('main-panel').style.display = 'flex';
                 const trigger = document.querySelector('.dropdown-trigger'); if(!trigger.classList.contains('open')) { toggleSidebarMenu(trigger); }
                 renderMembros();
-                renderContabilidadeDashboard(); // Garante atualização ao logar
+                renderContabilidadeDashboard();
             } else { document.getElementById('login-err').style.display = 'block'; }
         }
 
@@ -718,6 +701,7 @@
             });
         }
 
+        font-style: italic;
         function tab(sectionId, element) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.menu-list li').forEach(li => li.classList.remove('active'));
