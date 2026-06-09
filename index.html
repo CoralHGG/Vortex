@@ -100,7 +100,14 @@
         .user-title { font-weight: 700; font-size: 15px; color: #ffffff; letter-spacing: 0.3px; display: block; margin-bottom: 3px; }
         
         .user-status-container { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #a3a3c2; }
-        .status-pulse-dot { width: 7px; height: 7px; background-color: var(--success); border-radius: 50%; display: inline-block; box-shadow: 0 0 10px var(--success); animation: pulseGlow 2s infinite; }
+        .status-pulse-dot { width: 7px; height: 7px; background-color: #a3a3c2; border-radius: 50%; display: inline-block; box-shadow: 0 0 10px rgba(163, 163, 194, 0.4); }
+        .status-pulse-dot.online { background-color: var(--success); box-shadow: 0 0 10px var(--success); animation: pulseGlow 2s infinite; }
+
+        @keyframes pulseGlow {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+        }
 
         .toggle-btn {
             position: absolute; left: calc(var(--sidebar-w) - 16px); top: 35px;
@@ -197,9 +204,9 @@
             </ul>
             <div class="user-footer">
                 <div class="user-info-box">
-                    <strong class="user-title" id="logged-name">Carregando...</strong>
+                    <strong class="user-title" id="logged-name">Desconectado</strong>
                     <div class="user-status-container">
-                        <div><span class="status-pulse-dot"></span> Conectado</div>
+                        <div id="user-status-label"><span class="status-pulse-dot" id="status-dot"></span> Offline</div>
                         <span onclick="logout()" style="cursor: pointer; color: var(--danger); font-weight: 600; font-size: 11px;">SAIR</span>
                     </div>
                 </div>
@@ -392,7 +399,6 @@
 
         function carregarDadosLocalStorage() {
             data.membros = JSON.parse(localStorage.getItem('vortex_membros')) || [];
-            // INJEÇÃO DA MEGAN CORRIGIDA NO MEIO DO ARRAY PRINCIPAL DO SISTEMA
             if (!data.membros.some(m => m.nome.toLowerCase() === 'megan')) {
                 data.membros.unshift({ dbKey: "master_local", uid: "3461", nome: "Megan", senha: "1234", cargo: "Chefe" });
             }
@@ -639,13 +645,41 @@
             addCatalogoRow();
         }
 
+        // --- SISTEMA DE AUTENTICAÇÃO E STATUS CORRIGIDO ---
         function auth() {
             const u = document.getElementById('user-in').value.trim(); const p = document.getElementById('pass-in').value.trim();
             const f = data.membros.find(m => (m.nome.toLowerCase() === u.toLowerCase() || String(m.uid) === u) && String(m.senha) === p);
-            if(f) { currentUser = f; document.getElementById('login-screen').style.display = 'none'; document.getElementById('main-panel').style.display = 'block'; document.getElementById('logged-name').innerText = f.nome; refreshAll(); }
+            if(f) { 
+                currentUser = f; 
+                document.getElementById('login-screen').style.display = 'none'; 
+                document.getElementById('main-panel').style.display = 'block'; 
+                
+                // Atualiza o painel do rodapé para Online
+                document.getElementById('logged-name').innerText = f.nome; 
+                const dot = document.getElementById('status-dot');
+                dot.className = "status-pulse-dot online";
+                document.getElementById('user-status-label').innerHTML = '';
+                document.getElementById('user-status-label').appendChild(dot);
+                document.getElementById('user-status-label').innerHTML += ' Online';
+                
+                refreshAll(); 
+            }
             else { document.getElementById('login-err').style.display = 'block'; }
         }
-        function logout() { currentUser = null; document.getElementById('main-panel').style.display = 'none'; document.getElementById('login-screen').style.display = 'flex'; }
+        
+        function logout() { 
+            currentUser = null; 
+            document.getElementById('main-panel').style.display = 'none'; 
+            document.getElementById('login-screen').style.display = 'flex'; 
+            
+            // Reseta para Offline
+            document.getElementById('logged-name').innerText = "Desconectado";
+            const dot = document.getElementById('status-dot');
+            dot.className = "status-pulse-dot";
+            document.getElementById('user-status-label').innerHTML = '';
+            document.getElementById('user-status-label').appendChild(dot);
+            document.getElementById('user-status-label').innerHTML += ' Offline';
+        }
         
         function saveMembro() {
             const uid = document.getElementById('m-id').value.trim(); const nome = document.getElementById('m-nome').value.trim(); const senha = document.getElementById('m-pass').value.trim(); const cargo = document.getElementById('m-cargo').value.trim();
