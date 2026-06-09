@@ -458,7 +458,7 @@
 
         function removerRegistroCaixa(id) { if(confirm("Remover do caixa?")) { if(db) db.ref('caixa/'+id).remove(); else { data.caixa=data.caixa.filter(c=>c.id!==id); atualizarLocalStorage('caixa'); calcularEAtualizarDashboard(); } } }
 
-        // --- DROPDOWNS SINCRONIZADOS COM A CONFIGURAÇÃO ---
+        // --- DROPDOWNS SINCRONIZADOS ---
         function updateGlobalFamilyDropdowns() {
             const eSel = document.getElementById('e-global-family'); 
             const vFamSel = document.getElementById('v-global-family-dest');
@@ -537,8 +537,9 @@
                 const q = parseInt(r.querySelector('.v-qtd-input').value);
                 if(idx !== "" && q) {
                     const prod = data.catalogo[idx];
-                    const nv = { pro: prod.pro, emp: famDestino, q, v: prod.pre * q };
-                    if(db) db.ref('vendas').push().set(nv); else { nv.id='v_'+Date.now() + Math.random().toString(36).substr(2,3); data.vendas.push(nv); }
+                    const vId = 'v_' + Date.now() + Math.random().toString(36).substr(2,4);
+                    const nv = { id: vId, pro: prod.pro, emp: famDestino, q, v: prod.pre * q };
+                    if(db) db.ref('vendas').push().set(nv); else data.vendas.push(nv);
                     count++;
                 }
             });
@@ -566,12 +567,13 @@
             const t = document.getElementById('tab-ven'); if(!t) return; 
             t.innerHTML = "<tr><th>Família Destino</th><th>Nosso Produto</th><th>Qtd</th><th>Total Venda</th><th>Ação</th></tr>"; 
             data.vendas.forEach(v => {
+                const key = v.id || v.dbKey || '';
                 t.innerHTML += `<tr>
                     <td>${v.emp}</td>
                     <td>${v.pro}</td>
                     <td>${v.q}</td>
                     <td>R$ ${v.v.toLocaleString('pt-BR')}</td>
-                    <td><button class="btn-table-delete" onclick="removerVenda('${v.id || v.dbKey || ''}')">X</button></td>
+                    <td><button class="btn-table-delete" onclick="removerVenda('${key}')">X</button></td>
                 </tr>`;
             }); 
         }
@@ -580,7 +582,7 @@
             const container = document.getElementById('container-rows-encomendas');
             const rId = 'e_row_' + Date.now(); const div = document.createElement('div'); div.className = 'dynamic-row'; div.id = rId;
             div.innerHTML = `<select class="e-item-select" style="flex: 2;"></select><input type="number" class="e-qtd-input" placeholder="Qtd" style="flex: 1;"><button type="button" class="btn-remove-row" onclick="removeFormRow('${rId}')"><i class="fas fa-times"></i></button>`;
-            container.appendChild(div); updateEncomendasDropdowns();
+            container.appendChild(div); updateEncomendasProductsDropdowns();
         }
 
         function submitEncomendas() {
