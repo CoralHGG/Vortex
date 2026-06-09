@@ -295,6 +295,31 @@
             padding-bottom: 10px;
             margin-bottom: 10px;
         }
+
+        /* CONFIGURAÇÃO EXCLUSIVA PARA O RECOLHIMENTO DA CAIXA DE PAPEL DE PAREDE */
+        .collapsible-wrapper {
+            max-height: 500px;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .collapsible-wrapper.closed {
+            max-height: 0px;
+        }
+        .toggle-cfg-btn {
+            background: transparent;
+            border: none;
+            color: var(--warning);
+            font-size: 16px;
+            cursor: pointer;
+            width: auto;
+            padding: 0 5px;
+            display: inline-flex;
+            align-items: center;
+        }
+        .toggle-cfg-btn:hover {
+            background: transparent;
+            transform: scale(1.1);
+        }
     </style>
 </head>
 <body>
@@ -572,17 +597,22 @@
                 <div class="families-grid-container" id="grid-caixas-familias" style="margin-bottom: 20px;"></div>
 
                 <div class="info-box-wrapper" style="border-top: 3px solid var(--warning); margin-top: 10px;">
-                    <h3 style="color: var(--warning) !important;"><i class="fas fa-image"></i> Personalização de Fundo (Papel de Parede)</h3>
-                    <div class="form-row" style="margin-top: 15px;">
-                        <div class="form-group" style="flex: 2;">
-                            <label>Link da Imagem para a Tela de Login</label>
-                            <input type="text" id="cfg-bg-login" placeholder="https://exemplo.com/imagem-login.jpg">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
+                        <h3 style="color: var(--warning) !important; border: none; margin: 0;"><i class="fas fa-image"></i> Personalização de Fundo</h3>
+                        <button class="toggle-cfg-btn" onclick="toggleCaixaPapelParede(this)"><i class="fas fa-plus"></i></button>
+                    </div>
+                    <div id="wrapper-papeis-parede" class="collapsible-wrapper closed">
+                        <div class="form-row" style="margin-top: 15px; margin-bottom: 0;">
+                            <div class="form-group" style="flex: 2;">
+                                <label>Link da Imagem para a Tela de Login</label>
+                                <input type="text" id="cfg-bg-login" placeholder="https://exemplo.com/imagem-login.jpg">
+                            </div>
+                            <div class="form-group" style="flex: 2;">
+                                <label>Link da Imagem para o Painel Principal</label>
+                                <input type="text" id="cfg-bg-main" placeholder="https://exemplo.com/imagem-painel.jpg">
+                            </div>
+                            <button onclick="aplicarPapeisDeParede()" style="background: var(--warning);"><i class="fas fa-paint-roller"></i> Aplicar Fundos</button>
                         </div>
-                        <div class="form-group" style="flex: 2;">
-                            <label>Link da Imagem para o Painel Principal</label>
-                            <input type="text" id="cfg-bg-main" placeholder="https://exemplo.com/imagem-painel.jpg">
-                        </div>
-                        <button onclick="aplicarPapeisDeParede()" style="background: var(--warning);"><i class="fas fa-paint-roller"></i> Aplicar Fundos</button>
                     </div>
                 </div>
             </section>
@@ -636,6 +666,19 @@
             atualizarSelectsGeraisVendaseEncomendas();
             registrarLog("Painel", "Sistema carregou o banco de dados local.", "system");
         };
+
+        /* LÓGICA DE RECOLHER/EXPANDIR A CAIXA DE PAPEL DE PAREDE */
+        function toggleCaixaPapelParede(btn) {
+            const wrapper = document.getElementById('wrapper-papeis-parede');
+            const icon = btn.querySelector('i');
+            if(wrapper.classList.contains('closed')) {
+                wrapper.classList.remove('closed');
+                icon.className = "fas fa-minus";
+            } else {
+                wrapper.classList.add('closed');
+                icon.className = "fas fa-plus";
+            }
+        }
 
         /* LÓGICA DO PAPEL DE PAREDE */
         function aplicarPapeisDeParede() {
@@ -702,7 +745,7 @@
             if(document.getElementById('movimentacao').classList.contains('active')) {
                 initOuUpdateGraficos();
             }
-            alert("Valores do Caixa atualizados e logs sincronizados!");
+            alert("Valores do Caixa updated e logs sincronizados!");
         }
 
         function registrarLog(operador, acao, tag = "user") {
