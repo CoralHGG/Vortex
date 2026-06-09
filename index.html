@@ -1,321 +1,63 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PAINEL VORTEX | Core</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #a855f7;
-            --success: #22c55e;
-            --danger: #ef4444;
-            --bg: #0b0813;
-            --card: rgba(255, 255, 255, 0.03);
-            --border: rgba(255, 255, 255, 0.08);
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background: var(--bg); color: #fff; height: 100vh; overflow: hidden; display: flex; }
+/* --- NOVO RODAPÉ INTEGRADO --- */
+.user-footer { 
+    border-top: 1px solid var(--border); 
+    padding-top: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Alinha metadados na esquerda e botão na direita */
+    width: 100%;
+}
 
-        /* --- TELA DE LOGIN --- */
-        #login-screen {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: var(--bg); display: flex; justify-content: center; align-items: center; z-index: 9999;
-        }
-        .login-box {
-            background: rgba(15, 12, 28, 0.8); padding: 40px; border-radius: 20px;
-            border: 1px solid var(--border); width: 100%; max-width: 360px; text-align: center;
-        }
+.user-info-block {
+    display: flex;
+    flex-direction: column;
+    gap: 4px; /* Espaçamento vertical entre Nome/ID e o Status */
+}
 
-        /* --- ESTRUTURA CORE DO PAINEL --- */
-        #main-panel { display: none; width: 100vw; height: 100vh; display: flex; }
-        
-        .sidebar {
-            width: 260px; height: 100%; background: rgba(15, 12, 28, 0.7);
-            border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 25px;
-        }
-        
-        .sidebar-dropdown {
-            margin-top: 30px;
-            flex-grow: 1;
-        }
-        .dropdown-trigger {
-            width: 100%; padding: 12px 15px; background: rgba(255, 255, 255, 0.02);
-            border: 1px solid var(--border); border-radius: 10px; color: #fff;
-            font-weight: 600; display: flex; align-items: center; justify-content: space-between;
-            cursor: pointer; user-select: none; transition: background 0.2s;
-        }
-        .dropdown-trigger:hover { background: rgba(255, 255, 255, 0.05); }
-        .dropdown-trigger i.chevron { transition: transform 0.3s; }
-        .dropdown-trigger.open i.chevron { transform: rotate(180deg); }
+.user-name-tag {
+    font-weight: 700; 
+    font-size: 15px;
+    color: #fff;
+    letter-spacing: 0.3px;
+}
 
-        .menu-list { 
-            list-style: none; max-height: 0; overflow: hidden; 
-            transition: max-height 0.3s ease-out; padding-left: 5px; margin-top: 5px;
-        }
-        .menu-list li {
-            padding: 12px 15px; border-radius: 10px; color: #94a3b8;
-            cursor: pointer; display: flex; align-items: center; gap: 12px; margin-bottom: 5px; margin-top: 5px;
-        }
-        .menu-list li:hover { background: rgba(255,255,255,0.03); color: #fff; }
-        .menu-list li.active { background: rgba(168, 85, 247, 0.15); color: #fff; font-weight: 600; }
-        
-        /* --- RODAPÉ DO OPERADOR REESTILIZADO --- */
-        .user-footer { 
-            border-top: 1px solid var(--border); 
-            padding-top: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        .user-meta-box {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            width: 100%;
-        }
-        .user-name-tag {
-            font-weight: 700; 
-            font-size: 15px;
-            color: #fff;
-            letter-spacing: 0.3px;
-        }
-        .user-id-tag {
-            font-weight: 500;
-            font-size: 13px;
-            color: rgba(168, 85, 247, 0.8); /* Cor roxa sutil para destacar o ID */
-            margin-left: 4px;
-        }
-        .status-container {
-            display: flex; 
-            align-items: center; 
-            gap: 6px; 
-            font-size: 12px; 
-            color: #94a3b8;
-        }
-        .status-dot { width: 8px; height: 8px; background: #64748b; border-radius: 50%; display: inline-block; }
-        .status-dot.online { background: var(--success); box-shadow: 0 0 8px var(--success); }
+.user-id-tag {
+    font-weight: 500;
+    font-size: 13px;
+    color: rgba(168, 85, 247, 0.8);
+    margin-left: 2px;
+}
 
-        /* Botão Sair Estilizado */
-        .btn-logout {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            background: rgba(239, 68, 68, 0.08);
-            border: 1px solid rgba(239, 68, 68, 0.2);
-            padding: 5px 10px;
-            border-radius: 8px;
-            color: var(--danger);
-            font-size: 11px;
-            font-weight: 700;
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            transition: all 0.2s ease;
-        }
-        .btn-logout:hover {
-            background: var(--danger);
-            color: #fff;
-            box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
-        }
+.status-container {
+    display: flex; 
+    align-items: center; 
+    gap: 6px; 
+    font-size: 12px; 
+    color: #94a3b8;
+}
 
-        .main-content { flex-grow: 1; padding: 40px; overflow-y: auto; }
-        .section { display: none; }
-        .section.active { display: block; }
+.status-dot { width: 8px; height: 8px; background: #64748b; border-radius: 50%; display: inline-block; }
+.status-dot.online { background: var(--success); box-shadow: 0 0 8px var(--success); }
 
-        /* --- COMPONENTES PADRÃO --- */
-        input, select {
-            width: 100%; padding: 12px; background: rgba(0,0,0,0.3);
-            border: 1px solid var(--border); border-radius: 10px; color: #fff; margin-bottom: 15px; outline: none;
-        }
-        input:focus { border-color: var(--primary); }
-        button {
-            width: 100%; padding: 12px; background: var(--primary); border: none;
-            border-radius: 10px; color: #fff; font-weight: 600; cursor: pointer;
-        }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { text-align: left; padding: 10px; color: #64748b; font-size: 12px; text-transform: uppercase; }
-        td { padding: 14px 10px; border-bottom: 1px solid var(--border); font-size: 14px; }
-        
-        .badge { padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; }
-        .badge.online { background: rgba(34, 197, 94, 0.15); color: var(--success); }
-        .badge.offline { background: rgba(255, 255, 255, 0.05); color: #94a3b8; }
-    </style>
-</head>
-<body>
-
-    <div id="login-screen">
-        <div class="login-box">
-            <h2 style="margin-bottom: 5px; letter-spacing: 2px;">PAINEL VORTEX</h2>
-            <p style="font-size: 12px; color: #64748b; margin-bottom: 25px;">Insira suas credenciais</p>
-            <div id="login-err" style="color: var(--danger); font-size: 13px; margin-bottom: 15px; display: none;">Usuário ou senha incorretos.</div>
-            <input type="text" id="user-in" placeholder="ID ou Usuário">
-            <input type="password" id="pass-in" placeholder="Senha">
-            <button onclick="auth()">ACESSAR PAINEL</button>
-        </div>
-    </div>
-
-    <div id="main-panel">
-        <aside class="sidebar">
-            <h3 style="letter-spacing: 1px;">PAINEL VORTEX</h3>
-            
-            <div class="sidebar-dropdown">
-                <div class="dropdown-trigger" onclick="toggleSidebarMenu(this)">
-                    <span><i class="fas fa-bars" style="margin-right: 8px;"></i> Navegação</span>
-                    <i class="fas fa-chevron-down chevron"></i>
-                </div>
-                <ul class="menu-list" id="sidebar-menu-list">
-                    <li class="active" onclick="tab('dash', this)"><i class="fas fa-chart-pie"></i> Dashboard</li>
-                    <li onclick="tab('membros', this)"><i class="fas fa-users"></i> Membros</li>
-                </ul>
-            </div>
-
-            <div class="user-footer">
-                <div class="user-meta-box">
-                    <div>
-                        <span class="user-name-tag" id="nav-username">Desconectado</span>
-                        <span class="user-id-tag" id="nav-userid"></span>
-                    </div>
-                    <button class="btn-logout" onclick="logout()">
-                        <i class="fas fa-sign-out-alt"></i> Sair
-                    </button>
-                </div>
-                <div class="status-container">
-                    <span class="status-dot" id="nav-status-dot"></span> 
-                    <span id="nav-status-text">Offline</span>
-                </div>
-            </div>
-        </aside>
-
-        <main class="main-content">
-            <section id="dash" class="section active">
-                <h2>Dashboard</h2>
-                <p style="color: #94a3b8; margin-top: 10px;">Bem-vindo ao novo núcleo do sistema.</p>
-            </section>
-
-            <section id="membros" class="section">
-                <h2>Controle de Membros</h2>
-                <table style="width: 100%;">
-                    <thead>
-                        <tr><th>ID</th><th>Nome</th><th>Cargo</th><th>Status Real</th></tr>
-                    </thead>
-                    <tbody id="t-membros-corpo">
-                        </tbody>
-                </table>
-            </section>
-        </main>
-    </div>
-
-    <script>
-        let db = {
-            membros: [
-                { id: "3461", nome: "Megan", senha: "1234", cargo: "Chefe", online: false },
-                { id: "1002", nome: "Operador Padrão", senha: "999", cargo: "Suporte", online: false }
-            ]
-        };
-
-        let usuarioLogado = null;
-
-        window.onload = function() {
-            document.getElementById('main-panel').style.display = 'none';
-            renderMembros();
-        };
-
-        function toggleSidebarMenu(triggerElement) {
-            const menu = document.getElementById('sidebar-menu-list');
-            triggerElement.classList.toggle('open');
-            if (menu.style.maxHeight && menu.style.maxHeight !== '0px') {
-                menu.style.maxHeight = '0px';
-            } else {
-                menu.style.maxHeight = menu.scrollHeight + 'px';
-            }
-        }
-
-        function auth() {
-            const inputUser = document.getElementById('user-in').value.trim();
-            const inputPass = document.getElementById('pass-in').value.trim();
-            const user = db.membros.find(m => (m.nome.toLowerCase() === inputUser.toLowerCase() || m.id === inputUser) && m.senha === inputPass);
-
-            if (user) {
-                usuarioLogado = user;
-                user.online = true;
-
-                // Insere nome e injeta o ID formatado ao lado
-                document.getElementById('nav-username').innerText = user.nome;
-                document.getElementById('nav-userid').innerText = `(#${user.id})`;
-                
-                document.getElementById('nav-status-dot').className = "status-dot online";
-                document.getElementById('nav-status-text').innerText = "Online";
-
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('main-panel').style.display = 'flex';
-
-                const trigger = document.querySelector('.dropdown-trigger');
-                if(!trigger.classList.contains('open')) {
-                    toggleSidebarMenu(trigger);
-                }
-
-                renderMembros();
-            } else {
-                document.getElementById('login-err').style.display = 'block';
-            }
-        }
-
-        function logout() {
-            if (usuarioLogado) {
-                usuarioLogado.online = false;
-            }
-            usuarioLogado = null;
-
-            document.getElementById('nav-username').innerText = "Desconectado";
-            document.getElementById('nav-userid').innerText = ""; // Limpa o ID no logout
-            
-            document.getElementById('nav-status-dot').className = "status-dot";
-            document.getElementById('nav-status-text').innerText = "Offline";
-
-            const trigger = document.querySelector('.dropdown-trigger');
-            if(trigger.classList.contains('open')) {
-                toggleSidebarMenu(trigger);
-            }
-
-            document.getElementById('main-panel').style.display = 'none';
-            document.getElementById('login-screen').style.display = 'flex';
-            document.getElementById('user-in').value = '';
-            document.getElementById('pass-in').value = '';
-            document.getElementById('login-err').style.display = 'none';
-
-            renderMembros();
-        }
-
-        function renderMembros() {
-            const tbody = document.getElementById('t-membros-corpo');
-            if(!tbody) return;
-            
-            tbody.innerHTML = "";
-            db.membros.forEach(m => {
-                const statusBadge = m.online 
-                    ? `<span class="badge online"><i class="fas fa-circle" style="font-size: 8px;"></i> Conectado</span>` 
-                    : `<span class="badge offline">Offline</span>`;
-
-                tbody.innerHTML += `
-                    <tr>
-                        <td>#${m.id}</td>
-                        <td style="font-weight: 600;">${m.nome}</td>
-                        <td>${m.cargo}</td>
-                        <td>${statusBadge}</td>
-                    </tr>
-                `;
-            });
-        }
-
-        function tab(sectionId, element) {
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.menu-list li').forEach(li => li.classList.remove('active'));
-            
-            document.getElementById(sectionId).classList.add('active');
-            element.classList.add('active');
-        }
-    </script>
-</body>
-</html>
+/* Botão Sair Minimalista à Direita */
+.btn-logout {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    padding: 6px 12px;
+    border-radius: 8px;
+    color: var(--danger);
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.2s ease;
+}
+.btn-logout:hover {
+    background: var(--danger);
+    color: #fff;
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+}
