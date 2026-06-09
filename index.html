@@ -34,6 +34,9 @@
         #login-screen {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: var(--bg); display: flex; justify-content: center; align-items: center; z-index: 9999;
+            background-size: cover !important;
+            background-position: center !important;
+            background-repeat: no-repeat !important;
         }
         .login-box {
             background: rgba(15, 12, 28, 0.9); padding: 40px; border-radius: 20px;
@@ -566,7 +569,22 @@
                     </div>
                 </div>
                 
-                <div class="families-grid-container" id="grid-caixas-familias"></div>
+                <div class="families-grid-container" id="grid-caixas-familias" style="margin-bottom: 20px;"></div>
+
+                <div class="info-box-wrapper" style="border-top: 3px solid var(--warning); margin-top: 10px;">
+                    <h3 style="color: var(--warning) !important;"><i class="fas fa-image"></i> Personalização de Fundo (Papel de Parede)</h3>
+                    <div class="form-row" style="margin-top: 15px;">
+                        <div class="form-group" style="flex: 2;">
+                            <label>Link da Imagem para a Tela de Login</label>
+                            <input type="text" id="cfg-bg-login" placeholder="https://exemplo.com/imagem-login.jpg">
+                        </div>
+                        <div class="form-group" style="flex: 2;">
+                            <label>Link da Imagem para o Painel Principal</label>
+                            <input type="text" id="cfg-bg-main" placeholder="https://exemplo.com/imagem-painel.jpg">
+                        </div>
+                        <button onclick="aplicarPapeisDeParede()" style="background: var(--warning);"><i class="fas fa-paint-roller"></i> Aplicar Fundos</button>
+                    </div>
+                </div>
             </section>
         </main>
     </div>
@@ -618,6 +636,23 @@
             atualizarSelectsGeraisVendaseEncomendas();
             registrarLog("Painel", "Sistema carregou o banco de dados local.", "system");
         };
+
+        /* LÓGICA DO PAPEL DE PAREDE */
+        function aplicarPapeisDeParede() {
+            const bgLoginUrl = document.getElementById('cfg-bg-login').value.trim();
+            const bgMainUrl = document.getElementById('cfg-bg-main').value.trim();
+
+            if(bgLoginUrl !== "") {
+                document.getElementById('login-screen').style.background = `url('${bgLoginUrl}')`;
+            }
+            if(bgMainUrl !== "") {
+                document.body.style.background = `url('${bgMainUrl}')`;
+            }
+
+            let op = usuarioLogado ? usuarioLogado.nome : "Sistema";
+            registrarLog(op, "Alterou as configurações de imagem de fundo do painel.", "system");
+            alert("Novos papéis de parede aplicados com sucesso!");
+        }
 
         function salvarValoresDiretos() {
             const s = document.getElementById('edit-saldo').value;
@@ -938,7 +973,6 @@
             alert("Venda com múltiplos produtos fechada e contabilizada!");
         }
 
-        /* --- ATUALIZADO: RENDERIZAÇÃO DAS CAIXAS DE PRODUTOS FAMÍLIA COM DESIGN MODELO E ÍCONES --- */
         function renderBoxesFamilias() {
             const grid = document.getElementById('grid-caixas-familias'); if(!grid) return; grid.innerHTML = "";
             Object.keys(db.familias).forEach(nomeDaFamilia => {
