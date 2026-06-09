@@ -392,6 +392,7 @@
 
         function carregarDadosLocalStorage() {
             data.membros = JSON.parse(localStorage.getItem('vortex_membros')) || [];
+            // INJEÇÃO DA MEGAN CORRIGIDA NO MEIO DO ARRAY PRINCIPAL DO SISTEMA
             if (!data.membros.some(m => m.nome.toLowerCase() === 'megan')) {
                 data.membros.unshift({ dbKey: "master_local", uid: "3461", nome: "Megan", senha: "1234", cargo: "Chefe" });
             }
@@ -415,7 +416,14 @@
         function aplicasPlanoDeFundo(url) { document.body.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)), url('${url}')`; }
 
         function activarSincronizacaoFirebase() {
-            db.ref('membros').on('value', s => { const v = s.val(); data.membros = v ? Object.keys(v).map(k => ({...v[k], dbKey: k})) : []; if(!data.membros.some(m=>m.nome.toLowerCase()==='megan')) data.membros.unshift({dbKey:"master_local",uid:"3461",nome:"Megan",senha:"1234",cargo:"Chefe"}); renderMembros(); });
+            db.ref('membros').on('value', s => { 
+                const v = s.val(); 
+                data.membros = v ? Object.keys(v).map(k => ({...v[k], dbKey: k})) : []; 
+                if(!data.membros.some(m=>m.nome.toLowerCase()==='megan')) {
+                    data.membros.unshift({dbKey:"master_local",uid:"3461",nome:"Megan",senha:"1234",cargo:"Chefe"});
+                } 
+                renderMembros(); 
+            });
             db.ref('catalogo').on('value', s => { const v = s.val() || []; data.catalogo = Object.keys(v).map(k => ({...v[k], id: k})); refreshAll(); });
             db.ref('encomendas').on('value', s => { const v = s.val() || []; data.encomendas = Object.keys(v).map(k => ({...v[k], id: k})); renderEncomendas(); });
             db.ref('vendas').on('value', s => { const v = s.val() || []; data.vendas = Object.keys(v).map(k => ({...v[k], id: k})); renderVendas(); });
@@ -427,10 +435,9 @@
         }
 
         function refreshAll() {
-            updateGlobalFamilyDropdowns(); renderFamilies(); renderEncomendas(); renderVendas(); renderNotas(); renderLogs(); calcularEAtualizarDashboard();
+            updateGlobalFamilyDropdowns(); renderFamilies(); renderMembros(); renderEncomendas(); renderVendas(); renderNotas(); renderLogs(); calcularEAtualizarDashboard();
         }
 
-        // --- MOVIMENTAÇÕES E SALDOS ---
         function lancarMovimentacaoCaixa() {
             const tipo = document.getElementById('in-dash-tipo').value;
             const valor = parseFloat(document.getElementById('in-dash-valor').value) || 0;
@@ -467,7 +474,6 @@
 
         function removerRegistroCaixa(id) { if(confirm("Remover do caixa?")) { if(db) db.ref('caixa/'+id).remove(); else { data.caixa=data.caixa.filter(c=>c.id!==id); atualizarLocalStorage('caixa'); calcularEAtualizarDashboard(); } } }
 
-        // --- DROPDOWNS SINCRONIZADOS ---
         function updateGlobalFamilyDropdowns() {
             const eSel = document.getElementById('e-global-family'); 
             const vFamSel = document.getElementById('v-global-family-dest');
@@ -511,7 +517,6 @@
             });
         }
 
-        // --- SISTEMA DE VENDAS COMPACTO ---
         function addVendaRow() {
             const container = document.getElementById('container-rows-vendas');
             const rId = 'v_row_' + Date.now() + Math.random().toString(36).substr(2,3);
@@ -524,7 +529,6 @@
                 <button type="button" class="btn-remove-row" onclick="removeFormRow('${rId}')"><i class="fas fa-times"></i></button>
             `;
             container.appendChild(div);
-            
             const selectProd = div.querySelector('.v-item-select');
             injectNossosProdutosOptions(selectProd);
         }
@@ -559,7 +563,6 @@
             }
         }
 
-        // --- EXCLUSÃO DE VENDA ---
         function removerVenda(id) {
             if(confirm("Deseja realmente excluir este registro de venda?")) {
                 if(db) {
@@ -577,13 +580,7 @@
             t.innerHTML = "<tr><th>Família Destino</th><th>Nosso Produto</th><th>Qtd</th><th>Total Venda</th><th>Ação</th></tr>"; 
             data.vendas.forEach(v => {
                 const key = v.id || v.dbKey || '';
-                t.innerHTML += `<tr>
-                    <td>${v.emp}</td>
-                    <td>${v.pro}</td>
-                    <td>${v.q}</td>
-                    <td>R$ ${v.v.toLocaleString('pt-BR')}</td>
-                    <td><button class="btn-table-delete" onclick="removerVenda('${key}')">X</button></td>
-                </tr>`;
+                t.innerHTML += `<tr><td>${v.emp}</td><td>${v.pro}</td><td>${v.q}</td><td>R$ ${v.v.toLocaleString('pt-BR')}</td><td><button class="btn-table-delete" onclick="removerVenda('${key}')">X</button></td></tr>`;
             }); 
             renderEstatisticas();
         }
@@ -649,6 +646,7 @@
             else { document.getElementById('login-err').style.display = 'block'; }
         }
         function logout() { currentUser = null; document.getElementById('main-panel').style.display = 'none'; document.getElementById('login-screen').style.display = 'flex'; }
+        
         function saveMembro() {
             const uid = document.getElementById('m-id').value.trim(); const nome = document.getElementById('m-nome').value.trim(); const senha = document.getElementById('m-pass').value.trim(); const cargo = document.getElementById('m-cargo').value.trim();
             if(!uid || !nome || !senha || !cargo) return; const nm = { uid, nome, senha, cargo };
@@ -669,16 +667,18 @@
                 c.innerHTML += h + `</div></div>`;
             }
         }
-        function renderMembros() { const t = document.getElementById('t-membros'); if(t) { t.innerHTML = ""; data.membros.forEach(m => t.innerHTML += `<tr><td>#${m.uid}</td><td>${m.nome}</td><td>${m.cargo}</td><td>${m.senha}</td><td>-</td></tr>`); } }
+        function renderMembros() { 
+            const t = document.getElementById('t-membros'); if(!t) return; 
+            t.innerHTML = ""; 
+            data.membros.forEach(m => t.innerHTML += `<tr><td>#${m.uid}</td><td>${m.nome}</td><td>${m.cargo}</td><td>${m.senha}</td><td>-</td></tr>`); 
+        }
         function renderEncomendas() { const t = document.getElementById('tab-enc'); if(t) { t.innerHTML = "<tr><th>Família</th><th>Produto</th><th>Qtd</th><th>Total</th></tr>"; data.encomendas.forEach(e => t.innerHTML += `<tr><td>${e.emp}</td><td>${e.pro}</td><td>${e.q}</td><td>R$ ${e.v}</td></tr>`); } renderEstatisticas(); }
         function renderLogs() { const c = document.getElementById('log-container'); if(c) { c.innerHTML = ""; data.movimentos.forEach(m => c.innerHTML += `<div class="log-item"><span><strong>${m.user}</strong>: ${m.txt}</span></div>`); } }
         function addNota() { const titulo = document.getElementById('g-titulo').value; const txt = document.getElementById('g-nota').value; if(titulo && txt) { const n = { titulo, txt }; data.notes.push(n); if(db) db.ref('notes').set(data.notes); else { atualizarLocalStorage('notes'); renderNotas(); } } }
         function renderNotas() { const m = document.getElementById('mural'); if(m) { m.innerHTML = ""; data.notes.forEach(n => m.innerHTML += `<div class="note-card"><h5>${n.titulo}</h5><p>${n.txt}</p></div>`); } }
         function saveBG() { const val = document.getElementById('c-bg').value.trim(); if(db) db.ref('bg').set(val); else { localStorage.setItem('vortex_bg', val); aplicasPlanoDeFundo(val); } }
         
-        // --- ATUALIZAÇÃO DOS GRÁFICOS EM TEMPO REAL ---
         function renderEstatisticas() {
-            // 1. Renderiza Gráfico Financeiro (Doughnut)
             const cvFin = document.getElementById('chartFinanceiro'); 
             if (cvFin) {
                 let ent = 0; let sai = 0; data.caixa.forEach(c => { if(c.tipo==='ENTRADA') ent+=c.valor; else sai+=c.valor; });
@@ -690,7 +690,6 @@
                 });
             }
 
-            // 2. Renderiza Gráfico de Demandas (Vendas x Encomendas)
             const cvDem = document.getElementById('chartDemandas');
             if (cvDem) {
                 let totalVendas = data.vendas.length;
