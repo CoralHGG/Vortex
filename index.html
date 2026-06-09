@@ -506,7 +506,7 @@
                 tipo: "SYSTEM",
                 descricao: descricaoAlteracoes,
                 valor: 0,
-                resultante: db.financeiro.saldoAtual
+                resulting: db.financeiro.saldoAtual /* Corrigido de resultante para resulting */
             });
 
             registrarLog(nomeOperador, `Modificou manualmente as finanças: ${descricaoAlteracoes}`, "system");
@@ -692,7 +692,7 @@
             db.encomendas.push({ id: Date.now(), operador: usuarioLogado.nome, familia: fam, resumoItens: resumoProdutos, valorTotal: totalCustoPedido });
             db.financeiro.saldoAtual -= totalCustoPedido;
             db.financeiro.totalSaidas += totalCustoPedido;
-            db.financeiro.historico.push({ operador: usuarioLogado.nome, tipo: "SAIDA", descricao: `Compra realizada com a Família ${fam} [${resumoProdutos}]`, valor: totalCustoPedido, resultante: db.financeiro.saldoAtual });
+            db.financeiro.historico.push({ operador: usuarioLogado.nome, tipo: "SAIDA", descricao: `Compra realizada com a Família ${fam} [${resumoProdutos}]`, valor: totalCustoPedido, resulting: db.financeiro.saldoAtual });
 
             registrarLog(usuarioLogado.nome, `Fechou uma lista de Encomenda com a Família ${fam}. Total: R$ ${totalCustoPedido.toFixed(2)}`, "saida");
             carrinhoEncomendaAtual = [];
@@ -778,7 +778,7 @@
             db.vendas.push({ id: Date.now(), operador: usuarioLogado.nome, familia: fam, resumoItens: resumoProdutos, valorTotal: totalFaturamentoPedido });
             db.financeiro.saldoAtual += totalFaturamentoPedido;
             db.financeiro.totalEntradas += totalFaturamentoPedido;
-            db.financeiro.historico.push({ operador: usuarioLogado.nome, tipo: "ENTRADA", descricao: `Pedido Grande para Família ${fam} [${resumoProdutos}]`, valor: totalFaturamentoPedido, resultante: db.financeiro.saldoAtual });
+            db.financeiro.historico.push({ operador: usuarioLogado.nome, tipo: "ENTRADA", descricao: `Pedido Grande para Família ${fam} [${resumoProdutos}]`, valor: totalFaturamentoPedido, resulting: db.financeiro.saldoAtual });
 
             registrarLog(usuarioLogado.nome, `Concluiu venda para a Família ${fam}. Total: R$ ${totalFaturamentoPedido.toFixed(2)}`, "entrada");
             carrinhoVendaAtual = [];
@@ -788,19 +788,6 @@
             renderVendas();
             renderContabilidadeDashboard();
             alert("Venda com múltiplos produtos fechada e contabilizada!");
-        }
-
-        function renderVendas() {
-            const tbody = document.getElementById('t-vendas-corpo'); if(!tbody) return; tbody.innerHTML = "";
-            if(db.vendas.length === 0) { tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #64748b; font-style: italic;">Nenhuma venda registrada.</td></tr>`; return; }
-            [...db.vendas].reverse().forEach(v => { tbody.innerHTML += `<tr><td>${v.operador}</td><td>${v.familia}</td><td>${v.resumoItens}</td><td>R$ ${v.valorTotal.toFixed(2)}</td><td><button class="btn-delete" onclick="removerVenda(${v.id})"><i class="fas fa-trash"></i></button></td></tr>`; });
-        }
-
-        function removerVenda(id) {
-            if(confirm("Deseja apagar esta venda?")) {
-                db.vendas = db.vendas.filter(v => v.id !== id);
-                renderVendas();
-            }
         }
 
         function renderBoxesFamilias() {
@@ -843,7 +830,7 @@
             const tbody = document.getElementById('t-financeiro-corpo'); if(!tbody) return; tbody.innerHTML = "";
             [...db.financeiro.historico].reverse().forEach(m => {
                 const cor = m.tipo === "ENTRADA" ? "var(--success)" : (m.tipo === "SAIDA" ? "var(--danger)" : "var(--primary)");
-                tbody.innerHTML += `<tr><td><b>${m.operador}</b></td><td><span class="badge ${m.tipo === 'ENTRADA'?'online':(m.tipo==='SAIDA'?'offline':'system')}">${m.tipo}</span></td><td>${m.descricao}</td><td style="color:${cor}; font-weight:700;">R$ ${m.valor.toFixed(2)}</td><td>R$ ${m.resultante.toFixed(2)}</td></tr>`;
+                tbody.innerHTML += `<tr><td><b>${m.operador}</b></td><td><span class="badge ${m.tipo === 'ENTRADA'?'online':(m.tipo==='SAIDA'?'offline':'system')}">${m.tipo}</span></td><td>${m.descricao}</td><td style="color:${cor}; font-weight:700;">R$ ${m.valor.toFixed(2)}</td><td>R$ ${m.resulting.toFixed(2)}</td></tr>`;
             });
         }
 
@@ -870,7 +857,7 @@
         function removerNota(id) { db.anotacoes = db.anotacoes.filter(n => n.id !== id); renderMuralNotas(); }
         function renderMuralNotas() {
             const grid = document.getElementById('grid-mural-notas'); if(!grid) return; grid.innerHTML = "";
-            db.anotacoes.forEach(n => { grid.innerHTML += `<div class="info-box-wrapper" style="border-left: 4px solid var(--warning);"> ... </div>`; });
+            db.anotacoes.forEach(n => { grid.innerHTML += `<div class="info-box-wrapper" style="border-left: 4px solid var(--warning);"><h3>${n.titulo}</h3><p style="margin-top:10px; color:#cbd5e1; font-size:14px; white-space:pre-line;">${n.conteudo}</p><button class="btn-delete" style="margin-top:15px;" onclick="removerNota(${n.id})">Remover Nota</button></div>`; });
         }
 
         function auth() {
@@ -894,6 +881,8 @@
                 renderEncomendas(); 
                 renderVendas(); 
                 renderLogsPainel();
+                renderMuralNotas();
+                renderContabilidadeDashboard();
                 registrarLog(user.nome, "Efetuou login no painel.", "system");
             } else { 
                 document.getElementById('login-err').style.display = 'block'; 
