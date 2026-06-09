@@ -156,6 +156,12 @@
             box-shadow: 0 0 10px rgba(168, 85, 247, 0.15);
         }
         
+        /* CORREÇÃO AQUI: Garante que as caixas de opções de todas as abas fiquem escuras e legíveis */
+        select option {
+            background-color: #120e24 !important;
+            color: #fff !important;
+        }
+        
         button { 
             width: 100%; padding: 12px; background: var(--primary); border: none; 
             border-radius: 10px; color: #fff; font-weight: 600; cursor: pointer; 
@@ -875,7 +881,7 @@
                 instancePie.update();
             } else {
                 instancePie = new Chart(ctxPie, {
-                    type: 'pie', /* VOLTOU TOTALMENTE PARA GRÁFICO DE PIZZA AQUI */
+                    type: 'pie',
                     data: {
                         labels: ['Saldo em Caixa', 'Entradas', 'Saídas'],
                         datasets: [{ data: dadosPie, backgroundColor: ['#a855f7', '#22c55e', '#ef4444'], borderWidth: 1, borderColor: 'rgba(255,255,255,0.05)' }]
@@ -887,11 +893,11 @@
             let fatVendas = db.vendas.reduce((acc, c) => acc + c.valorTotal, 0);
             let custEncomendas = db.encomendas.reduce((acc, c) => acc + c.valorTotal, 0);
             const dadosVendasSemanas = [fatVendas * 0.2, fatVendas * 0.5, fatVendas * 0.8, fatVendas];
-            const dadosComprasSemanas = [custEncomendas * 0.4, custEncomendas * 0.3, custEncomendas * 0.6, custEncomendas];
+            const dadosComprasSWeeks = [custEncomendas * 0.4, custEncomendas * 0.3, custEncomendas * 0.6, custEncomendas];
 
             if(instanceBar) {
                 instanceBar.data.datasets[0].data = dadosVendasSemanas;
-                instanceBar.data.datasets[1].data = dadosComprasSemanas;
+                instanceBar.data.datasets[1].data = dadosComprasSWeeks;
                 instanceBar.update();
             } else {
                 instanceBar = new Chart(ctxBar, {
@@ -900,7 +906,7 @@
                         labels: ['Semana 1', 'Semana 2', 'Semana 3', 'Semana Atual'],
                         datasets: [
                             { label: 'Vendas (Entradas)', data: dadosVendasSemanas, backgroundColor: 'rgba(34, 197, 94, 0.65)', borderColor: '#22c55e', borderWidth: 1 },
-                            { label: 'Encomendas (Saídas)', data: dadosComprasSemanas, backgroundColor: 'rgba(239, 68, 68, 0.65)', borderColor: '#ef4444', borderWidth: 1 }
+                            { label: 'Encomendas (Saídas)', data: dadosComprasSWeeks, backgroundColor: 'rgba(239, 68, 68, 0.65)', borderColor: '#ef4444', borderWidth: 1 }
                         ]
                     },
                     options: {
