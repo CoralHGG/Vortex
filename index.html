@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PAINEL VORTEX | Core</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -16,6 +16,7 @@
             --bg: #0b0813;
             --card: rgba(15, 12, 28, 0.75);
             --border: rgba(255, 255, 255, 0.08);
+            --input-bg: rgba(255, 255, 255, 0.03);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { 
@@ -131,29 +132,57 @@
         }
         .families-grid-container .info-box-wrapper, .notes-grid-container .info-box-wrapper { margin-top: 0; }
 
-        .form-row { display: flex; gap: 10px; margin-bottom: 20px; align-items: flex-end; flex-wrap: wrap; }
-        .form-row .form-group { flex: 1; margin-bottom: 0; min-width: 110px; }
-        .form-row button { width: auto; padding: 12px 20px; height: 45px; }
+        .form-row { display: flex; gap: 15px; margin-bottom: 20px; align-items: flex-end; flex-wrap: wrap; }
+        .form-row .form-group { flex: 1; margin-bottom: 0; min-width: 140px; }
+        .form-row button { width: auto; padding: 12px 25px; height: 45px; }
 
-        input, textarea, select { width: 100%; padding: 12px; background: rgba(0,0,0,0.5); border: 1px solid var(--border); border-radius: 10px; color: #fff; margin-bottom: 5px; outline: none; }
+        /* --- ESTILOS DE FORMULÁRIO MINIMALISTAS --- */
+        .form-group label {
+            display: block; font-size: 11px; text-transform: uppercase; color: #64748b;
+            font-weight: 600; margin-bottom: 6px; letter-spacing: 0.5px;
+        }
+        input, textarea, select { 
+            width: 100%; padding: 12px 14px; background: var(--input-bg); 
+            border: 1px solid var(--border); border-radius: 10px; color: #fff; 
+            margin-bottom: 5px; outline: none; transition: all 0.2s ease;
+        }
         input, select { height: 45px; }
-        input:focus, textarea:focus, select:focus { border-color: var(--primary); }
+        input:focus, textarea:focus, select:focus { 
+            border-color: var(--primary); 
+            background: rgba(168, 85, 247, 0.04);
+            box-shadow: 0 0 10px rgba(168, 85, 247, 0.15);
+        }
         
-        button { width: 100%; padding: 12px; background: var(--primary); border: none; border-radius: 10px; color: #fff; font-weight: 600; cursor: pointer; transition: background 0.2s; }
-        button:hover { background: #9333ea; }
+        button { 
+            width: 100%; padding: 12px; background: var(--primary); border: none; 
+            border-radius: 10px; color: #fff; font-weight: 600; cursor: pointer; 
+            transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        button:hover { background: #9333ea; transform: translateY(-1px); }
+        button:active { transform: translateY(0); }
         
+        /* --- ESTILIZAÇÃO COMPLETA DAS TABELAS --- */
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th { text-align: left; padding: 12px 10px; color: #64748b; font-size: 12px; text-transform: uppercase; border-bottom: 1px solid var(--border); }
-        td { padding: 14px 10px; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 14px; }
+        th { text-align: left; padding: 14px 12px; color: #64748b; font-size: 11px; text-transform: uppercase; border-bottom: 2px solid var(--border); letter-spacing: 0.5px; }
+        td { padding: 16px 12px; border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 14px; color: #e2e8f0; vertical-align: middle; }
+        tr:hover td { background: rgba(255, 255, 255, 0.01); }
         
-        .btn-delete { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; width: auto; }
-        .btn-delete:hover { background: var(--danger); color: #fff; }
+        .btn-delete { background: rgba(239, 68, 68, 0.08); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.15); padding: 8px 12px; border-radius: 8px; font-size: 12px; cursor: pointer; width: auto; transition: all 0.2s; }
+        .btn-delete:hover { background: var(--danger); color: #fff; box-shadow: 0 0 12px rgba(239, 68, 68, 0.3); }
 
-        .badge { padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; }
-        .badge.online { background: rgba(34, 197, 94, 0.15); color: var(--success); }
-        .badge.offline { background: rgba(255, 255, 255, 0.05); color: #94a3b8; }
-        .badge.system { background: rgba(168, 85, 247, 0.15); color: var(--primary); }
+        /* --- BADGES E ELEMENTOS VISUAIS --- */
+        .badge { padding: 5px 10px; border-radius: 8px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; display: inline-inline-block; }
+        .badge.online { background: rgba(34, 197, 94, 0.12); color: var(--success); border: 1px solid rgba(34, 197, 94, 0.2); }
+        .badge.offline { background: rgba(255, 255, 255, 0.04); color: #94a3b8; border: 1px solid rgba(255, 255, 255, 0.06); }
+        .badge.system { background: rgba(168, 85, 247, 0.12); color: var(--primary); border: 1px solid rgba(168, 85, 247, 0.2); }
         
+        /* Tag ID */
+        .id-badge { background: rgba(255, 255, 255, 0.05); color: #94a3b8; font-family: monospace; font-weight: 600; padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border); }
+        
+        /* Discord Tag Minimalista */
+        .discord-user-tag { display: flex; align-items: center; gap: 8px; color: #5865F2; font-weight: 500; font-size: 13px; }
+        .discord-user-tag i { font-size: 15px; }
+
         /* Log Real-Time Styles */
         .log-item { padding: 10px 15px; border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 13px; display: flex; justify-content: space-between; align-items: center; }
         .log-item:hover { background: rgba(255,255,255,0.01); }
@@ -237,20 +266,23 @@
             </section>
 
             <section id="membros" class="section">
-                <h2>Controle e Registro de Membros</h2>
-                <div class="info-box-wrapper">
-                    <h3 style="margin-bottom: 15px; color: var(--primary);"><i class="fas fa-user-plus"></i> Novo Membro</h3>
+                <h2 style="margin-bottom: 5px;">Controle de Membros Core</h2>
+                <p style="color: #64748b; font-size: 13px; margin-bottom: 20px;">Gerencie credenciais de acesso, cargos e identidades vinculadas.</p>
+                
+                <div class="info-box-wrapper" style="border-top: 3px solid var(--primary); padding: 25px;">
+                    <h3 style="margin-bottom: 20px; color: #fff; font-size: 15px; font-weight: 600;"><i class="fas fa-user-plus" style="color: var(--primary); margin-right: 8px;"></i> Criar Novo Acesso / Membro</h3>
                     <div class="form-row">
-                        <div class="form-group"><label>Nome</label><input type="text" id="mem-nome"></div>
-                        <div class="form-group" style="max-width: 120px;"><label>ID In-Game</label><input type="text" id="mem-id"></div>
-                        <div class="form-group"><label>ID do Discord</label><input type="text" id="mem-discord"></div>
-                        <div class="form-group"><label>Cargo</label><input type="text" id="mem-cargo"></div>
-                        <button onclick="registrarNovoMembroLogin()"><i class="fas fa-save"></i> Criar Acesso</button>
+                        <div class="form-group"><label>Nome do Operador</label><input type="text" id="mem-nome" placeholder="Ex: Megan"></div>
+                        <div class="form-group" style="max-width: 140px;"><label>ID In-Game</label><input type="text" id="mem-id" placeholder="Ex: 3461"></div>
+                        <div class="form-group"><label>Usuário do Discord</label><input type="text" id="mem-discord" placeholder="Ex: nome_user"></div>
+                        <div class="form-group"><label>Cargo Corporativo</label><input type="text" id="mem-cargo" placeholder="Ex: Gerente"></div>
+                        <button onclick="registrarNovoMembroLogin()"><i class="fas fa-plus"></i> Concluir Registro</button>
                     </div>
                 </div>
-                <div class="info-box-wrapper">
-                    <table>
-                        <thead><tr><th>ID</th><th>Nome</th><th>Discord</th><th>Cargo</th><th>Status</th><th style="width: 60px;">Ações</th></tr></thead>
+
+                <div class="info-box-wrapper" style="padding-top: 15px;">
+                    <table style="margin-top: 5px;">
+                        <thead><tr><th>ID</th><th>Nome</th><th>Vínculo Discord</th><th>Cargo</th><th>Status</th><th style="width: 80px; text-align: center;">Ações</th></tr></thead>
                         <tbody id="t-membros-corpo"></tbody>
                     </table>
                 </div>
@@ -506,7 +538,7 @@
                 tipo: "SYSTEM",
                 descricao: descricaoAlteracoes,
                 valor: 0,
-                resulting: db.financeiro.saldoAtual /* Corrigido de resultante para resulting */
+                resulting: db.financeiro.saldoAtual
             });
 
             registrarLog(nomeOperador, `Modificou manualmente as finanças: ${descricaoAlteracoes}`, "system");
@@ -683,7 +715,7 @@
         }
 
         function salvarEncomendaCompleta() {
-            if(!usuarioLogado || carrinhoEncomendaAtual.length === 0) return;
+            if(!usuarioLogado || grannyEncomendaAtual.length === 0) return;
             const fam = document.getElementById('enc-familia').value;
             let totalCustoPedido = 0;
             let resumoProdutos = carrinhoEncomendaAtual.map(i => `${i.quantidade}x ${i.nome}`).join(", ");
@@ -834,15 +866,47 @@
             });
         }
 
+        /* --- ATUALIZADO: RENDEREZAÇÃO DA ABA MEMBROS COM LOGO DISCORD --- */
         function renderMembros() {
             const tbody = document.getElementById('t-membros-corpo'); if(!tbody) return; tbody.innerHTML = "";
-            db.membros.forEach(m => { tbody.innerHTML += `<tr><td>#${m.id}</td><td>${m.nome}</td><td>${m.discord}</td><td>${m.cargo}</td><td><span class="badge ${m.online?'online':'offline'}">${m.online?'Conectado':'Offline'}</span></td><td><button class="btn-delete" onclick="deletarMembro('${m.id}')"><i class="fas fa-user-minus"></i></button></td></tr>`; });
+            db.membros.forEach(m => { 
+                tbody.innerHTML += `
+                    <tr>
+                        <td><span class="id-badge">#${m.id}</span></td>
+                        <td><strong style="color: #fff; font-size: 15px;">${m.nome}</strong></td>
+                        <td>
+                            <div class="discord-user-tag">
+                                <i class="fab fa-discord"></i> @${m.discord}
+                            </div>
+                        </td>
+                        <td><span style="background: rgba(255,255,255,0.05); padding: 4px 10px; border-radius: 6px; font-size: 13px; color: #cbd5e1;">${m.cargo}</span></td>
+                        <td><span class="badge ${m.online?'online':'offline'}">${m.online?'Conectado':'Offline'}</span></td>
+                        <td style="text-align: center;"><button class="btn-delete" onclick="deletarMembro('${m.id}')"><i class="fas fa-user-minus"></i></button></td>
+                    </tr>`; 
+            });
         }
 
         function registrarNovoMembroLogin() {
-            const n = document.getElementById('mem-nome').value.trim(); const id = document.getElementById('mem-id').value.trim(); const d = document.getElementById('mem-discord').value.trim(); const c = document.getElementById('mem-cargo').value.trim();
-            if(!n || !id || !d || !c) return; db.membros.push({ id: id, nome: n, discord: d, senha: "1234", cargo: c, online: false }); 
-            document.getElementById('mem-nome').value=""; document.getElementById('mem-id').value=""; document.getElementById('mem-discord').value=""; document.getElementById('mem-cargo').value=""; renderMembros();
+            const n = document.getElementById('mem-nome').value.trim(); 
+            const id = document.getElementById('mem-id').value.trim(); 
+            const d = document.getElementById('mem-discord').value.trim(); 
+            const c = document.getElementById('mem-cargo').value.trim();
+            
+            if(!n || !id || !d || !c) {
+                alert("Preencha todos os campos minimalistas para registrar!");
+                return;
+            }
+            
+            db.membros.push({ id: id, nome: n, discord: d, senha: "1234", cargo: c, online: false }); 
+            document.getElementById('mem-nome').value=""; 
+            document.getElementById('mem-id').value=""; 
+            document.getElementById('mem-discord').value=""; 
+            document.getElementById('mem-cargo').value=""; 
+            
+            renderMembros();
+            if(usuarioLogado) {
+                registrarLog(usuarioLogado.nome, `Registrou um novo acesso corporativo para ${n} (#${id})`, "system");
+            }
         }
 
         function deletarMembro(id) { db.membros = db.membros.filter(m => m.id !== id); renderMembros(); }
