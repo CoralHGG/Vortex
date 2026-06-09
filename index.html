@@ -62,7 +62,6 @@
         }
         button:hover { opacity: 0.9; transform: scale(1.02); }
         .btn-danger { background: var(--danger); }
-        .btn-warning { background: #eab308; color: #000; }
 
         .btn-add-row { background: rgba(255,255,255,0.05); border: 1px dashed var(--border); color: #94a3b8; margin-bottom: 15px; }
         .btn-add-row:hover { background: rgba(168, 85, 247, 0.1); color: #fff; border-color: var(--primary); }
@@ -102,7 +101,6 @@
         
         .user-status-container { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #a3a3c2; }
         .status-pulse-dot { width: 7px; height: 7px; background-color: var(--success); border-radius: 50%; display: inline-block; box-shadow: 0 0 10px var(--success); animation: pulseGlow 2s infinite; }
-        @keyframes pulseGlow { 0% { transform: scale(0.9); opacity: 0.6; } 50% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(0.9); opacity: 0.6; } }
 
         .toggle-btn {
             position: absolute; left: calc(var(--sidebar-w) - 16px); top: 35px;
@@ -135,29 +133,11 @@
         .box-list { background: var(--glass); backdrop-filter: var(--blur); border: 1px solid var(--border); padding: 25px; border-radius: 16px; margin-bottom: 25px; width: 100%; overflow-x: auto; }
         .box-title { font-size: 16px; font-weight: 600; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
 
-        /* Grade de Famílias Estilo Post-it */
-        .grid-families { 
-            display: grid; 
-            grid-template-columns: repeat(2, 1fr); 
-            gap: 20px; 
-            margin-top: 15px;
-        }
-        @media (max-width: 768px) {
-            .grid-families { grid-template-columns: 1fr; }
-        }
+        .grid-families { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-top: 15px; }
+        @media (max-width: 768px) { .grid-families { grid-template-columns: 1fr; } }
 
-        .family-card { 
-            background: rgba(255, 255, 255, 0.02); 
-            border: 1px solid var(--border); 
-            border-left: 4px solid var(--primary); 
-            padding: 20px; 
-            border-radius: 14px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            position: relative;
-        }
-        .family-card h4 { font-size: 15px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px; max-width: 85%; }
+        .family-card { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border); border-left: 4px solid var(--primary); padding: 20px; border-radius: 14px; display: flex; flex-direction: column; gap: 12px; position: relative; }
+        .family-card h4 { font-size: 15px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px; }
         .family-products-list { display: flex; flex-direction: column; gap: 8px; }
         .family-item { display: flex; justify-content: space-between; align-items: center; font-size: 13.5px; opacity: 0.85; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
         .family-item:last-child { border-bottom: none; }
@@ -166,14 +146,6 @@
         th { text-align: left; padding: 12px 15px; opacity: 0.5; font-size: 11px; text-transform: uppercase; }
         td { padding: 16px 15px; border-bottom: 1px solid var(--border); font-size: 14px; }
 
-        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 8px; }
-        .online { background: var(--success); box-shadow: 0 0 10px var(--success); }
-        .offline { background: #64748b; }
-        .badge { padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; }
-        .badge-low { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
-        .badge-ok { background: rgba(34, 197, 94, 0.15); color: var(--success); }
-
-        /* Estilo dos Gráficos e Registros */
         .charts-wrapper { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 25px; margin-bottom: 25px; }
         .chart-box { background: var(--glass); backdrop-filter: var(--blur); border: 1px solid var(--border); padding: 20px; border-radius: 16px; display: flex; flex-direction: column; align-items: center; }
         .chart-container { position: relative; width: 100%; height: 280px; }
@@ -183,17 +155,13 @@
         .log-item span strong { color: var(--primary); }
         .log-time { font-size: 11px; opacity: 0.4; font-family: monospace; }
 
-        /* Grade do Mural de Anotações */
         .notes-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 20px; }
-        .note-card { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border); border-radius: 14px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; position: relative; }
-        .note-card h5 { font-size: 15px; font-weight: 700; color: var(--primary); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+        .note-card { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border); border-radius: 14px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; }
+        .note-card h5 { font-size: 15px; font-weight: 700; color: var(--primary); margin-bottom: 10px; }
         .note-card p { font-size: 14px; opacity: 0.85; line-height: 1.5; white-space: pre-wrap; margin-bottom: 15px; }
-        .note-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.04); padding-top: 10px; font-size: 11px; opacity: 0.5; }
 
-        .btn-table-delete {
-            background: transparent; color: var(--danger); padding: 4px 8px; border-radius: 6px; font-size: 13px; transition: 0.2s; border: none; cursor: pointer;
-        }
-        .btn-table-delete:hover { background: rgba(239, 68, 68, 0.15); transform: scale(1.05); }
+        .btn-table-delete { background: transparent; color: var(--danger); padding: 4px 8px; border-radius: 6px; font-size: 13px; border: none; cursor: pointer; }
+        .btn-table-delete:hover { background: rgba(239, 68, 68, 0.15); }
     </style>
 </head>
 <body>
@@ -202,10 +170,10 @@
         <div class="login-box">
             <div class="logo-area"><h2>VORTEX</h2><span>Painel Operacional</span></div>
             <div id="login-err" style="color: var(--danger); background: rgba(239, 64, 64, 0.1); border: 1px solid rgba(239, 64, 64, 0.2); padding: 10px; border-radius: 10px; font-size: 13px; margin-bottom: 20px; display: none;">
-                Usuário ou senha incorretos! Verifique os dados.
+                Usuário ou senha incorretos!
             </div>
-            <input type="text" id="user-in" placeholder="Usuário/ID (Ex: Megan ou 3461)">
-            <input type="password" id="pass-in" placeholder="Senha (Ex: 1234)">
+            <input type="text" id="user-in" placeholder="Usuário/ID">
+            <input type="password" id="pass-in" placeholder="Senha">
             <button style="width: 100%;" onclick="auth()">ENTRAR NO SISTEMA</button>
         </div>
     </div>
@@ -217,7 +185,6 @@
 
         <aside class="sidebar" id="sidebar">
             <div class="logo-area"><h2>VORTEX</h2><span>Gestão em Nuvem</span></div>
-            
             <ul class="menu-list">
                 <li class="active" onclick="tab('dash')"><i class="fas fa-chart-pie"></i> Dashboard</li>
                 <li onclick="tab('mem')"><i class="fas fa-users"></i> Membros</li>
@@ -227,18 +194,12 @@
                 <li onclick="tab('ger')"><i class="fas fa-user-shield"></i> Gerência</li>
                 <li onclick="tab('cfg')"><i class="fas fa-cog"></i> Configuração</li>
             </ul>
-
             <div class="user-footer">
                 <div class="user-info-box">
                     <strong class="user-title" id="logged-name">Carregando...</strong>
-                    <div class="user-status-container" style="display: flex; justify-content: space-between; align-items: center; gap: 6px; font-size: 12px; color: #a3a3c2;">
-                        <div>
-                            <span class="status-pulse-dot"></span>
-                            <span>Conectado</span>
-                        </div>
-                        <span onclick="logout()" style="cursor: pointer; color: var(--danger); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">
-                            <i class="fas fa-sign-out-alt"></i> Sair
-                        </span>
+                    <div class="user-status-container">
+                        <div><span class="status-pulse-dot"></span> Conectado</div>
+                        <span onclick="logout()" style="cursor: pointer; color: var(--danger); font-weight: 600; font-size: 11px;">SAIR</span>
                     </div>
                 </div>
             </div>
@@ -255,86 +216,58 @@
                     <div class="collapsible-content">
                         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 15px;">
                             <div>
-                                <label style="font-size: 11px; opacity:0.6; display:block; margin-bottom:5px;">Tipo de Operação</label>
                                 <select id="in-dash-tipo">
                                     <option value="ENTRADA">🟢 ENTRADA (+)</option>
                                     <option value="RETIRADA">🔴 RETIRADA (-)</option>
                                 </select>
                             </div>
-                            <div>
-                                <label style="font-size: 11px; opacity:0.6; display:block; margin-bottom:5px;">Valor da Operação (R$)</label>
-                                <input type="number" id="in-dash-valor" placeholder="Ex: 50000">
-                            </div>
-                            <div>
-                                <label style="font-size: 11px; opacity:0.6; display:block; margin-bottom:5px;">Operador / Responsável</label>
-                                <input type="text" id="in-dash-responsavel" placeholder="Quem está mexendo?">
-                            </div>
+                            <div><input type="number" id="in-dash-valor" placeholder="Valor (R$)"></div>
+                            <div><input type="text" id="in-dash-responsavel" placeholder="Operador Responsável"></div>
                         </div>
-                        <div style="margin-bottom: 15px;">
-                            <label style="font-size: 11px; opacity:0.6; display:block; margin-bottom:5px;">Descrição / Motivo</label>
-                            <input type="text" id="in-dash-obs" placeholder="Ex: Carga de investimentos ou Retirada de lucro">
+                        <input type="text" id="in-dash-obs" placeholder="Descrição / Motivo do Lançamento" style="margin-bottom: 15px;">
+                        <div style="background: rgba(255,255,255,0.02); padding: 15px; border-radius: 12px; border:1px solid var(--border); margin-bottom: 15px;">
+                            <label style="font-size: 11px; opacity:0.6; color: var(--primary);">Definir Saldo Inicial Fixo</label>
+                            <input type="number" id="in-saldo-base" placeholder="Ex: 50000" style="max-width: 300px; margin-top: 5px;">
                         </div>
-                        <hr style="border:0; border-top:1px solid var(--border); margin: 20px 0;">
-                        <div style="margin-bottom: 15px; background: rgba(255,255,255,0.02); padding: 15px; border-radius: 12px; border:1px solid var(--border);">
-                            <label style="font-size: 11px; opacity:0.6; display:block; margin-bottom:5px; color: var(--primary);">Definir/Ajustar Saldo Inicial de Segurança</label>
-                            <input type="number" id="in-saldo-base" placeholder="Defina um saldo base fixo inicial se necessário" style="max-width: 300px;">
-                        </div>
-
-                        <button onclick="lancarMovimentacaoCaixa()">SALVAR E ATUALIZAR SALDO</button>
+                        <button onclick="lancarMovimentacaoCaixa()">SALVAR MOVIMENTAÇÃO</button>
                     </div>
                 </div>
 
                 <div class="grid-cards">
-                    <div class="card"><h4>Saldo Atual Geral (Calculado)</h4><div class="value" id="v-saldo" style="color:#60a5fa">R$ 0,00</div></div>
+                    <div class="card"><h4>Saldo Atual Automatizado</h4><div class="value" id="v-saldo" style="color:#60a5fa">R$ 0,00</div></div>
                     <div class="card"><h4>Total de Entradas</h4><div class="value" style="color: var(--success)" id="v-ent">R$ 0,00</div></div>
-                    <div class="card"><h4>Total de Retiradas (Saídas)</h4><div class="value" style="color: var(--danger)" id="v-sai">R$ 0,00</div></div>
+                    <div class="card"><h4>Total de Retiradas</h4><div class="value" style="color: var(--danger)" id="v-sai">R$ 0,00</div></div>
                 </div>
 
                 <div class="box-list">
-                    <div class="box-title"><i class="fas fa-list-alt"></i> Livro Caixa: Histórico Completo de Entradas e Retiradas</div>
+                    <div class="box-title"><i class="fas fa-list-alt"></i> Livro Caixa: Histórico de Entradas e Retiradas</div>
                     <table>
                         <thead>
-                            <tr>
-                                <th>Data/Hora</th>
-                                <th>Tipo</th>
-                                <th>Valor</th>
-                                <th>Responsável/Operador</th>
-                                <th>Descrição/Motivo</th>
-                                <th>Ação</th>
-                            </tr>
+                            <tr><th>Data/Hora</th><th>Tipo</th><th>Valor</th><th>Responsável</th><th>Descrição</th><th>Ação</th></tr>
                         </thead>
-                        <tbody id="t-caixa-historico">
-                            <tr><td colspan="6" style="text-align:center; opacity:0.4;">Nenhum registro lançado no livro caixa.</td></tr>
-                        </tbody>
+                        <tbody id="t-caixa-historico"></tbody>
                     </table>
                 </div>
             </section>
 
             <section id="mem" class="section">
                 <div class="collapsible-box" id="box-mem-form">
-                    <div class="collapsible-header" onclick="toggleBox('box-mem-form')">
-                        <span id="form-mem-title">Cadastrar Novo Membro / Acesso</span>
-                        <span class="icon-indicator">+</span>
-                    </div>
+                    <div class="collapsible-header" onclick="toggleBox('box-mem-form')"><span>Cadastrar Novo Operador</span><span class="icon-indicator">+</span></div>
                     <div class="collapsible-content">
                         <input type="hidden" id="m-key">
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                            <input type="text" id="m-id" placeholder="ID do Membro (Ex: 3461)">
-                            <input type="text" id="m-nome" placeholder="Nome do Membro">
-                            <input type="text" id="m-pass" placeholder="Senha de Acesso">
-                            <input type="text" id="m-cargo" placeholder="Cargo/Função">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                            <input type="text" id="m-id" placeholder="ID (Ex: 3461)">
+                            <input type="text" id="m-nome" placeholder="Nome">
+                            <input type="text" id="m-pass" placeholder="Senha">
+                            <input type="text" id="m-cargo" placeholder="Cargo">
                         </div>
-                        <div style="display: flex; gap: 10px; margin-top: 15px;">
-                            <button id="btn-save-mem" onclick="saveMembro()">SALVAR NOVO MEMBRO</button>
-                            <button id="btn-cancel-edit" style="display: none;" class="btn-danger" onclick="cancelarEdicaoMembro()">CANCELAR</button>
-                        </div>
+                        <button onclick="saveMembro()">SALVAR OPERADOR</button>
                     </div>
                 </div>
-
                 <div class="box-list">
-                    <div class="box-title">Lista de Operadores Cadastrados</div>
+                    <div class="box-title">Lista de Operadores</div>
                     <table>
-                        <thead><tr><th>ID</th><th>Membro</th><th>Cargo</th><th>Senha</th><th>Status</th><th>Ações</th></tr></thead>
+                        <thead><tr><th>ID</th><th>Membro</th><th>Cargo</th><th>Senha</th><th>Ação</th></tr></thead>
                         <tbody id="t-membros"></tbody>
                     </table>
                 </div>
@@ -342,137 +275,84 @@
 
             <section id="enc" class="section">
                 <div class="collapsible-box" id="box-enc-form">
-                    <div class="collapsible-header" onclick="toggleBox('box-enc-form')">
-                        <span>Lançar Entrada de Encomendas (Em Lote)</span>
-                        <span class="icon-indicator">+</span>
-                    </div>
+                    <div class="collapsible-header" onclick="toggleBox('box-enc-form')"><span>Receber Encomendas das Famílias</span><span class="icon-indicator">+</span></div>
                     <div class="collapsible-content">
-                        <div style="margin-bottom: 20px;">
-                            <label style="font-size: 12px; text-transform: uppercase; opacity: 0.6; display: block; margin-bottom: 8px;">Família / Fornecedor</label>
-                            <select id="e-global-family" onchange="updateEncomendasProductsDropdowns()">
-                                <option value="">Escolha a Família primeiro...</option>
-                            </select>
-                        </div>
-
-                        <label style="font-size: 12px; text-transform: uppercase; opacity: 0.6; display: block; margin-bottom: 8px;">Itens Recebidos desta Família</label>
+                        <select id="e-global-family" onchange="updateEncomendasProductsDropdowns()" style="margin-bottom: 15px;"></select>
                         <div id="container-rows-encomendas"></div>
-                        <button type="button" class="button btn-add-row" onclick="addEncomendaRow()"><i class="fas fa-plus"></i> Adicionar Mais um Item</button>
-                        <br>
-                        <button style="margin-top: 5px;" onclick="submitEncomendas()">REGISTRAR ENCOMENDA COMPLETA</button>
+                        <button class="btn-add-row" onclick="addEncomendaRow()"><i class="fas fa-plus"></i> Adicionar Item</button>
+                        <button onclick="submitEncomendas()">SALVAR ENCOMENDA</button>
                     </div>
                 </div>
-                <div class="box-list">
-                    <div class="box-title">Histórico de Itens em Encomendas</div>
-                    <table id="tab-enc"></table>
-                </div>
+                <div class="box-list"><table><tbody id="tab-enc"></tbody></table></div>
             </section>
 
             <section id="ven" class="section">
                 <div class="collapsible-box" id="box-ven-form">
                     <div class="collapsible-header" onclick="toggleBox('box-ven-form')">
-                        <span>Registrar Nova Venda para Famílias (Em Lote)</span>
+                        <span>Registrar Saída/Venda dos NOSSOS Produtos para Famílias</span>
                         <span class="icon-indicator">+</span>
                     </div>
                     <div class="collapsible-content">
-                        <div style="margin-bottom: 20px;">
-                            <label style="font-size: 12px; text-transform: uppercase; opacity: 0.6; display: block; margin-bottom: 8px;">Família / Fornecedor</label>
-                            <select id="v-global-family" onchange="updateVendasProductsDropdowns()">
-                                <option value="">Escolha a Família primeiro...</option>
-                            </select>
-                        </div>
-
-                        <label style="font-size: 12px; text-transform: uppercase; opacity: 0.6; display: block; margin-bottom: 8px;">Produtos Vendidos desta Família</label>
+                        <p style="font-size: 12px; color: var(--primary); margin-bottom: 15px;">
+                            💡 Nota: Os produtos ofertados aqui são os cadastrados na categoria "Nosso Catálogo" na aba Configuração.
+                        </p>
                         <div id="container-rows-vendas"></div>
-                        <button type="button" class="button btn-add-row" onclick="addVendaRow()"><i class="fas fa-plus"></i> Adicionar Mais um Item</button>
-                        <br>
-                        <button style="margin-top: 5px;" onclick="submitVendas()">CONFIRMAR VENDA COMPLETA</button>
+                        <button class="btn-add-row" onclick="addVendaRow()"><i class="fas fa-plus"></i> Adicionar Mais um Item na Venda</button>
+                        <br><br>
+                        <button onclick="submitVendas()">CONFIRMAR VENDA E LANÇAR</button>
                     </div>
                 </div>
                 <div class="box-list">
-                    <div class="box-title">Histórico de Vendas Realizadas</div>
-                    <table id="tab-ven"></table>
+                    <div class="box-title">Histórico de Nossas Vendas para Famílias</div>
+                    <table>
+                        <thead>
+                            <tr><th>Nosso Produto</th><th>Família Compradora</th><th>Qtd</th><th>Total Venda</th></tr>
+                        </thead>
+                        <tbody id="tab-ven"></tbody>
+                    </table>
                 </div>
             </section>
 
             <section id="mov" class="section">
                 <div class="box-list">
-                    <div class="box-title"><i class="fas fa-chart-bar"></i> Painel de Métricas Visuais Estratégicas</div>
-                    
                     <div class="charts-wrapper">
-                        <div class="chart-box">
-                            <h4 style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; color: #a3a3c2;">Fluxo de Caixa do Painel</h4>
-                            <div class="chart-container">
-                                <canvas id="chartFinanceiro"></canvas>
-                            </div>
-                        </div>
-                        <div class="chart-box">
-                            <h4 style="font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; color: #a3a3c2;">Encomendas vs Vendas (Volume total)</h4>
-                            <div class="chart-container">
-                                <canvas id="chartProdutos"></canvas>
-                            </div>
-                        </div>
+                        <div class="chart-box"><div class="chart-container"><canvas id="chartFinanceiro"></canvas></div></div>
                     </div>
-
-                    <div class="box-title" style="margin-top: 10px; border-top: 1px solid var(--border); padding-top: 25px;"><i class="fas fa-history"></i> Mural de Atividades dos Operadores</div>
-                    <div class="log-timeline" id="log-container">
-                        <div style="text-align: center; opacity: 0.4; padding: 20px; font-size: 13px;">Nenhuma atividade registrada no painel ainda.</div>
-                    </div>
+                    <div class="box-title"><i class="fas fa-history"></i> Mural de Histórico de Logs do Sistema</div>
+                    <div class="log-timeline" id="log-container"></div>
                 </div>
             </section>
 
             <section id="ger" class="section">
                 <div class="box-list">
-                    <div class="box-title"><i class="fas fa-edit"></i> Registrar Nova Anotação Interna</div>
-                    <div style="display: flex; flex-direction: column; gap: 15px;">
-                        <input type="text" id="g-titulo" placeholder="Título do Lembrete / Assunto Importante">
-                        <textarea id="g-nota" placeholder="Digite os detalhes da anotação, metas ou regras que precisam ficar salvas..." rows="4"></textarea>
-                    </div>
-                    <button style="margin-top: 15px;" onclick="addNota()"><i class="fas fa-save"></i> FIXAR ANOTAÇÃO NO MURAL</button>
+                    <input type="text" id="g-titulo" placeholder="Título do Lembrete" style="margin-bottom: 10px;">
+                    <textarea id="g-nota" placeholder="Conteúdo da anotação..." rows="3" style="margin-bottom: 10px;"></textarea>
+                    <button onclick="addNota()">FIXAR NO MURAL</button>
                 </div>
-                
-                <div class="box-list">
-                    <div class="box-title"><i class="fas fa-sticky-note"></i> Quadro de Notas Permanentes da Liderança</div>
-                    <div class="notes-grid" id="mural"></div>
-                </div>
+                <div class="notes-grid" id="mural"></div>
             </section>
 
             <section id="cfg" class="section">
                 <div class="collapsible-box" id="box-cfg-bg">
-                    <div class="collapsible-header" onclick="toggleBox('box-cfg-bg')">
-                        <span>Alterar Plano de Fundo do Painel</span>
-                        <span class="icon-indicator">+</span>
-                    </div>
+                    <div class="collapsible-header" onclick="toggleBox('box-cfg-bg')"><span>Plano de Fundo</span><span class="icon-indicator">+</span></div>
                     <div class="collapsible-content">
-                        <input type="text" id="c-bg" placeholder="URL da Imagem da Internet">
-                        <button style="margin-top: 15px;" onclick="saveBG()">APLICAR IMAGEM</button>
+                        <input type="text" id="c-bg" placeholder="URL da Imagem">
+                        <button onclick="saveBG()" style="margin-top: 10px;">APLICAR</button>
                     </div>
                 </div>
 
                 <div class="collapsible-box" id="box-cfg-fam">
-                    <div class="collapsible-header" onclick="toggleBox('box-cfg-fam')">
-                        <span>Cadastrar Produtos de Famílias / Fornecedores (Em Lote)</span>
-                        <span class="icon-indicator">+</span>
-                    </div>
+                    <div class="collapsible-header" onclick="toggleBox('box-cfg-fam')"><span>Cadastrar Fornecedores / Nossos Produtos Próprios</span><span class="icon-indicator">+</span></div>
                     <div class="collapsible-content">
-                        <div style="margin-bottom: 20px;">
-                            <label style="font-size: 12px; text-transform: uppercase; opacity: 0.6; display: block; margin-bottom: 8px;">Família / Fornecedor</label>
-                            <input type="text" id="c-global-family" placeholder="Digite o nome da Família para este lote de produtos...">
-                        </div>
-                        
-                        <label style="font-size: 12px; text-transform: uppercase; opacity: 0.6; display: block; margin-bottom: 8px;">Produtos deste Fornecedor</label>
+                        <input type="text" id="c-global-family" placeholder="Nome da Família (Use 'Nosso Catálogo' para seus próprios itens)" style="margin-bottom: 15px;">
                         <div id="container-rows-catalogo"></div>
-                        <button type="button" class="button btn-add-row" onclick="addCatalogoRow()"><i class="fas fa-plus"></i> Adicionar Mais um Produto</button>
-                        <br>
-                        <button style="margin-top: 5px;" onclick="submitCatalogo()">SALVAR TODOS E VINCULAR</button>
+                        <button class="btn-add-row" onclick="addCatalogoRow()"><i class="fas fa-plus"></i> Adicionar Campo de Produto</button>
+                        <button onclick="submitCatalogo()">SALVAR ITENS</button>
                     </div>
                 </div>
 
-                <div class="box-list">
-                    <div class="box-title"><i class="fas fa-cubes"></i> Blocos de Notas: Catálogos de Famílias Salvas</div>
-                    <div id="container-familias" class="grid-families"></div>
-                </div>
+                <div class="box-list"><div id="container-familias" class="grid-families"></div></div>
             </section>
-
         </main>
     </div>
 
@@ -482,62 +362,27 @@
 
     <script>
         const usarFirebase = true; 
+        const firebaseConfig = { apiKey: "SUA_API_KEY", authDomain: "SEU_PROJETO.firebaseapp.com", databaseURL: "https://SEU_PROJETO-default-rtdb.firebaseio.com", projectId: "SEU_PROJETO", storageBucket: "SEU_PROJETO.appspot.com", messagingSenderId: "SEU_ID", appId: "SEU_APP_ID" };
 
-        const firebaseConfig = {
-            apiKey: "SUA_API_KEY",
-            authDomain: "SEU_PROJETO.firebaseapp.com",
-            databaseURL: "https://SEU_PROJETO-default-rtdb.firebaseio.com",
-            projectId: "SEU_PROJETO",
-            storageBucket: "SEU_PROJETO.appspot.com",
-            messagingSenderId: "SEU_ID",
-            appId: "SEU_APP_ID"
-        };
-
-        let currentUser = null;
-        let db = null;
-        
-        // Estrutura de dados unificada
-        let data = { 
-            membros: [], 
-            encomendas: [], 
-            vendas: [], 
-            movimentos: [], 
-            catalogo: [], 
-            notes: [], 
-            caixa: [],            // <- Armazena as entradas/retiradas do livro caixa
-            dash: { base: 0 }     // <- Saldo inicial base configurável
-        };
-        
+        let currentUser = null; let db = null;
+        let data = { membros: [], encomendas: [], vendas: [], movimentos: [], catalogo: [], notes: [], caixa: [], dash: { base: 0 } };
         let chartFinInstancia = null;
-        let chartProdInstancia = null;
 
         window.onload = function() {
             resetFormulariosMultiplos();
             if (usarFirebase && firebaseConfig.apiKey !== "SUA_API_KEY") {
                 try {
-                    firebase.initializeApp(firebaseConfig);
-                    db = firebase.database();
+                    firebase.initializeApp(firebaseConfig); db = firebase.database();
                     ativarSincronizacaoFirebase();
-                    console.log("VORTEX: Banco em Nuvem do Firebase Ativado com Sucesso.");
-                } catch(e) {
-                    console.error("Erro nas chaves do Firebase. Executando LocalStorage.");
-                    carregarDadosLocalStorage();
-                }
-            } else {
-                console.log("VORTEX: Executando no modo LocalStorage persistentente.");
-                carregarDadosLocalStorage();
-            }
+                } catch(e) { carregarDadosLocalStorage(); }
+            } else { carregarDadosLocalStorage(); }
         };
 
         function carregarDadosLocalStorage() {
-            const memSalvos = localStorage.getItem('vortex_membros');
-            data.membros = memSalvos ? JSON.parse(memSalvos) : [];
-            
-            if (!data.membros.some(m => m.dbKey === 'master_local' || m.nome.toLowerCase() === 'megan')) {
-                data.membros.unshift({ dbKey: "master_local", uid: "3461", nome: "Megan", senha: "1234", cargo: "Chefe", status: { online: false, lastSeen: 0 } });
-                atualizarLocalStorage('membros');
+            data.membros = JSON.parse(localStorage.getItem('vortex_membros')) || [];
+            if (!data.membros.some(m => m.nome.toLowerCase() === 'megan')) {
+                data.membros.unshift({ dbKey: "master_local", uid: "3461", nome: "Megan", senha: "1234", cargo: "Chefe" });
             }
-
             data.encomendas = JSON.parse(localStorage.getItem('vortex_encomendas')) || [];
             data.vendas = JSON.parse(localStorage.getItem('vortex_vendas')) || [];
             data.movimentos = JSON.parse(localStorage.getItem('vortex_movimentos')) || [];
@@ -545,478 +390,224 @@
             data.notes = JSON.parse(localStorage.getItem('vortex_notes')) || [];
             data.caixa = JSON.parse(localStorage.getItem('vortex_caixa')) || [];
             data.dash = JSON.parse(localStorage.getItem('vortex_dash')) || { base: 0 };
-
-            const bgSalvo = localStorage.getItem('vortex_bg');
-            if(bgSalvo) aplicasPlanoDeFundo(bgSalvo);
-
-            renderMembros();
-            calcularEAtualizarDashboard();
-            updateGlobalFamilyDropdowns();
-            renderFamilies();
-            renderEncomendas();
-            renderVendas();
-            renderNotas();
-            renderEstatisticas();
-            renderLogs();
+            
+            const bg = localStorage.getItem('vortex_bg'); if(bg) aplicasPlanoDeFundo(bg);
+            refreshAll();
         }
 
         function atualizarLocalStorage(tipo) {
-            if(usarFirebase && db && firebaseConfig.apiKey !== "SUA_API_KEY") return; 
+            if(usarFirebase && db && firebaseConfig.apiKey !== "SUA_API_KEY") return;
             localStorage.setItem('vortex_' + tipo, JSON.stringify(data[tipo]));
         }
 
-        function aplicasPlanoDeFundo(url) {
-            const style = `linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)), url('${url}')`;
-            document.body.style.backgroundImage = style;
-            document.getElementById('login-screen').style.backgroundImage = style;
-        }
+        function aplicasPlanoDeFundo(url) { document.body.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)), url('${url}')`; }
 
         function activarSincronizacaoFirebase() {
-            db.ref('membros').on('value', s => { 
-                const val = s.val();
-                data.membros = val ? Object.keys(val).map(k => ({...val[k], dbKey: k})) : [];
-                if (!data.membros.some(m => m.dbKey === 'master_local' || m.nome.toLowerCase() === 'megan')) {
-                    data.membros.unshift({ dbKey: "master_local", uid: "3461", nome: "Megan", senha: "1234", cargo: "Chefe", status: { online: false, lastSeen: 0 } });
-                }
-                if(currentUser) {
-                    const eu = data.membros.find(m => m.dbKey === currentUser.dbKey || m.nome === currentUser.nome);
-                    if(eu) eu.status = { online: true, lastSeen: Date.now() };
-                }
-                renderMembros();
-            });
-            db.ref('catalogo').on('value', s => { 
-                const val = s.val() || [];
-                data.catalogo = Object.keys(val).map(k => ({...val[k], id: k}));
-                updateGlobalFamilyDropdowns(); 
-                renderFamilies(); 
-                renderEstatisticas(); 
-            });
-            db.ref('encomendas').on('value', s => { 
-                const val = s.val() || [];
-                data.encomendas = Object.keys(val).map(k => ({...val[k], id: k}));
-                renderEncomendas(); 
-                renderEstatisticas(); 
-            });
-            db.ref('vendas').on('value', s => { 
-                const val = s.val() || [];
-                data.vendas = Object.keys(val).map(k => ({...val[k], id: k}));
-                renderVendas(); 
-                renderEstatisticas(); 
-            });
-            db.ref('movimentos').on('value', s => { data.movimentos = s.val() || []; renderEstatisticas(); renderLogs(); });
+            db.ref('membros').on('value', s => { const v = s.val(); data.membros = v ? Object.keys(v).map(k => ({...v[k], dbKey: k})) : []; if(!data.membros.some(m=>m.nome.toLowerCase()==='megan')) data.membros.unshift({dbKey:"master_local",uid:"3461",nome:"Megan",senha:"1234",cargo:"Chefe"}); renderMembros(); });
+            db.ref('catalogo').on('value', s => { const v = s.val() || []; data.catalogo = Object.keys(v).map(k => ({...v[k], id: k})); refreshAll(); });
+            db.ref('encomendas').on('value', s => { const v = s.val() || []; data.encomendas = Object.keys(v).map(k => ({...v[k], id: k})); renderEncomendas(); });
+            db.ref('vendas').on('value', s => { const v = s.val() || []; data.vendas = Object.keys(v).map(k => ({...v[k], id: k})); renderVendas(); });
+            db.ref('movimentos').on('value', s => { data.movimentos = s.val() || []; renderLogs(); });
             db.ref('notes').on('value', s => { data.notes = s.val() || []; renderNotas(); });
-            db.ref('caixa').on('value', s => { 
-                const val = s.val() || [];
-                data.caixa = Object.keys(val).map(k => ({...val[k], id: k}));
-                calcularEAtualizarDashboard(); 
-            });
-            db.ref('dash').on('value', s => { 
-                data.dash = s.val() || { base: 0 }; 
-                calcularEAtualizarDashboard(); 
-            });
+            db.ref('caixa').on('value', s => { const v = s.val() || []; data.caixa = Object.keys(v).map(k => ({...v[k], id: k})); calcularEAtualizarDashboard(); });
+            db.ref('dash').on('value', s => { data.dash = s.val() || { base: 0 }; calcularEAtualizarDashboard(); });
             db.ref('bg').on('value', s => { if(s.val()) aplicasPlanoDeFundo(s.val()); });
         }
 
-        // --- SISTEMA AUTOMATIZADO DE CALCULO DE SALDO ---
+        function refreshAll() {
+            updateGlobalFamilyDropdowns(); renderFamilies(); renderEncomendas(); renderVendas(); renderNotas(); renderLogs(); calcularEAtualizarDashboard();
+        }
+
+        // --- MOVIMENTAÇÕES E SALDOS ---
         function lancarMovimentacaoCaixa() {
             const tipo = document.getElementById('in-dash-tipo').value;
             const valor = parseFloat(document.getElementById('in-dash-valor').value) || 0;
-            const responsavel = document.getElementById('in-dash-responsavel').value.trim();
+            const resp = document.getElementById('in-dash-responsavel').value.trim();
             const obs = document.getElementById('in-dash-obs').value.trim() || "Sem descrição";
-            const baseInput = parseFloat(document.getElementById('in-saldo-base').value);
+            const bIn = parseFloat(document.getElementById('in-saldo-base').value);
 
-            // Se alterou a base fixa inicial
-            if(!isNaN(baseInput)) {
-                data.dash.base = baseInput;
-                if(db) db.ref('dash').set(data.dash);
-                else atualizarLocalStorage('dash');
-            }
+            if(!isNaN(bIn)) { data.dash.base = bIn; if(db) db.ref('dash').set(data.dash); else atualizarLocalStorage('dash'); }
+            if(valor <= 0 || !resp) { calcularEAtualizarDashboard(); toggleBox('box-dash-form'); return; }
 
-            if(valor <= 0 || !responsavel) {
-                if(isNaN(baseInput)) alert("Por favor, preencha o valor da operação e o responsável!");
-                else {
-                    calcularEAtualizarDashboard();
-                    toggleBox('box-dash-form');
-                    document.getElementById('in-saldo-base').value = '';
-                }
-                return;
-            }
-
-            const novaMovimentacao = {
-                data: new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'}),
-                tipo: tipo,
-                valor: valor,
-                responsavel: responsavel,
-                obs: obs
-            };
-
-            if(db) {
-                db.ref('caixa').push().set(novaMovimentacao);
-            } else {
-                novaMovimentacao.id = 'cx_' + Date.now() + Math.random();
-                data.caixa.push(novaMovimentacao);
-                atualizarLocalStorage('caixa');
-                calcularEAtualizarDashboard();
-            }
-
-            registrarAcaoNoPainel(`Lançou uma ${tipo} no valor de R$ ${valor.toLocaleString('pt-BR')} (Responsável: ${responsavel}).`);
+            const n = { data: new Date().toLocaleString('pt-BR'), tipo, valor, responsavel: resp, obs };
+            if(db) db.ref('caixa').push().set(n); else { n.id = 'cx_'+Date.now(); data.caixa.push(n); atualizarLocalStorage('caixa'); calcularEAtualizarDashboard(); }
             
-            // Limpa form
-            document.getElementById('in-dash-valor').value = '';
-            document.getElementById('in-dash-responsavel').value = '';
-            document.getElementById('in-dash-obs').value = '';
-            document.getElementById('in-saldo-base').value = '';
-            toggleBox('box-dash-form');
+            document.getElementById('in-dash-valor').value=''; document.getElementById('in-dash-responsavel').value=''; document.getElementById('in-dash-obs').value=''; document.getElementById('in-saldo-base').value=''; toggleBox('box-dash-form');
         }
 
         function calcularEAtualizarDashboard() {
-            let totalEntradas = 0;
-            let totalRetiradas = 0;
+            let ent = 0; let sai = 0;
+            data.caixa.forEach(c => { if(c.tipo==='ENTRADA') ent+=c.valor; else sai+=c.valor; });
+            let total = (data.dash.base || 0) + ent - sai;
 
-            data.caixa.forEach(item => {
-                if(item.tipo === 'ENTRADA') totalEntradas += item.valor;
-                if(item.tipo === 'RETIRADA') totalRetiradas += item.valor;
-            });
+            document.getElementById('v-saldo').innerText = `R$ ${total.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
+            document.getElementById('v-ent').innerText = `R$ ${ent.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
+            document.getElementById('v-sai').innerText = `R$ ${sai.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
 
-            // Regra matemática: Base + Entradas - Retiradas
-            let saldoFinalCalculado = (data.dash.base || 0) + totalEntradas - totalRetiradas;
-
-            // Renderiza na tela
-            document.getElementById('v-saldo').innerText = `R$ ${saldoFinalCalculado.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
-            document.getElementById('v-ent').innerText = `R$ ${totalEntradas.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
-            document.getElementById('v-sai').innerText = `R$ ${totalRetiradas.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
-
-            // Renderiza a tabela do histórico de Livro Caixa
-            const tbody = document.getElementById('t-caixa-historico');
-            if(!tbody) return;
-
-            if(data.caixa.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; opacity:0.4;">Nenhum registro lançado no livro caixa.</td></tr>`;
-                return;
-            }
-
+            const tbody = document.getElementById('t-caixa-historico'); if(!tbody) return;
             tbody.innerHTML = '';
-            [...data.caixa].reverse().forEach(item => {
-                const corTipo = item.tipo === 'ENTRADA' ? 'var(--success)' : 'var(--danger)';
-                const sinal = item.tipo === 'ENTRADA' ? '+' : '-';
-                tbody.innerHTML += `
-                    <tr>
-                        <td>${item.data}</td>
-                        <td><span style="color:${corTipo}; font-weight:700; font-size:12px;">● ${item.tipo}</span></td>
-                        <td style="color:${corTipo}; font-weight:700;">${sinal} R$ ${item.valor.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
-                        <td><strong>${item.responsavel}</strong></td>
-                        <td style="opacity:0.8;">${item.obs}</td>
-                        <td><button class="btn-table-delete" onclick="removerRegistroCaixa('${item.id}')"><i class="fas fa-trash-alt"></i></button></td>
-                    </tr>
-                `;
+            [...data.caixa].reverse().forEach(c => {
+                const cor = c.tipo === 'ENTRADA' ? 'var(--success)' : 'var(--danger)';
+                tbody.innerHTML += `<tr><td>${c.data}</td><td><span style="color:${cor}">● ${c.tipo}</span></td><td style="color:${cor}">R$ ${c.valor.toLocaleString('pt-BR')}</td><td>${c.responsavel}</td><td>${c.obs}</td><td><button class="btn-table-delete" onclick="removerRegistroCaixa('${c.id}')">X</button></td></tr>`;
             });
-
             renderEstatisticas();
         }
 
-        function removerRegistroCaixa(id) {
-            if(confirm("Deseja deletar permanentemente esse lançamento do Livro Caixa? O saldo recalculado mudará.")) {
-                if(db) {
-                    db.ref('caixa/' + id).remove();
-                } else {
-                    data.caixa = data.caixa.filter(c => c.id !== id);
-                    atualizarLocalStorage('caixa');
-                    calcularEAtualizarDashboard();
-                }
-                registrarAcaoNoPainel(`Excluiu um registro de lançamento de fluxo de caixa.`);
-            }
-        }
+        function removerRegistroCaixa(id) { if(confirm("Remover do caixa?")) { if(db) db.ref('caixa/'+id).remove(); else { data.caixa=data.caixa.filter(c=>c.id!==id); atualizarLocalStorage('caixa'); calcularEAtualizarDashboard(); } } }
 
-
-        // --- CONFIGURAÇÕES DE DROPDOWNS DE FAMÍLIAS ---
+        // --- PROGRAMAÇÃO DE VENDAS INVERTIDA ---
         function updateGlobalFamilyDropdowns() {
-            const eSelect = document.getElementById('e-global-family');
-            const vSelect = document.getElementById('v-global-family');
-            if(!eSelect || !vSelect) return;
-
-            let familiasUnicas = [...new Set(data.catalogo.map(c => c.emp))].sort();
-            let optionsHtml = '<option value="">Escolha a Família primeiro...</option>';
-            familiasUnicas.forEach(f => { optionsHtml += `<option value="${f}">${f}</option>`; });
-
-            const eVal = eSelect.value; const vVal = vSelect.value;
-            eSelect.innerHTML = optionsHtml; vSelect.innerHTML = optionsHtml;
-            eSelect.value = familiasUnicas.includes(eVal) ? eVal : "";
-            vSelect.value = familiasUnicas.includes(vVal) ? vVal : "";
-
+            const eSel = document.getElementById('e-global-family'); if(!eSel) return;
+            let fams = [...new Set(data.catalogo.map(c => c.emp))].sort();
+            eSel.innerHTML = '<option value="">Selecione a Família...</option>';
+            fams.forEach(f => eSel.innerHTML += `<option value="${f}">${f}</option>`);
             updateEncomendasProductsDropdowns();
-            updateVendasProductsDropdowns();
         }
 
         function updateEncomendasProductsDropdowns() {
             const fam = document.getElementById('e-global-family').value;
-            document.querySelectorAll('#container-rows-encomendas .dynamic-row').forEach(row => {
-                const select = row.querySelector('.e-item-select');
-                populateProductsDropdownByFamily(select, fam);
-                calcRowE(row.id);
+            document.querySelectorAll('#container-rows-encomendas .dynamic-row').forEach(r => {
+                const s = r.querySelector('.e-item-select'); s.innerHTML = '<option value="">Selecione...</option>';
+                data.catalogo.filter(c => c.emp === fam).forEach((c,i) => s.innerHTML += `<option value="${data.catalogo.indexOf(c)}">${c.pro}</option>`);
             });
-        }
-
-        function updateVendasProductsDropdowns() {
-            const fam = document.getElementById('v-global-family').value;
-            document.querySelectorAll('#container-rows-vendas .dynamic-row').forEach(row => {
-                const select = row.querySelector('.v-item-select');
-                populateProductsDropdownByFamily(select, fam);
-                calcRowV(row.id);
-            });
-        }
-
-        function populateProductsDropdownByFamily(selectElement, familiaSelecionada) {
-            if(!selectElement) return;
-            if(!familiaSelecionada) {
-                selectElement.innerHTML = '<option value="">Escolha a Família acima...</option>';
-                return;
-            }
-            let atual = selectElement.value;
-            selectElement.innerHTML = '<option value="">Escolha o item...</option>';
-            data.catalogo.forEach((c, i) => {
-                if(c.emp === familiaSelecionada) { selectElement.innerHTML += `<option value="${i}">${c.pro}</option>`; }
-            });
-            selectElement.value = atual;
-        }
-
-        function resetFormulariosMultiplos() {
-            document.getElementById('container-rows-encomendas').innerHTML = '';
-            document.getElementById('container-rows-vendas').innerHTML = '';
-            document.getElementById('container-rows-catalogo').innerHTML = '';
-            document.getElementById('c-global-family').value = '';
-            if(document.getElementById('e-global-family')) document.getElementById('e-global-family').value = '';
-            if(document.getElementById('v-global-family')) document.getElementById('v-global-family').value = '';
-            addEncomendaRow(); addVendaRow(); addCatalogoRow();
-        }
-
-        function addEncomendaRow() {
-            const container = document.getElementById('container-rows-encomendas');
-            const rowId = 'enc_row_' + Date.now() + Math.random().toString(36).substr(2, 5);
-            const div = document.createElement('div');
-            div.className = 'dynamic-row'; div.id = rowId;
-            div.innerHTML = `
-                <select class="e-item-select" onchange="calcRowE('${rowId}')" style="flex: 2;"></select>
-                <input type="number" class="e-qtd-input" placeholder="Quantidade" oninput="calcRowE('${rowId}')" style="flex: 1;">
-                <input type="text" class="e-val-input" placeholder="Custo Auto" readonly style="flex: 1;">
-                <button type="button" class="btn-remove-row" onclick="removeFormRow('${rowId}')"><i class="fas fa-times"></i></button>
-            `;
-            container.appendChild(div);
-            populateProductsDropdownByFamily(div.querySelector('.e-item-select'), document.getElementById('e-global-family').value);
-        }
-
-        function calcRowE(rowId) {
-            const row = document.getElementById(rowId); if(!row) return;
-            const select = row.querySelector('.e-item-select').value; const qtd = row.querySelector('.e-qtd-input').value;
-            if(select !== "" && qtd) {
-                const item = data.catalogo[select];
-                row.querySelector('.e-val-input').value = `R$ ${(item.pre * qtd).toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
-            } else { row.querySelector('.e-val-input').value = ''; }
-        }
-
-        function submitEncomendas() {
-            const famGlobal = document.getElementById('e-global-family').value;
-            if(!famGlobal) { alert("Selecione uma Família primeiro!"); return; }
-            const rows = document.querySelectorAll('#container-rows-encomendas .dynamic-row');
-            let adicionados = 0;
-            rows.forEach(row => {
-                const idx = row.querySelector('.e-item-select').value; const q = parseInt(row.querySelector('.e-qtd-input').value);
-                if(idx !== "" && q) {
-                    const c = data.catalogo[idx];
-                    const novaEncomenda = { emp: famGlobal, pro: c.pro, q, v: c.pre * q };
-                    if(db) { db.ref('encomendas').push().set(novaEncomenda); } 
-                    else { novaEncomenda.id = 'enc_' + Date.now() + Math.random(); data.encomendas.push(novaEncomenda); }
-                    adicionados++;
-                }
-            });
-            if(adicionados > 0) {
-                if(!db) atualizarLocalStorage('encomendas');
-                registrarAcaoNoPainel(`Registrou entrada de ${adicionados} itens em encomendas (${famGlobal}).`);
-                renderEncomendas(); resetFormulariosMultiplos(); toggleBox('box-enc-form');
-            }
         }
 
         function addVendaRow() {
             const container = document.getElementById('container-rows-vendas');
-            const rowId = 'ven_row_' + Date.now() + Math.random().toString(36).substr(2, 5);
-            const div = document.createElement('div');
-            div.className = 'dynamic-row'; div.id = rowId;
+            const rId = 'v_row_' + Date.now() + Math.random().toString(36).substr(2,3);
+            const div = document.createElement('div'); div.className = 'dynamic-row'; div.id = rId;
+            
+            // Filtra o que pertence a você ("Nosso Catálogo")
+            let optionsNossosProdutos = '<option value="">Escolha nosso produto...</option>';
+            data.catalogo.forEach((c, i) => {
+                if(c.emp.toLowerCase() === 'nosso catálogo' || c.emp.toLowerCase() === 'nosso catalogo') {
+                    optionsNossosProdutos += `<option value="${i}">${c.pro} (R$ ${c.pre})</option>`;
+                }
+            });
+
+            // Filtra as famílias clientes
+            let optionsFamiliasClientes = '<option value="">Para qual Família?</option>';
+            let fams = [...new Set(data.catalogo.map(c => c.emp))].filter(f => f.toLowerCase() !== 'nosso catálogo' && f.toLowerCase() !== 'nosso catalogo').sort();
+            fams.forEach(f => optionsFamiliasClientes += `<option value="${f}">${f}</option>`);
+
             div.innerHTML = `
-                <select class="v-item-select" onchange="calcRowV('${rowId}')" style="flex: 2;"></select>
-                <input type="number" class="v-qtd-input" placeholder="Quantidade" oninput="calcRowV('${rowId}')" style="flex: 1;">
-                <input type="text" class="v-val-input" placeholder="Faturamento Auto" readonly style="flex: 1;">
-                <button type="button" class="btn-remove-row" onclick="removeFormRow('${rowId}')"><i class="fas fa-times"></i></button>
+                <select class="v-item-select" onchange="calcRowV('${rId}')" style="flex: 2;">${optionsNossosProdutos}</select>
+                <select class="v-fam-select" style="flex: 2;">${optionsFamiliasClientes}</select>
+                <input type="number" class="v-qtd-input" placeholder="Qtd" oninput="calcRowV('${rId}')" style="flex: 1;">
+                <input type="text" class="v-val-input" placeholder="Total" readonly style="flex: 1.2;">
+                <button type="button" class="btn-remove-row" onclick="removeFormRow('${rId}')"><i class="fas fa-times"></i></button>
             `;
             container.appendChild(div);
-            populateProductsDropdownByFamily(div.querySelector('.v-item-select'), document.getElementById('v-global-family').value);
         }
 
-        function calcRowV(rowId) {
-            const row = document.getElementById(rowId); if(!row) return;
-            const select = row.querySelector('.v-item-select').value; const qtd = row.querySelector('.v-qtd-input').value;
-            if(select !== "" && qtd) {
-                const item = data.catalogo[select];
-                row.querySelector('.v-val-input').value = `R$ ${(item.pre * qtd).toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
-            } else { row.querySelector('.v-val-input').value = ''; }
+        function calcRowV(rId) {
+            const row = document.getElementById(rId); if(!row) return;
+            const idx = row.querySelector('.v-item-select').value; const qtd = row.querySelector('.v-qtd-input').value;
+            if(idx !== "" && qtd) { row.querySelector('.v-val-input').value = `R$ ${(data.catalogo[idx].pre * qtd).toLocaleString('pt-BR')}`; }
+            else { row.querySelector('.v-val-input').value = ''; }
         }
 
         function submitVendas() {
-            const famGlobal = document.getElementById('v-global-family').value;
-            if(!famGlobal) { alert("Selecione uma Família primeiro!"); return; }
-            const rows = document.querySelectorAll('#container-rows-vendas .dynamic-row');
-            let adicionados = 0;
-            rows.forEach(row => {
-                const idx = row.querySelector('.v-item-select').value; const q = parseInt(row.querySelector('.v-qtd-input').value);
-                if(idx !== "" && q) {
-                    const c = data.catalogo[idx];
-                    const novaVenda = { emp: famGlobal, pro: c.pro, q, v: c.pre * q };
-                    if(db) { db.ref('vendas').push().set(novaVenda); } 
-                    else { novaVenda.id = 'ven_' + Date.now() + Math.random(); data.vendas.push(novaVenda); }
-                    adicionados++;
+            const rows = document.querySelectorAll('#container-rows-vendas .dynamic-row'); let count = 0;
+            rows.forEach(r => {
+                const idx = r.querySelector('.v-item-select').value;
+                const famDestino = r.querySelector('.v-fam-select').value;
+                const q = parseInt(r.querySelector('.v-qtd-input').value);
+                if(idx !== "" && famDestino && q) {
+                    const prod = data.catalogo[idx];
+                    const nv = { pro: prod.pro, emp: famDestino, q, v: prod.pre * q };
+                    if(db) db.ref('vendas').push().set(nv); else { nv.id='v_'+Date.now(); data.vendas.push(nv); }
+                    count++;
                 }
             });
-            if(adicionados > 0) {
-                if(!db) atualizarLocalStorage('vendas');
-                registrarAcaoNoPainel(`Confirmou a venda de ${adicionados} itens da família '${famGlobal}'.`);
-                renderVendas(); resetFormulariosMultiplos(); toggleBox('box-ven-form');
-            }
+            if(count > 0) { if(!db) { atualizarLocalStorage('vendas'); renderVendas(); } resetFormulariosMultiplos(); toggleBox('box-ven-form'); }
+        }
+
+        function addEncomendaRow() {
+            const container = document.getElementById('container-rows-encomendas');
+            const rId = 'e_row_' + Date.now(); const div = document.createElement('div'); div.className = 'dynamic-row'; div.id = rId;
+            div.innerHTML = `<select class="e-item-select" style="flex: 2;"></select><input type="number" class="e-qtd-input" placeholder="Qtd" style="flex: 1;"><button type="button" class="btn-remove-row" onclick="removeFormRow('${rId}')"><i class="fas fa-times"></i></button>`;
+            container.appendChild(div); updateEncomendasProductsDropdowns();
+        }
+
+        function submitEncomendas() {
+            const fam = document.getElementById('e-global-family').value; if(!fam) return;
+            const rows = document.querySelectorAll('#container-rows-encomendas .dynamic-row');
+            rows.forEach(r => {
+                const idx = r.querySelector('.e-item-select').value; const q = parseInt(r.querySelector('.e-qtd-input').value);
+                if(idx !== "" && q) {
+                    const ne = { emp: fam, pro: data.catalogo[idx].pro, q, v: data.catalogo[idx].pre * q };
+                    if(db) db.ref('encomendas').push().set(ne); else data.encomendas.push(ne);
+                }
+            });
+            if(!db) { atualizarLocalStorage('encomendas'); renderEncomendas(); } resetFormulariosMultiplos(); toggleBox('box-enc-form');
         }
 
         function addCatalogoRow() {
             const container = document.getElementById('container-rows-catalogo');
-            const rowId = 'cat_row_' + Date.now() + Math.random().toString(36).substr(2, 5);
-            const div = document.createElement('div');
-            div.className = 'dynamic-row'; div.id = rowId;
-            div.innerHTML = `
-                <input type="text" class="c-pro-input" placeholder="Produto Comercializado" style="flex: 2;">
-                <input type="number" class="c-pre-input" placeholder="Preço Unitário (R$)" style="flex: 1;">
-                <button type="button" class="btn-remove-row" onclick="removeFormRow('${rowId}')"><i class="fas fa-times"></i></button>
-            `;
+            const rId = 'c_row_'+Date.now(); const div = document.createElement('div'); div.className='dynamic-row'; div.id=rId;
+            div.innerHTML = `<input type="text" class="c-pro-input" placeholder="Nome do Produto" style="flex: 2;"><input type="number" class="c-pre-input" placeholder="Preço" style="flex: 1;"><button type="button" class="btn-remove-row" onclick="removeFormRow('${rId}')">X</button>`;
             container.appendChild(div);
         }
 
         function submitCatalogo() {
-            const empGlobal = document.getElementById('c-global-family').value.trim();
-            if(!empGlobal) { alert("Digite o nome da Família!"); return; }
+            const famName = document.getElementById('c-global-family').value.trim(); if(!famName) return;
             const rows = document.querySelectorAll('#container-rows-catalogo .dynamic-row');
-            let adicionados = 0;
-            rows.forEach(row => {
-                const pro = row.querySelector('.c-pro-input').value.trim(); const pre = parseFloat(row.querySelector('.c-pre-input').value);
+            rows.forEach(r => {
+                const pro = r.querySelector('.c-pro-input').value.trim(); const pre = parseFloat(r.querySelector('.c-pre-input').value);
                 if(pro && !isNaN(pre)) {
-                    const novoItem = { emp: empGlobal, pro, pre };
-                    if(db) db.ref('catalogo').push().set(novoItem);
-                    else { novoItem.id = 'cat_' + Date.now() + Math.random(); data.catalogo.push(novoItem); }
-                    adicionados++;
+                    const nc = { emp: famName, pro, pre }; if(db) db.ref('catalogo').push().set(nc); else data.catalogo.push(nc);
                 }
             });
-            if(adicionados > 0) {
-                if(!db) { atualizarLocalStorage('catalogo'); updateGlobalFamilyDropdowns(); renderFamilies(); }
-                registrarAcaoNoPainel(`Cadastrou ${adicionados} produtos em '${empGlobal}'.`);
-                resetFormulariosMultiplos(); toggleBox('box-cfg-fam');
-            }
+            if(!db) { atualizarLocalStorage('catalogo'); refreshAll(); } resetFormulariosMultiplos(); toggleBox('box-cfg-fam');
         }
 
-        function removeFormRow(rowId) { const row = document.getElementById(rowId); if(row) row.remove(); }
-
-        function registrarAcaoNoPainel(mensagem) {
-            const userName = currentUser ? currentUser.nome : "Sistema";
-            const novoLog = { user: userName, txt: mensagem, time: new Date().toLocaleTimeString('pt-BR') + ' - ' + new Date().toLocaleDateString('pt-BR') };
-            if(!data.movimentos) data.movimentos = [];
-            data.movimentos.push(novoLog);
-            if(db) db.ref('movimentos').set(data.movimentos);
-            else { atualizarLocalStorage('movimentos'); renderLogs(); }
-        }
-
-        function renderLogs() {
-            const container = document.getElementById('log-container'); if(!container) return;
-            if(!data.movimentos || data.movimentos.length === 0) { container.innerHTML = `<div style="text-align: center; opacity: 0.4; padding: 20px; font-size: 13px;">Nenhuma atividade ainda.</div>`; return; }
-            container.innerHTML = ""; [...data.movimentos].reverse().forEach(log => { container.innerHTML += `<div class="log-item"><span><strong>${log.user}</strong>: ${log.txt}</span><div class="log-time">${log.time}</div></div>`; });
+        function removeFormRow(id) { const r = document.getElementById(id); if(r) r.remove(); }
+        function resetFormulariosMultiplos() {
+            document.getElementById('container-rows-encomendas').innerHTML = ''; document.getElementById('container-rows-vendas').innerHTML = ''; document.getElementById('container-rows-catalogo').innerHTML = '';
+            document.getElementById('c-global-family').value = ''; addEncomendaRow(); addVendaRow(); addCatalogoRow();
         }
 
         function auth() {
             const u = document.getElementById('user-in').value.trim(); const p = document.getElementById('pass-in').value.trim();
-            const found = data.membros.find(m => (m.nome.toLowerCase() === u.toLowerCase() || String(m.uid) === u) && String(m.senha) === p);
-            if(found) {
-                currentUser = found; currentUser.status = { online: true, lastSeen: Date.now() };
-                document.getElementById('login-screen').style.display = 'none'; document.getElementById('main-panel').style.display = 'block';
-                document.getElementById('logged-name').innerText = `${currentUser.nome} | ${currentUser.uid}`;
-                renderMembros();
-                if(db && currentUser.dbKey !== 'master_local') db.ref('membros/' + currentUser.dbKey + '/status').set({ online: true, lastSeen: Date.now() });
-            } else { document.getElementById('login-err').style.display = 'block'; }
+            const f = data.membros.find(m => (m.nome.toLowerCase() === u.toLowerCase() || String(m.uid) === u) && String(m.senha) === p);
+            if(f) { currentUser = f; document.getElementById('login-screen').style.display = 'none'; document.getElementById('main-panel').style.display = 'block'; document.getElementById('logged-name').innerText = f.nome; refreshAll(); }
+            else { document.getElementById('login-err').style.display = 'block'; }
         }
-
-        function logout() {
-            if(db && currentUser && currentUser.dbKey !== 'master_local') db.ref('membros/' + currentUser.dbKey + '/status').set({ online: false, lastSeen: Date.now() });
-            currentUser = null; document.getElementById('main-panel').style.display = 'none'; document.getElementById('login-screen').style.display = 'flex';
-        }
-
+        function logout() { currentUser = null; document.getElementById('main-panel').style.display = 'none'; document.getElementById('login-screen').style.display = 'flex'; }
         function saveMembro() {
-            const key = document.getElementById('m-key').value; const uid = document.getElementById('m-id').value.trim();
-            const nome = document.getElementById('m-nome').value.trim(); const senha = document.getElementById('m-pass').value.trim();
-            const cargo = document.getElementById('m-cargo').value.trim(); if(!uid || !nome || !senha || !cargo) return;
-            if(key) {
-                if(key === 'master_local') data.membros[0] = { dbKey: "master_local", uid, nome, senha, cargo, status: { online: true, lastSeen: Date.now() } };
-                else if(db) db.ref('membros/' + key).update({ uid, nome, senha, cargo });
-                else { const idx = data.membros.findIndex(m => m.dbKey === key); if(idx !== -1) data.membros[idx] = { dbKey: key, uid, nome, senha, cargo, status: data.membros[idx].status }; }
-            } else {
-                const novo = { uid, nome, senha, cargo, status: { online: false, lastSeen: 0 } };
-                if(db) db.ref('membros').push().set(novo); else { novo.dbKey = 'local_' + Date.now(); data.membros.push(novo); }
-            }
-            atualizarLocalStorage('membros'); cancelarEdicaoMembro(); renderMembros(); toggleBox('box-mem-form');
+            const uid = document.getElementById('m-id').value.trim(); const nome = document.getElementById('m-nome').value.trim(); const senha = document.getElementById('m-pass').value.trim(); const cargo = document.getElementById('m-cargo').value.trim();
+            if(!uid || !nome || !senha || !cargo) return; const nm = { uid, nome, senha, cargo };
+            if(db) db.ref('membros').push().set(nm); else { data.membros.push(nm); atualizarLocalStorage('membros'); renderMembros(); }
+            toggleBox('box-mem-form');
         }
 
-        function prepararEdicaoMembro(key) {
-            const mem = data.membros.find(m => m.dbKey === key); if(!mem) return;
-            document.getElementById('m-key').value = mem.dbKey; document.getElementById('m-id').value = mem.uid;
-            document.getElementById('m-nome').value = mem.nome; document.getElementById('m-pass').value = mem.senha;
-            document.getElementById('m-cargo').value = mem.cargo; toggleBox('box-mem-form');
-        }
-
-        function cancelarEdicaoMembro() { document.getElementById('m-key').value = ""; document.getElementById('m-id').value = ""; document.getElementById('m-nome').value = ""; document.getElementById('m-pass').value = ""; document.getElementById('m-cargo').value = ""; }
-        function delMem(k) { if(confirm("Remover?")) { if(db && k !== 'master_local') db.ref('membros/'+k).remove(); else { data.membros = data.membros.filter(m => m.dbKey !== k); atualizarLocalStorage('membros'); renderMembros(); } } }
-        function toggleBox(id) { const box = document.getElementById(id); box.classList.toggle('open'); }
-        function toggleSidebar() { const side = document.getElementById('sidebar'); side.classList.toggle('collapsed'); }
+        function toggleBox(id) { document.getElementById(id).classList.toggle('open'); }
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('collapsed'); }
         function tab(id) { document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
 
         function renderFamilies() {
-            const container = document.getElementById('container-familias'); if(!container) return;
-            if(!data.catalogo || data.catalogo.length === 0) { container.innerHTML = '<div style="opacity:0.4;padding:20px;">Vazio.</div>'; return; }
-            container.innerHTML = ""; let fams = {}; data.catalogo.forEach(c => { if(!fams[c.emp]) fams[c.emp] = []; fams[c.emp].push(c); });
-            for(let f in fams) {
-                let card = `<div class="family-card"><h4>${f}</h4><div class="family-products-list">`;
-                fams[f].forEach(p => { card += `<div class="family-item"><span>${p.pro}</span><strong>R$ ${p.pre.toLocaleString('pt-BR')}</strong></div>`; });
-                card += `</div></div>`; container.innerHTML += card;
+            const c = document.getElementById('container-familias'); if(!c) return; c.innerHTML = "";
+            let fMap = {}; data.catalogo.forEach(i => { if(!fMap[i.emp]) fMap[i.emp] = []; fMap[i.emp].push(i); });
+            for(let f in fMap) {
+                let h = `<div class="family-card"><h4>${f}</h4><div class="family-products-list">`;
+                fMap[f].forEach(p => h += `<div class="family-item"><span>${p.pro}</span><strong>R$ ${p.pre}</strong></div>`);
+                c.innerHTML += h + `</div></div>`;
             }
         }
-
-        function renderMembros() { const t = document.getElementById('t-membros'); if(!t) return; t.innerHTML = ""; data.membros.forEach(m => { t.innerHTML += `<tr><td><strong>#${m.uid}</strong></td><td>${m.nome}</td><td>${m.cargo}</td><td>${m.senha}</td><td>🟢</td><td><button onclick="prepararEdicaoMembro('${m.dbKey}')">Editar</button></td></tr>`; }); }
-        function renderEncomendas() { const t = document.getElementById('tab-enc'); if(!t) return; t.innerHTML = "<tr><th>Família</th><th>Produto</th><th>Qtd</th><th>Total</th></tr>"; data.encomendas.forEach(e => t.innerHTML += `<tr><td>${e.emp}</td><td>${e.pro}</td><td>${e.q}</td><td>R$ ${e.v.toLocaleString('pt-BR')}</td></tr>`); }
-        function renderVendas() { const t = document.getElementById('tab-ven'); if(!t) return; t.innerHTML = "<tr><th>Família</th><th>Produto</th><th>Qtd</th><th>Total</th></tr>"; data.vendas.forEach(v => t.innerHTML += `<tr><td>${v.emp}</td><td>${v.pro}</td><td>${v.q}</td><td>R$ ${v.v.toLocaleString('pt-BR')}</td></tr>`); }
-
-        function renderEstatisticas() {
-            const canvasFin = document.getElementById('chartFinanceiro'); if (!canvasFin) return;
-            let totalE = 0; let totalR = 0;
-            data.caixa.forEach(c => { if(c.tipo==='ENTRADA') totalE+=c.valor; else totalR+=c.valor; });
-            if (chartFinInstancia) chartFinInstancia.destroy();
-            chartFinInstancia = new Chart(canvasFin, {
-                type: 'doughnut',
-                data: { labels: ['Entradas', 'Retiradas'], datasets: [{ data: [totalE, totalR], backgroundColor: ['#22c55e', '#ef4444'] }] },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
-        }
-
-        function addNota() {
-            const t = document.getElementById('g-titulo').value; const txt = document.getElementById('g-nota').value;
-            if(!t || !txt) return; const n = { id: 'nt_'+Date.now(), titulo: t, txt: txt, u: currentUser?currentUser.nome:"Líder", d: new Date().toLocaleDateString('pt-BR') };
-            data.notes.push(n); if(db) db.ref('notes').set(data.notes); else { atualizarLocalStorage('notes'); renderNotas(); }
-            document.getElementById('g-titulo').value=''; document.getElementById('g-nota').value='';
-        }
-
-        function renderNotas() {
-            const m = document.getElementById('mural'); if(!m) return; m.innerHTML = "";
-            data.notes.forEach(n => { m.innerHTML += `<div class="note-card"><h5>${n.titulo}</h5><p>${n.txt}</p><small>${n.u} - ${n.d}</small></div>`; });
-        }
-
+        function renderMembros() { const t = document.getElementById('t-membros'); if(t) { t.innerHTML = ""; data.membros.forEach(m => t.innerHTML += `<tr><td>#${m.uid}</td><td>${m.nome}</td><td>${m.cargo}</td><td>${m.senha}</td><td>-</td></tr>`); } }
+        function renderEncomendas() { const t = document.getElementById('tab-enc'); if(t) { t.innerHTML = "<tr><th>Família</th><th>Produto</th><th>Qtd</th><th>Total</th></tr>"; data.encomendas.forEach(e => t.innerHTML += `<tr><td>${e.emp}</td><td>${e.pro}</td><td>${e.q}</td><td>R$ ${e.v}</td></tr>`); } }
+        function renderVendas() { const t = document.getElementById('tab-ven'); if(t) { t.innerHTML = "<tr><th>Nosso Produto</th><th>Família Destino</th><th>Qtd</th><th>Total Venda</th></tr>"; data.vendas.forEach(v => t.innerHTML += `<tr><td>${v.pro}</td><td>${v.emp}</td><td>${v.q}</td><td>R$ ${v.v.toLocaleString('pt-BR')}</td></tr>`); } }
+        function renderLogs() { const c = document.getElementById('log-container'); if(c) { c.innerHTML = ""; data.movimentos.forEach(m => c.innerHTML += `<div class="log-item"><span><strong>${m.user}</strong>: ${m.txt}</span></div>`); } }
+        function addNota() { const titulo = document.getElementById('g-titulo').value; const txt = document.getElementById('g-nota').value; if(titulo && txt) { const n = { titulo, txt }; data.notes.push(n); if(db) db.ref('notes').set(data.notes); else { atualizarLocalStorage('notes'); renderNotas(); } } }
+        function renderNotas() { const m = document.getElementById('mural'); if(m) { m.innerHTML = ""; data.notes.forEach(n => m.innerHTML += `<div class="note-card"><h5>${n.titulo}</h5><p>${n.txt}</p></div>`); } }
         function saveBG() { const val = document.getElementById('c-bg').value.trim(); if(db) db.ref('bg').set(val); else { localStorage.setItem('vortex_bg', val); aplicasPlanoDeFundo(val); } }
+        function renderEstatisticas() {
+            const cv = document.getElementById('chartFinanceiro'); if (!cv) return;
+            let ent = 0; let sai = 0; data.caixa.forEach(c => { if(c.tipo==='ENTRADA') ent+=c.valor; else sai+=c.valor; });
+            if (chartFinInstancia) chartFinInstancia.destroy();
+            chartFinInstancia = new Chart(cv, { type: 'doughnut', data: { labels: ['Entradas', 'Retiradas'], datasets: [{ data: [ent, sai], backgroundColor: ['#22c55e', '#ef4444'] }] }, options: { responsive: true, maintainAspectRatio: false } });
+        }
     </script>
 </body>
 </html>
