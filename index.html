@@ -11,6 +11,7 @@
             --primary: #a855f7;
             --success: #22c55e;
             --danger: #ef4444;
+            --warning: #f59e0b;
             --bg: #0b0813;
             --card: rgba(15, 12, 28, 0.75);
             --border: rgba(255, 255, 255, 0.08);
@@ -143,20 +144,38 @@
         }
 
         /* GRIDS DE 3 COLUNAS */
-        .families-grid-container, .notes-grid-container {
+        .families-grid-container, .notes-grid-container, .finance-cards-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 20px;
             width: 100%;
+        }
+        
+        .families-grid-container, .notes-grid-container {
             margin-top: 20px;
         }
 
         @media (max-width: 1024px) {
-            .families-grid-container, .notes-grid-container { grid-template-columns: repeat(2, 1fr); }
+            .families-grid-container, .notes-grid-container, .finance-cards-grid { grid-template-columns: repeat(2, 1fr); }
         }
         @media (max-width: 768px) {
-            .families-grid-container, .notes-grid-container { grid-template-columns: 1fr; }
+            .families-grid-container, .notes-grid-container, .finance-cards-grid { grid-template-columns: 1fr; }
         }
+
+        /* CARD FINANCEIRO COMPACTO */
+        .fin-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px 25px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+        .fin-card-info h3 { font-size: 12px; text-transform: uppercase; color: #64748b; letter-spacing: 0.5px; margin-bottom: 4px; }
+        .fin-card-info p { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+        .fin-card-icon { width: 45px; height: 45px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
 
         /* BOX DE CONTRASTE PADRÃO */
         .info-box-wrapper {
@@ -193,7 +212,7 @@
             height: 45px;
         }
 
-        /* ESTILO ESPECÍFICO DO CARD DE ANOTAÇÃO */
+        /* HISTÓRICO DE NOTA */
         .note-card-header {
             display: flex;
             justify-content: space-between;
@@ -251,7 +270,7 @@
         }
         input, select { height: 45px; }
         textarea { height: 100px; resize: none; font-size: 14px; }
-        input:focus, textarea:focus { border-color: var(--primary); }
+        input:focus, textarea:focus, select:focus { border-color: var(--primary); }
         
         button {
             width: 100%; padding: 12px; background: var(--primary); border: none;
@@ -327,9 +346,75 @@
 
         <main class="main-content">
             <section id="dash" class="section active">
-                <h2>Dashboard</h2>
+                <h2 style="margin-bottom: 20px;">Fluxo Bancário & Caixa</h2>
+                
+                <div class="finance-cards-grid">
+                    <div class="fin-card">
+                        <div class="fin-card-info">
+                            <h3>Saldo Atual</h3>
+                            <p id="banco-saldo" style="color: #fff;">R$ 0,00</p>
+                        </div>
+                        <div class="fin-card-icon" style="background: rgba(168, 85, 247, 0.15); color: var(--primary);">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                    </div>
+                    <div class="fin-card">
+                        <div class="fin-card-info">
+                            <h3>Total Entradas</h3>
+                            <p id="banco-entradas" style="color: var(--success);">R$ 0,00</p>
+                        </div>
+                        <div class="fin-card-icon" style="background: rgba(34, 197, 94, 0.15); color: var(--success);">
+                            <i class="fas fa-arrow-trend-up"></i>
+                        </div>
+                    </div>
+                    <div class="fin-card">
+                        <div class="fin-card-info">
+                            <h3>Total Saídas</h3>
+                            <p id="banco-saidas" style="color: var(--danger);">R$ 0,00</p>
+                        </div>
+                        <div class="fin-card-icon" style="background: rgba(239, 68, 68, 0.15); color: var(--danger);">
+                            <i class="fas fa-arrow-trend-down"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-box-wrapper" style="max-width: 100%;">
+                    <h3 style="margin-bottom: 15px; font-size: 15px; color: #cbd5e1;"><i class="fas fa-cash-register"></i> Novo Lançamento Financeiro</h3>
+                    <div class="form-row">
+                        <div class="form-group" style="max-width: 150px;">
+                            <label for="fin-tipo">Operação</label>
+                            <select id="fin-tipo">
+                                <option value="ENTRADA">Entrada (+)</option>
+                                <option value="SAIDA">Saída (-)</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="max-width: 200px;">
+                            <label for="fin-valor">Valor (R$)</label>
+                            <input type="number" id="fin-valor" placeholder="0.00" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label for="fin-desc">Descrição / Motivo</label>
+                            <input type="text" id="fin-desc" placeholder="Ex: Recebimento de Carga ou Compra de Peças">
+                        </div>
+                        <button onclick="registrarMovimentacaoBancaria()"><i class="fas fa-check"></i> Executar</button>
+                    </div>
+                </div>
+
                 <div class="info-box-wrapper">
-                    <p style="color: #cbd5e1;">Bem-vindo ao novo núcleo do sistema.</p>
+                    <h3 style="font-size: 15px; color: #cbd5e1;"><i class="fas fa-history"></i> Histórico de Registro e Movimentações</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Operador (Membro)</th>
+                                <th>Tipo</th>
+                                <th>Descrição</th>
+                                <th>Valor</th>
+                                <th>Saldo Resultante</th>
+                            </tr>
+                        </thead>
+                        <tbody id="t-financeiro-corpo">
+                            </tbody>
+                    </table>
                 </div>
             </section>
 
@@ -351,96 +436,49 @@
 
             <section id="importante" class="section">
                 <h2>Mural Importante</h2>
-                
                 <div class="info-box-wrapper" style="max-width: 600px; width: 100%;">
-                    <h3 style="margin-bottom: 15px; font-size: 16px; color: var(--primary);">
-                        <i class="fas fa-pen-nib"></i> Criar Nova Anotação / Aviso
-                    </h3>
-                    <div class="form-group">
-                        <label for="nota-titulo">Título do Aviso</label>
-                        <input type="text" id="nota-titulo" placeholder="Ex: Meta da semana">
-                    </div>
-                    <div class="form-group">
-                        <label for="nota-conteudo">Conteúdo do Registro</label>
-                        <textarea id="nota-conteudo" placeholder="Digite aqui o que precisa deixar anotado..."></textarea>
-                    </div>
+                    <h3 style="margin-bottom: 15px; font-size: 16px; color: var(--primary);"><i class="fas fa-pen-nib"></i> Criar Nova Anotação / Aviso</h3>
+                    <div class="form-group"><label for="nota-titulo">Título do Aviso</label><input type="text" id="nota-titulo" placeholder="Ex: Meta da semana"></div>
+                    <div class="form-group"><label for="nota-conteudo">Conteúdo do Registro</label><textarea id="nota-conteudo" placeholder="Digite aqui..."></textarea></div>
                     <button onclick="adicionarNota()"><i class="fas fa-save"></i> Fixar no Mural</button>
                 </div>
-
-                <div class="notes-grid-container" id="grid-mural-notas">
-                    </div>
+                <div class="notes-grid-container" id="grid-mural-notas"></div>
             </section>
 
             <section id="configuracao" class="section">
                 <h2>Configuração do Sistema</h2>
-                
                 <div class="boxes-row-container">
                     <div class="info-box-wrapper">
-                        <h3 style="margin-bottom: 20px; font-size: 16px; letter-spacing: 0.5px; color: var(--primary);">
-                            <i class="fas fa-boxes"></i> Produtos Vortex
-                        </h3>
-                        
+                        <h3 style="margin-bottom: 20px; font-size: 16px; color: var(--primary);"><i class="fas fa-boxes"></i> Produtos Vortex</h3>
                         <div class="form-row">
-                            <div class="form-group">
-                                <label for="prod-nome">Nome do Produto</label>
-                                <input type="text" id="prod-nome" placeholder="Ex: Produto Alfa">
-                            </div>
-                            <div class="form-group" style="max-width: 120px; min-width: 90px;">
-                                <label for="prod-valor">Valor Unidade</label>
-                                <input type="number" id="prod-valor" placeholder="0.00" step="0.01">
-                            </div>
+                            <div class="form-group"><label for="prod-nome">Nome do Produto</label><input type="text" id="prod-nome" placeholder="Ex: Produto Alfa"></div>
+                            <div class="form-group" style="max-width: 120px; min-width: 90px;"><label for="prod-valor">Valor Unidade</label><input type="number" id="prod-valor" placeholder="0.00" step="0.01"></div>
                             <button onclick="adicionarProduto()"><i class="fas fa-plus"></i></button>
                         </div>
-
                         <table>
-                            <thead>
-                                <tr><th>Produto</th><th>Valor Unidade</th><th style="width: 50px;">Ações</th></tr>
-                            </thead>
+                            <thead><tr><th>Produto</th><th>Valor Unidade</th><th style="width: 50px;">Ações</th></tr></thead>
                             <tbody id="t-produtos-corpo"></tbody>
                         </table>
                     </div>
-
                     <div class="info-box-wrapper">
-                        <h3 style="margin-bottom: 20px; font-size: 16px; letter-spacing: 0.5px; color: #38bdf8;">
-                            <i class="fas fa-handshake"></i> Gerenciador de Produtos das Famílias
-                        </h3>
-                        
+                        <h3 style="margin-bottom: 20px; font-size: 16px; color: #38bdf8;"><i class="fas fa-handshake"></i> Gerenciador de Produtos das Famílias</h3>
                         <div class="form-row">
-                            <div class="form-group">
-                                <label for="fam-nome-grupo">Nome da Família</label>
-                                <input type="text" id="fam-nome-grupo" placeholder="Ex: Medici">
-                            </div>
-                            <div class="form-group">
-                                <label for="fam-nome">Nome do Produto</label>
-                                <input type="text" id="fam-nome" placeholder="Ex: Item Externo">
-                            </div>
-                            <div class="form-group" style="max-width: 110px; min-width: 80px;">
-                                <label for="fam-valor">Valor Unidade</label>
-                                <input type="number" id="fam-valor" placeholder="0.00" step="0.01">
-                            </div>
+                            <div class="form-group"><label for="fam-nome-grupo">Nome da Família</label><input type="text" id="fam-nome-grupo" placeholder="Ex: Medici"></div>
+                            <div class="form-group"><label for="fam-nome">Nome do Produto</label><input type="text" id="fam-nome" placeholder="Ex: Item Externo"></div>
+                            <div class="form-group" style="max-width: 110px; min-width: 80px;"><label for="fam-valor">Valor Unidade</label><input type="number" id="fam-valor" placeholder="0.00" step="0.01"></div>
                             <button onclick="adicionarProdutoFamilia()" style="background: #38bdf8;"><i class="fas fa-plus"></i></button>
                         </div>
-                        <p style="font-size: 11px; color: #64748b; margin-top: -10px;">*Ao adicionar, uma box própria da família será criada ou atualizada abaixo.</p>
                     </div>
                 </div>
-
                 <div class="families-grid-container" id="grid-caixas-familias"></div>
-
                 <div class="collapsible-wrapper">
                     <div class="collapsible-header" onclick="toggleConfigBox()">
                         <h3><i class="fas fa-image" style="color: var(--primary);"></i> Personalização de Telas (via Link)</h3>
                         <i id="box-toggle-icon" class="fas fa-plus" style="color: #94a3b8;"></i>
                     </div>
-                    
                     <div id="box-toggle-content" class="collapsible-content">
-                        <div class="form-group">
-                            <label for="cfg-bg-login">URL do Background da Tela de Login</label>
-                            <input type="text" id="cfg-bg-login" placeholder="Ex: https://site.com/imagem-login.jpg">
-                        </div>
-                        <div class="form-group">
-                            <label for="cfg-bg-panel">URL do Background do Painel Interno</label>
-                            <input type="text" id="cfg-bg-panel" placeholder="Ex: https://site.com/imagem-painel.jpg">
-                        </div>
+                        <div class="form-group"><label for="cfg-bg-login">URL do Background da Tela de Login</label><input type="text" id="cfg-bg-login" placeholder="Ex: link"></div>
+                        <div class="form-group"><label for="cfg-bg-panel">URL do Background do Painel Interno</label><input type="text" id="cfg-bg-panel" placeholder="Ex: link"></div>
                         <button onclick="salvarConfiguracoesVisuais()"><i class="fas fa-save"></i> SALVAR CONFIGURAÇÕES</button>
                     </div>
                 </div>
@@ -462,10 +500,19 @@
                 "Medici": [{ id: 1, nome: "Componente Mecânico Ext", valor: 180.00 }],
                 "Mazzini": [{ id: 2, nome: "Algema de Aço", valor: 90.00 }]
             },
-            // Banco de anotações (Aba Importante)
             anotacoes: [
-                { id: 1, titulo: "Aviso de Reunião", conteudo: "Reunião geral com os líderes no próximo domingo às 20h para balanço financeiro das filiais." }
+                { id: 1, titulo: "Aviso de Reunião", conteudo: "Reunião geral com os líderes no próximo domingo às 20h." }
             ],
+            // BANCO DA CONTABILIDADE
+            financeiro: {
+                saldoAtual: 15000.00,
+                totalEntradas: 20000.00,
+                totalSaidas: 5000.00,
+                historico: [
+                    { operador: "Megan", tipo: "ENTRADA", descricao: "Balanço Inicial de Caixa", valor: 20000.00, resultante: 20000.00 },
+                    { operador: "Megan", tipo: "SAIDA", descricao: "Compra de insumos metalúrgicos", valor: 5000.00, resultante: 15000.00 }
+                ]
+            },
             config: { bgLogin: "", bgPanel: "" }
         };
 
@@ -477,126 +524,143 @@
             renderMembros();
             renderProdutos(); 
             renderBoxesFamilias();
-            renderMuralAnotacoes(); // Inicializa o mural de anotações
+            renderMuralAnotacoes();
+            renderContabilidadeDashboard(); // Inicializa os dados bancários
         };
 
-        // --- SISTEMA DO MURAL DE ANOTAÇÕES (ABA IMPORTANTE) ---
-        function renderMuralAnotacoes() {
-            const grid = document.getElementById('grid-mural-notas');
-            if(!grid) return;
-            grid.innerHTML = "";
+        // --- SISTEMA DE CONTABILIDADE FINANCEIRA (DASHBOARD) ---
+        function renderContabilidadeDashboard() {
+            // Atualiza os cards visuais superiores
+            document.getElementById('banco-saldo').innerText = `R$ ${db.financeiro.saldoAtual.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+            document.getElementById('banco-entradas').innerText = `R$ ${db.financeiro.totalEntradas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+            document.getElementById('banco-saidas').innerText = `R$ ${db.financeiro.totalSaidas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
 
-            if(db.anotacoes.length === 0) {
-                grid.innerHTML = `<p style="color: #64748b; font-style: italic; grid-column: span 3; margin-top: 10px;">O mural de anotações está vazio por enquanto.</p>`;
+            // Atualiza as colunas de registros abaixo
+            const tbody = document.getElementById('t-financeiro-corpo');
+            if(!tbody) return;
+            tbody.innerHTML = "";
+
+            if(db.financeiro.historico.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #64748b; font-style: italic;">Nenhuma movimentação bancária registrada.</td></tr>`;
                 return;
             }
 
-            db.anotacoes.forEach(nota => {
-                grid.innerHTML += `
-                    <div class="info-box-wrapper" style="min-width: 100%;">
-                        <div class="note-card-header">
-                            <h4 style="font-size: 15px; color: #f8fafc; font-weight: 700; letter-spacing: 0.3px;">
-                                <i class="fas fa-sticky-note" style="color: var(--primary); margin-right: 6px;"></i> ${nota.titulo}
-                            </h4>
-                            <button class="btn-delete" style="padding: 4px 8px; font-size: 10px;" onclick="removerNota(${nota.id})">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                        <p style="color: #cbd5e1; font-size: 14px; line-height: 1.5; white-space: pre-wrap;">${nota.conteudo}</p>
-                    </div>
+            // Inverte o histórico para mostrar os mais recentes no topo
+            [...db.financeiro.historico].reverse().forEach(mov => {
+                const corValor = mov.tipo === "ENTRADA" ? "var(--success)" : "var(--danger)";
+                const prefixo = mov.tipo === "ENTRADA" ? "+ R$" : "- R$";
+                const badgeTipo = mov.tipo === "ENTRADA" ? 
+                    `<span class="badge online" style="background: rgba(34, 197, 94, 0.1); color: var(--success);">ENTRADA</span>` : 
+                    `<span class="badge offline" style="background: rgba(239, 68, 68, 0.1); color: var(--danger);">SAÍDA</span>`;
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td style="font-weight: 600; color: #f8fafc;"><i class="fas fa-user-circle" style="color: rgba(255,255,255,0.3); margin-right: 5px;"></i> ${mov.operador}</td>
+                        <td>${badgeTipo}</td>
+                        <td style="color: #cbd5e1;">${mov.descricao}</td>
+                        <td style="color: ${corValor}; font-weight: 700;">${prefixo} ${mov.valor.toFixed(2)}</td>
+                        <td style="font-weight: 600; color: #94a3b8;">R$ ${mov.resultante.toFixed(2)}</td>
+                    </tr>
                 `;
             });
         }
 
-        function adicionarNota() {
-            const tituloIn = document.getElementById('nota-titulo');
-            const conteudoIn = document.getElementById('nota-conteudo');
-            
-            const titulo = tituloIn.value.trim();
-            const conteudo = conteudoIn.value.trim();
-
-            if(!titulo || !conteudo) {
-                alert("Preencha o título e o conteúdo da anotação antes de fixar!");
+        function registrarMovimentacaoBancaria() {
+            // Verifica se tem usuário autenticado no sistema para vincular o log
+            if(!usuarioLogado) {
+                alert("Erro crítico: Você precisa estar logado para efetuar transações!");
                 return;
             }
 
-            db.anotacoes.push({
-                id: Date.now(),
-                titulo: titulo,
-                conteudo: conteudo
+            const tipo = document.getElementById('fin-tipo').value;
+            const valorIn = document.getElementById('fin-valor');
+            const descIn = document.getElementById('fin-desc');
+            const valor = parseFloat(valorIn.value);
+            const descricao = descIn.value.trim();
+
+            if(isNaN(valor) || valor <= 0 || !descricao) {
+                alert("Por favor, preencha o valor correto e informe uma descrição válida para o motivo!");
+                return;
+            }
+
+            // Cálculos dinâmicos matemáticos baseados na operação escolhida
+            if(tipo === "ENTRADA") {
+                db.financeiro.saldoAtual += valor;
+                db.financeiro.totalEntradas += valor;
+            } else {
+                db.financeiro.saldoAtual -= valor;
+                db.financeiro.totalSaidas += valor;
+            }
+
+            // Salva o registro conectando com o login ativo obtido de usuarioLogado.nome
+            db.financeiro.historico.push({
+                operador: usuarioLogado.nome,
+                tipo: tipo,
+                descricao: descricao,
+                valor: valor,
+                resultante: db.financeiro.saldoAtual
             });
 
-            // Limpa os campos após salvar
-            tituloIn.value = "";
-            conteudoIn.value = "";
+            // Limpa os inputs
+            valorIn.value = "";
+            descIn.value = "";
 
-            renderMuralAnotacoes();
+            // Renderiza novamente a contabilidade com os novos valores
+            renderContabilidadeDashboard();
         }
 
-        function removerNota(id) {
-            db.anotacoes = db.anotacoes.filter(n => n.id !== id);
-            renderMuralAnotacoes();
+        // --- SISTEMA DO MURAL DE ANOTAÇÕES (ABA IMPORTANTE) ---
+        function renderMuralAnotacoes() {
+            const grid = document.getElementById('grid-mural-notas'); if(!grid) return; grid.innerHTML = "";
+            if(db.anotacoes.length === 0) { grid.innerHTML = `<p style="color: #64748b; font-style: italic; grid-column: span 3; margin-top: 10px;">O mural está vazio por enquanto.</p>`; return; }
+            db.anotacoes.forEach(nota => {
+                grid.innerHTML += `<div class="info-box-wrapper" style="min-width: 100%;"><div class="note-card-header"><h4 style="font-size: 15px; color: #f8fafc; font-weight: 700;"><i class="fas fa-sticky-note" style="color: var(--primary); margin-right: 6px;"></i> ${nota.titulo}</h4><button class="btn-delete" style="padding: 4px 8px; font-size: 10px;" onclick="removerNota(${nota.id})"><i class="fas fa-trash"></i></button></div><p style="color: #cbd5e1; font-size: 14px; line-height: 1.5; white-space: pre-wrap;">${nota.conteudo}</p></div>`;
+            });
         }
+        function adicionarNota() {
+            const tIn = document.getElementById('nota-titulo'); const cIn = document.getElementById('nota-conteudo');
+            const t = tIn.value.trim(); const c = cIn.value.trim();
+            if(!t || !c) { alert("Preencha o título e o conteúdo!"); return; }
+            db.anotacoes.push({ id: Date.now(), titulo: t, conteudo: c });
+            tIn.value = ""; cIn.value = ""; renderMuralAnotacoes();
+        }
+        function removerNota(id) { db.anotacoes = db.anotacoes.filter(n => n.id !== id); renderMuralAnotacoes(); }
 
         // --- PRODUTOS VORTEX ---
         function renderProdutos() {
-            const tbody = document.getElementById('t-produtos-corpo');
-            if(!tbody) return;
-            tbody.innerHTML = "";
-            if(db.produtos.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: #64748b; font-style: italic;">Nenhum produto registrado.</td></tr>`;
-                return;
-            }
-            db.produtos.forEach(p => {
-                tbody.innerHTML += `<tr><td style="font-weight: 600;">${p.nome}</td><td style="color: var(--success); font-weight: 600;">R$ ${p.valor.toFixed(2)}</td><td><button class="btn-delete" onclick="removerProduto(${p.id})"><i class="fas fa-trash"></i></button></td></tr>`;
-            });
+            const tbody = document.getElementById('t-produtos-corpo'); if(!tbody) return; tbody.innerHTML = "";
+            if(db.produtos.length === 0) { tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: #64748b; font-style: italic;">Nenhum produto registrado.</td></tr>`; return; }
+            db.produtos.forEach(p => { tbody.innerHTML += `<tr><td style="font-weight: 600;">${p.nome}</td><td style="color: var(--success); font-weight: 600;">R$ ${p.valor.toFixed(2)}</td><td><button class="btn-delete" onclick="removerProduto(${p.id})"><i class="fas fa-trash"></i></button></td></tr>`; });
         }
-
         function adicionarProduto() {
-            const nomeIn = document.getElementById('prod-nome'); const valorIn = document.getElementById('prod-valor');
-            const nome = nomeIn.value.trim(); const valor = parseFloat(valorIn.value);
-            if(!nome || isNaN(valor) || valor <= 0) { alert("Preencha o nome do produto e um valor válido!"); return; }
-            db.produtos.push({ id: Date.now(), nome: nome, valor: valor });
-            nomeIn.value = ""; valorIn.value = ""; renderProdutos();
+            const nIn = document.getElementById('prod-nome'); const vIn = document.getElementById('prod-valor');
+            const n = nIn.value.trim(); const v = parseFloat(vIn.value);
+            if(!n || isNaN(v) || v <= 0) { alert("Preencha os campos!"); return; }
+            db.produtos.push({ id: Date.now(), nome: n, valor: v }); nIn.value = ""; vIn.value = ""; renderProdutos();
         }
-
         function removerProduto(id) { db.produtos = db.produtos.filter(p => p.id !== id); renderProdutos(); }
 
         // --- SISTEMA DE FAMÍLIAS ---
         function renderBoxesFamilias() {
-            const grid = document.getElementById('grid-caixas-familias');
-            if(!grid) return;
-            grid.innerHTML = "";
-            const nomesFamilias = Object.keys(db.familias);
-            if(nomesFamilias.length === 0) return;
-
+            const grid = document.getElementById('grid-caixas-familias'); if(!grid) return; grid.innerHTML = "";
+            const nomesFamilias = Object.keys(db.familias); if(nomesFamilias.length === 0) return;
             nomesFamilias.forEach(nomeDaFamilia => {
-                const produtosDaFamilia = db.familias[nomeDaFamilia];
-                let linhasTabela = "";
-                if(produtosDaFamilia.length === 0) {
-                    linhasTabela = `<tr><td colspan="3" style="text-align: center; color: #64748b; font-style: italic;">Sem produtos.</td></tr>`;
-                } else {
-                    produtosDaFamilia.forEach(p => {
-                        linhasTabela += `<tr><td style="font-weight: 600;">${p.nome}</td><td style="color: #38bdf8; font-weight: 600;">R$ ${p.valor.toFixed(2)}</td><td><button class="btn-delete" onclick="removerProdutoDaFamilia('${nomeDaFamilia}', ${p.id})"><i class="fas fa-trash"></i></button></td></tr>`;
-                    });
-                }
-                grid.innerHTML += `<div class="info-box-wrapper" style="min-width: 100%;"><h3 style="margin-bottom: 15px; font-size: 15px; letter-spacing: 0.5px; color: #e2e8f0; border-bottom: 1px solid var(--border); padding-bottom: 10px;"><i class="fas fa-users" style="color: #38bdf8; margin-right: 6px;"></i> Família: ${nomeDaFamilia}</h3><table><thead><tr><th>Produto</th><th>Valor Unidade</th><th style="width: 40px;">Ações</th></tr></thead><tbody>${linhasTabela}</tbody></table></div>`;
+                const produtosDaFamilia = db.familias[nomeDaFamilia]; let linhasTabela = "";
+                if(produtosDaFamilia.length === 0) { linhasTabela = `<tr><td colspan="3" style="text-align: center; color: #64748b; font-style: italic;">Sem produtos.</td></tr>`; } 
+                else { produtosDaFamilia.forEach(p => { linhasTabela += `<tr><td style="font-weight: 600;">${p.nome}</td><td style="color: #38bdf8; font-weight: 600;">R$ ${p.valor.toFixed(2)}</td><td><button class="btn-delete" onclick="removerProdutoDaFamilia('${nomeDaFamilia}', ${p.id})"><i class="fas fa-trash"></i></button></td></tr>`; }); }
+                grid.innerHTML += `<div class="info-box-wrapper" style="min-width: 100%;"><h3 style="margin-bottom: 15px; font-size: 15px; color: #e2e8f0; border-bottom: 1px solid var(--border); padding-bottom: 10px;"><i class="fas fa-users" style="color: #38bdf8; margin-right: 6px;"></i> Família: ${nomeDaFamilia}</h3><table><thead><tr><th>Produto</th><th>Valor Unidade</th><th style="width: 40px;">Ações</th></tr></thead><tbody>${linhasTabela}</tbody></table></div>`;
             });
         }
-
         function adicionarProdutoFamilia() {
-            const familiaIn = document.getElementById('fam-nome-grupo'); const nomeIn = document.getElementById('fam-nome'); const valorIn = document.getElementById('fam-valor');
-            const familia = familiaIn.value.trim(); const nome = nomeIn.value.trim(); const valor = parseFloat(valorIn.value);
-            if(!familia || !nome || isNaN(valor) || valor <= 0) { alert("Preencha todos os campos corretamente!"); return; }
-            if(!db.familias[familia]) { db.familias[familia] = []; }
-            db.familias[familia].push({ id: Date.now(), nome: nome, valor: valor });
-            nomeIn.value = ""; valorIn.value = ""; renderBoxesFamilias();
+            const fIn = document.getElementById('fam-nome-grupo'); const nIn = document.getElementById('fam-nome'); const vIn = document.getElementById('fam-valor');
+            const f = fIn.value.trim(); const n = nIn.value.trim(); const v = parseFloat(vIn.value);
+            if(!f || !n || isNaN(v) || v <= 0) { alert("Preencha corretamente!"); return; }
+            if(!db.familias[f]) { db.familias[f] = []; } db.familias[f].push({ id: Date.now(), nome: n, valor: v });
+            nIn.value = ""; vIn.value = ""; renderBoxesFamilias();
         }
-
         function removerProdutoDaFamilia(nomeFamilia, idProduto) {
             db.familias[nomeFamilia] = db.familias[nomeFamilia].filter(p => p.id !== idProduto);
-            if(db.familias[nomeFamilia].length === 0) { delete db.familias[nomeFamilia]; }
-            renderBoxesFamilias();
+            if(db.familias[nomeFamilia].length === 0) { delete db.familias[nomeFamilia]; } renderBoxesFamilias();
         }
 
         // --- SISTEMAS DE BASE ---
@@ -605,13 +669,11 @@
             if (content.classList.contains('open')) { content.style.maxHeight = '0px'; content.classList.remove('open'); icon.className = 'fas fa-plus'; } 
             else { content.classList.add('open'); content.style.maxHeight = content.scrollHeight + 'px'; icon.className = 'fas fa-minus'; }
         }
-
         function toggleSidebarMenu(triggerElement) {
             const menu = document.getElementById('sidebar-menu-list'); triggerElement.classList.toggle('open');
             if (menu.style.maxHeight && menu.style.maxHeight !== '0px') { menu.style.maxHeight = '0px'; } 
             else { menu.style.maxHeight = menu.scrollHeight + 'px'; }
         }
-
         function aplicarBackgrounds() {
             const loginScreen = document.getElementById('login-screen'); const mainBody = document.body;
             if (db.config.bgLogin && db.config.bgLogin.trim() !== "") { loginScreen.style.setProperty('background', `url('${db.config.bgLogin.trim()}')`, 'important'); } 
@@ -619,7 +681,6 @@
             if (db.config.bgPanel && db.config.bgPanel.trim() !== "") { mainBody.style.setProperty('background', `url('${db.config.bgPanel.trim()}')`, 'important'); } 
             else { mainBody.style.setProperty('background', 'var(--bg)', 'important'); }
         }
-
         function salvarConfiguracoesVisuais() {
             db.config.bgLogin = document.getElementById('cfg-bg-login').value; db.config.bgPanel = document.getElementById('cfg-bg-panel').value;
             aplicarBackgrounds(); alert("Planos de fundo atualizados!");
@@ -635,6 +696,7 @@
                 document.getElementById('login-screen').style.display = 'none'; document.getElementById('main-panel').style.display = 'flex';
                 const trigger = document.querySelector('.dropdown-trigger'); if(!trigger.classList.contains('open')) { toggleSidebarMenu(trigger); }
                 renderMembros();
+                renderContabilidadeDashboard(); // Garante atualização ao logar
             } else { document.getElementById('login-err').style.display = 'block'; }
         }
 
