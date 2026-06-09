@@ -44,7 +44,6 @@
             width: 100vw; 
             height: 100vh; 
             display: flex; 
-            width: 100%;
             background: rgba(11, 8, 19, 0.6); 
         }
         
@@ -126,23 +125,8 @@
         .form-row .form-group { flex: 1; margin-bottom: 0; min-width: 110px; }
         .form-row button { width: auto; padding: 12px 20px; height: 45px; }
 
-        .note-card-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 15px; }
-
-        .collapsible-wrapper {
-            background: rgba(15, 12, 28, 0.85); border: 1px solid var(--border); border-radius: 12px;
-            max-width: 600px; width: 100%; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.5); margin-top: 40px; flex-shrink: 0;
-        }
-        .collapsible-header { padding: 15px 20px; background: rgba(255, 255, 255, 0.02); display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
-        .collapsible-header h3 { font-size: 14px; letter-spacing: 0.5px; color: #cbd5e1; display: flex; align-items: center; gap: 10px; }
-        .collapsible-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; padding: 0 20px; }
-        .collapsible-content.open { padding: 20px; border-top: 1px solid var(--border); }
-
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 6px; font-weight: 600; }
-
         input, textarea, select { width: 100%; padding: 12px; background: rgba(0,0,0,0.5); border: 1px solid var(--border); border-radius: 10px; color: #fff; margin-bottom: 5px; outline: none; }
         input, select { height: 45px; }
-        textarea { height: 100px; resize: none; font-size: 14px; }
         input:focus, textarea:focus, select:focus { border-color: var(--primary); }
         
         button { width: 100%; padding: 12px; background: var(--primary); border: none; border-radius: 10px; color: #fff; font-weight: 600; cursor: pointer; transition: background 0.2s; }
@@ -228,17 +212,7 @@
                 </div>
 
                 <div class="info-box-wrapper">
-                    <h3 style="margin-bottom: 15px; font-size: 15px; color: #cbd5e1;"><i class="fas fa-cash-register"></i> Novo Lançamento Manual</h3>
-                    <div class="form-row">
-                        <div class="form-group" style="max-width: 150px;"><label>Operação</label><select id="fin-tipo"><option value="ENTRADA">Entrada (+)</option><option value="SAIDA">Saída (-)</option></select></div>
-                        <div class="form-group" style="max-width: 200px;"><label>Valor (R$)</label><input type="number" id="fin-valor" step="0.01"></div>
-                        <div class="form-group"><label>Descrição / Motivo</label><input type="text" id="fin-desc"></div>
-                        <button onclick="registrarMovimentacaoBancaria()"><i class="fas fa-check"></i> Executar</button>
-                    </div>
-                </div>
-
-                <div class="info-box-wrapper">
-                    <h3><i class="fas fa-history"></i> Histórico Geral</h3>
+                    <h3><i class="fas fa-history"></i> Histórico Geral de Movimentações</h3>
                     <table>
                         <thead><tr><th>Operador</th><th>Tipo</th><th>Descrição</th><th>Valor</th><th>Saldo Resultante</th></tr></thead>
                         <tbody id="t-financeiro-corpo"></tbody>
@@ -268,55 +242,74 @@
 
             <section id="encomendas" class="section">
                 <h2>Gerenciador de Encomendas & Compras</h2>
-                
                 <div class="info-box-wrapper">
                     <h3 style="margin-bottom: 15px; color: var(--primary);"><i class="fas fa-cart-plus"></i> Registrar Nova Compra</h3>
                     <div class="form-row">
-                        <div class="form-group">
-                            <label for="enc-familia">Família Destino</label>
-                            <select id="enc-familia" onchange="atualizarSelectProdutosEncomenda()">
-                                <option value="">-- Selecione a Família --</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="enc-produto">Produto Cadastrado</label>
-                            <select id="enc-produto" onchange="calcularPreviaValorEncomenda()">
-                                <option value="">-- Selecione o Produto --</option>
-                            </select>
-                        </div>
-                        <div class="form-group" style="max-width: 120px;">
-                            <label for="enc-qtd">Quantidade</label>
-                            <input type="number" id="enc-qtd" value="1" min="1" oninput="calcularPreviaValorEncomenda()">
-                        </div>
-                        <div class="form-group" style="max-width: 180px;">
-                            <label>Valor Total Estimado</label>
-                            <input type="text" id="enc-previa-total" value="R$ 0,00" readonly style="background: rgba(255,255,255,0.03); color: var(--success); font-weight: 700;">
-                        </div>
-                        <button onclick="salvarNovaEncomenda()" style="background: var(--primary);"><i class="fas fa-shopping-basket"></i> Fechar Pedido</button>
+                        <div class="form-group"><label>Família Destino</label><select id="enc-familia" onchange="atualizarSelectProdutosEncomenda()"><option value="">-- Selecione a Família --</option></select></div>
+                        <div class="form-group"><label>Produto Cadastrado</label><select id="enc-produto" onchange="calcularPreviaValorEncomenda()"><option value="">-- Selecione o Produto --</option></select></div>
+                        <div class="form-group" style="max-width: 120px;"><label>Quantidade</label><input type="number" id="enc-qtd" value="1" min="1" oninput="calcularPreviaValorEncomenda()"></div>
+                        <div class="form-group" style="max-width: 180px;"><label>Valor Total Estimado</label><input type="text" id="enc-previa-total" value="R$ 0,00" readonly style="color: var(--success); font-weight: 700;"></div>
+                        <button onclick="salvarNovaEncomenda()"><i class="fas fa-shopping-basket"></i> Fechar Pedido</button>
                     </div>
                 </div>
-
                 <div class="info-box-wrapper">
-                    <h3><i class="fas fa-boxes"></i> Histórico de Encomendas Registradas</h3>
                     <table>
-                        <thead>
-                            <tr>
-                                <th>Operador</th>
-                                <th>Família</th>
-                                <th>Produto</th>
-                                <th>Qtd</th>
-                                <th>Valor Unitário</th>
-                                <th>Valor Total</th>
-                                <th style="width: 50px;">Ações</th>
-                            </tr>
-                        </thead>
+                        <thead><tr><th>Operador</th><th>Família</th><th>Produto</th><th>Qtd</th><th>Unitário</th><th>Total</th><th style="width: 50px;">Ações</th></tr></thead>
                         <tbody id="t-encomendas-corpo"></tbody>
                     </table>
                 </div>
             </section>
 
-            <section id="vendas" class="section"><h2>Vendas</h2><div class="info-box-wrapper"><p>Registro e controle de saídas e vendas.</p></div></section>
-            <section id="movimentacao" class="section"><h2>Movimentação</h2><div class="info-box-wrapper"><p>Histórico financeiro detalhado.</p></div></section>
+            <section id="vendas" class="section">
+                <h2>Gerenciador de Vendas Vortex</h2>
+                
+                <div class="info-box-wrapper">
+                    <h3 style="margin-bottom: 15px; color: var(--success);"><i class="fas fa-cash-register"></i> Registrar Nova Venda</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ven-familia">Família Compradora</label>
+                            <select id="ven-familia">
+                                <option value="">-- Selecione a Família --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="ven-produto">Produto Vortex</label>
+                            <select id="ven-produto" onchange="calcularPreviaValorVenda()">
+                                <option value="">-- Selecione o Produto Vortex --</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="max-width: 120px;">
+                            <label for="ven-qtd">Quantidade</label>
+                            <input type="number" id="ven-qtd" value="1" min="1" oninput="calcularPreviaValorVenda()">
+                        </div>
+                        <div class="form-group" style="max-width: 180px;">
+                            <label>Faturamento Total</label>
+                            <input type="text" id="ven-previa-total" value="R$ 0,00" readonly style="background: rgba(255,255,255,0.03); color: var(--success); font-weight: 700;">
+                        </div>
+                        <button onclick="salvarNovaVenda()" style="background: var(--success);"><i class="fas fa-check-double"></i> Confirmar Venda</button>
+                    </div>
+                </div>
+
+                <div class="info-box-wrapper">
+                    <h3><i class="fas fa-receipt"></i> Histórico de Vendas Concluídas</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Vendedor (Membro)</th>
+                                <th>Família Cliente</th>
+                                <th>Produto Vortex</th>
+                                <th>Qtd</th>
+                                <th>Valor Unitário</th>
+                                <th>Faturamento Total</th>
+                                <th style="width: 50px;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="t-vendas-corpo"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="movimentacao" class="section"><h2>Movimentação</h2><div class="info-box-wrapper"><p>O histórico geral unificado pode ser consultado na Dashboard.</p></div></section>
 
             <section id="importante" class="section">
                 <h2>Mural Importante</h2>
@@ -334,11 +327,11 @@
                     <div class="info-box-wrapper">
                         <h3><i class="fas fa-boxes"></i> Produtos Vortex</h3>
                         <div class="form-row">
-                            <div class="form-group"><label>Nome</label><input type="text" id="prod-nome"></div>
+                            <div class="form-group"><label>Nome do Produto</label><input type="text" id="prod-nome" placeholder="Ex: Colete"></div>
                             <div class="form-group" style="max-width: 120px;"><label>Valor Unidade</label><input type="number" id="prod-valor" step="0.01"></div>
                             <button onclick="adicionarProduto()"><i class="fas fa-plus"></i></button>
                         </div>
-                        <table><thead><tr><th>Produto</th><th>Valor</th><th>Ações</th></tr></thead><tbody id="t-produtos-corpo"></tbody></table>
+                        <table><thead><tr><th>Produto</th><th>Valor</th><th style="width: 50px;">Ações</th></tr></thead><tbody id="t-produtos-corpo"></tbody></table>
                     </div>
                     
                     <div class="info-box-wrapper">
@@ -361,236 +354,256 @@
             membros: [
                 { id: "3461", nome: "Megan", discord: "megan_vortex", senha: "1234", cargo: "Chefe", online: false }
             ],
-            produtos: [],
+            produtos: [
+                { id: 1, nome: "Kit de Reparo Premium", valor: 250.00 },
+                { id: 2, nome: "Colete Balístico V3", valor: 500.00 }
+            ],
             familias: {
-                "Medici": [{ id: 1, nome: "Componente Mecânico Ext", valor: 180.00 }],
-                "Mazzini": [{ id: 2, nome: "Algema de Aço", valor: 90.00 }]
+                "Medici": [{ id: 101, nome: "Componente Mecânico Ext", valor: 180.00 }],
+                "Mazzini": [{ id: 102, nome: "Algema de Aço", valor: 90.00 }]
             },
-            encomendas: [], // Onde ficam salvas as compras feitas
+            encomendas: [],
+            vendas: [], // Onde ficam salvas as vendas feitas
             anotacoes: [],
-            financeiro: { saldoAtual: 15000.00, totalEntradas: 20000.00, totalSaidas: 5000.00, historico: [] },
+            financeiro: { 
+                saldoAtual: 15000.00, 
+                totalEntradas: 20000.00, 
+                totalSaidas: 5000.00, 
+                historico: [
+                    { operador: "Sistema", tipo: "ENTRADA", descricao: "Balanço Inicial de Caixa", valor: 20000.00, resultante: 20000.00 },
+                    { operador: "Sistema", tipo: "SAIDA", descricao: "Configuração Inicial de Insumos", valor: 5000.00, resultante: 15000.00 }
+                ] 
+            },
             config: { bgLogin: "", bgPanel: "" }
         };
 
         let usuarioLogado = null;
 
         window.onload = function() {
-            aplicarBackgrounds();
             renderMembros();
+            renderProdutos();
             renderBoxesFamilias();
             renderContabilidadeDashboard();
             renderEncomendas();
+            renderVendas();
+            atualizarSelectsGeraisVendaseEncomendas();
         };
 
-        // --- SISTEMA DINÂMICO DE ENCOMENDAS ---
-        
-        // Atualiza a lista de Famílias e Produtos na aba de Encomendas
-        function atualizarSelectsFamiliasEncomenda() {
-            const selectFam = document.getElementById('enc-familia');
-            if(!selectFam) return;
+        // --- ATUALIZAÇÃO DOS SELECTS DAS ABAS (MANTÉM TUDO SINCRONIZADO) ---
+        function atualizarSelectsGeraisVendaseEncomendas() {
+            // Selects da aba de Encomendas
+            const encFam = document.getElementById('enc-familia');
+            if(encFam) {
+                encFam.innerHTML = '<option value="">-- Selecione a Família --</option>';
+                Object.keys(db.familias).forEach(f => encFam.innerHTML += `<option value="${f}">${f}</option>`);
+            }
+
+            // Selects da aba de Vendas
+            const venFam = document.getElementById('ven-familia');
+            const venProd = document.getElementById('ven-produto');
             
-            // Salva o valor atualmente selecionado para não resetar à toa
-            const valorSelecionado = selectFam.value;
-            
-            selectFam.innerHTML = '<option value="">-- Selecione a Família --</option>';
-            Object.keys(db.familias).forEach(fam => {
-                selectFam.innerHTML += `<option value="${fam}">${fam}</option>`;
-            });
-            
-            // Restaura o valor se ele ainda existir
-            if(db.familias[valorSelecionado]) {
-                selectFam.value = valorSelecionado;
-            } else {
-                document.getElementById('enc-produto').innerHTML = '<option value="">-- Selecione o Produto --</option>';
+            if(venFam) {
+                venFam.innerHTML = '<option value="">-- Selecione a Família --</option>';
+                Object.keys(db.familias).forEach(f => venFam.innerHTML += `<option value="${f}">${f}</option>`);
+            }
+            if(venProd) {
+                venProd.innerHTML = '<option value="">-- Selecione o Produto Vortex --</option>';
+                db.produtos.forEach(p => venProd.innerHTML += `<option value="${p.id}">${p.nome} (R$ ${p.valor.toFixed(2)})</option>`);
             }
         }
 
-        // Quando o usuário escolhe a família, puxa os produtos cadastrados dela
-        function atualizarSelectProdutosEncomenda() {
-            const familiaSelecionada = document.getElementById('enc-familia').value;
-            const selectProd = document.getElementById('enc-produto');
-            
-            selectProd.innerHTML = '<option value="">-- Selecione o Produto --</option>';
-            
-            if(!familiaSelecionada || !db.familias[familiaSelecionada]) {
-                calcularPreviaValorEncomenda();
-                return;
-            }
+        // --- SISTEMA INTERATIVO DE VENDAS ---
+        function calcularPreviaValorVenda() {
+            const prodId = document.getElementById('ven-produto').value;
+            const qtd = parseInt(document.getElementById('ven-qtd').value) || 0;
+            const inputPrevia = document.getElementById('ven-previa-total');
 
-            db.familias[familiaSelecionada].forEach(p => {
-                selectProd.innerHTML += `<option value="${p.id}">${p.nome} (R$ ${p.valor.toFixed(2)})</option>`;
-            });
-            
-            calcularPreviaValorEncomenda();
-        }
-
-        // Calcula a prévia em tempo real (Valor Unitário * Qtd)
-        function calcularPreviaValorEncomenda() {
-            const fam = document.getElementById('enc-familia').value;
-            const prodId = document.getElementById('enc-produto').value;
-            const qtd = parseInt(document.getElementById('enc-qtd').value) || 0;
-            const inputPrevia = document.getElementById('enc-previa-total');
-
-            if(!fam || !prodId || qtd <= 0) {
+            if(!prodId || qtd <= 0) {
                 inputPrevia.value = "R$ 0,00";
                 return;
             }
 
-            const produto = db.familias[fam].find(p => p.id == prodId);
+            const produto = db.produtos.find(p => p.id == prodId);
             if(produto) {
                 const total = produto.valor * qtd;
                 inputPrevia.value = `R$ ${total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
             }
         }
 
-        // Salva a encomenda no histórico
-        function salvarNovaEncomenda() {
-            if(!usuarioLogado) { alert("Você precisa estar logado!"); return; }
-            
-            const fam = document.getElementById('enc-familia').value;
-            const prodId = document.getElementById('enc-produto').value;
-            const qtd = parseInt(document.getElementById('enc-qtd').value) || 0;
+        function salvarNovaVenda() {
+            if(!usuarioLogado) { alert("Você precisa estar logado para registrar vendas!"); return; }
+
+            const fam = document.getElementById('ven-familia').value;
+            const prodId = document.getElementById('ven-produto').value;
+            const qtd = parseInt(document.getElementById('ven-qtd').value) || 0;
 
             if(!fam || !prodId || qtd <= 0) {
-                alert("Selecione a Família, o Produto e insira uma quantidade válida!");
+                alert("Preencha a Família Cliente, o Produto Vortex e insira uma quantidade válida!");
                 return;
             }
 
-            const produto = db.familias[fam].find(p => p.id == prodId);
+            const produto = db.produtos.find(p => p.id == prodId);
             if(!produto) return;
 
-            const valorTotal = produto.valor * qtd;
+            const faturamentoTotal = produto.valor * qtd;
 
-            // Adiciona no banco interno de encomendas
-            db.encomendas.push({
+            // 1. Salva no banco de vendas
+            db.vendas.push({
                 id: Date.now(),
                 operador: usuarioLogado.nome,
                 familia: fam,
                 produtoNome: produto.nome,
                 quantidade: qtd,
                 valorUnitario: produto.valor,
-                valorTotal: valorTotal
+                valorTotal: faturamentoTotal
             });
 
-            // Opcional: desconta automaticamente das saídas de caixa do Dashboard? 
-            // Caso queira automatizar o caixa depois me avisa, por enquanto só registra na aba.
-
-            // Reseta formulário
-            document.getElementById('enc-qtd').value = "1";
-            document.getElementById('enc-produto').value = "";
-            calcularPreviaValorEncomenda();
+            // 2. CONTABILIZAÇÃO AUTOMÁTICA NO CAIXA (Soma no saldo e nas entradas)
+            db.financeiro.saldoAtual += faturamentoTotal;
+            db.financeiro.totalEntradas += faturamentoTotal;
             
-            renderEncomendas();
-            alert("Encomenda registrada com sucesso!");
+            // Adiciona a venda no extrato geral da dashboard
+            db.financeiro.historico.push({
+                operador: usuarioLogado.nome,
+                tipo: "ENTRADA",
+                descricao: `Venda de ${qtd}x ${produto.nome} para Família ${fam}`,
+                valor: faturamentoTotal,
+                resultante: db.financeiro.saldoAtual
+            });
+
+            // Limpa formulário da venda
+            document.getElementById('ven-qtd').value = "1";
+            document.getElementById('ven-produto').value = "";
+            calcularPreviaValorVenda();
+
+            // Atualiza telas
+            renderVendas();
+            renderContabilidadeDashboard();
+            alert("Venda registrada! Faturamento adicionado ao caixa da Dashboard com sucesso.");
         }
 
-        function renderEncomendas() {
-            const tbody = document.getElementById('t-encomendas-corpo');
+        function renderVendas() {
+            const tbody = document.getElementById('t-vendas-corpo');
             if(!tbody) return;
             tbody.innerHTML = "";
 
-            if(db.encomendas.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #64748b; font-style: italic;">Nenhuma encomenda registrada.</td></tr>`;
+            if(db.vendas.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #64748b; font-style: italic;">Nenhuma venda registrada até o momento.</td></tr>`;
                 return;
             }
 
-            [...db.encomendas].reverse().forEach(enc => {
+            [...db.vendas].reverse().forEach(v => {
                 tbody.innerHTML += `
                     <tr>
-                        <td style="font-weight:600;"><i class="fas fa-user-circle" style="opacity:0.4; margin-right:5px;"></i>${enc.operador}</td>
-                        <td style="color:#38bdf8; font-weight:600;">${enc.familia}</td>
-                        <td style="color:#fff;">${enc.produtoNome}</td>
-                        <td style="font-weight:700; color:var(--primary);">${enc.quantidade}x</td>
-                        <td style="color:#94a3b8;">R$ ${enc.valorUnitario.toFixed(2)}</td>
-                        <td style="color:var(--success); font-weight:700;">R$ ${enc.valorTotal.toFixed(2)}</td>
-                        <td><button class="btn-delete" onclick="removerEncomenda(${enc.id})"><i class="fas fa-trash"></i></button></td>
+                        <td style="font-weight:600;"><i class="fas fa-user-tie" style="opacity:0.4; margin-right:5px;"></i>${v.operador}</td>
+                        <td style="color:#e2e8f0; font-weight:600;">${v.familia}</td>
+                        <td style="color:#a855f7; font-weight:600;">${v.produtoNome}</td>
+                        <td style="font-weight:700; color:#fff;">${v.quantidade}x</td>
+                        <td style="color:#94a3b8;">R$ ${v.valorUnitario.toFixed(2)}</td>
+                        <td style="color:var(--success); font-weight:700;">R$ ${v.valorTotal.toFixed(2)}</td>
+                        <td><button class="btn-delete" onclick="removerVenda(${v.id})"><i class="fas fa-trash"></i></button></td>
                     </tr>
                 `;
             });
         }
 
-        function removerEncomenda(id) {
-            if(confirm("Deseja apagar o registro desta encomenda?")) {
-                db.encomendas = db.encomendas.filter(e => e.id !== id);
-                renderEncomendas();
+        function removerVenda(id) {
+            if(confirm("Deseja apagar o registro desta venda? (Atenção: Valores de caixa já computados não retrocedem automaticamente)")) {
+                db.vendas = db.vendas.filter(v => v.id !== id);
+                renderVendas();
             }
         }
 
-        // --- ATUALIZAÇÕES DOS MÉTODOS EXISTENTES PARA SUPORTAR O VÍNCULO ---
+        // --- MANUTENÇÃO DO SISTEMA DE ENCOMENDAS ---
+        function atualizarSelectProdutosEncomenda() {
+            const familiaSelecionada = document.getElementById('enc-familia').value;
+            const selectProd = document.getElementById('enc-produto');
+            selectProd.innerHTML = '<option value="">-- Selecione o Produto --</option>';
+            if(!familiaSelecionada || !db.familias[familiaSelecionada]) { calcularPreviaValorEncomenda(); return; }
+            db.familias[familiaSelecionada].forEach(p => { selectProd.innerHTML += `<option value="${p.id}">${p.nome} (R$ ${p.valor.toFixed(2)})</option>`; });
+            calcularPreviaValorEncomenda();
+        }
+        function calcularPreviaValorEncomenda() {
+            const fam = document.getElementById('enc-familia').value; const prodId = document.getElementById('enc-produto').value;
+            const qtd = parseInt(document.getElementById('enc-qtd').value) || 0; const inputPrevia = document.getElementById('enc-previa-total');
+            if(!fam || !prodId || qtd <= 0) { inputPrevia.value = "R$ 0,00"; return; }
+            const produto = db.familias[fam].find(p => p.id == prodId);
+            if(produto) { inputPrevia.value = `R$ ${(produto.valor * qtd).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`; }
+        }
+        function salvarNovaEncomenda() {
+            if(!usuarioLogado) return; const fam = document.getElementById('enc-familia').value; const prodId = document.getElementById('enc-produto').value; const qtd = parseInt(document.getElementById('enc-qtd').value) || 0;
+            if(!fam || !prodId || qtd <= 0) return; const produto = db.familias[fam].find(p => p.id == prodId); if(!produto) return;
+            const total = produto.valor * qtd;
+            db.encomendas.push({ id: Date.now(), operador: usuarioLogado.nome, familia: fam, produtoNome: produto.nome, quantidade: qtd, valorUnitario: produto.valor, valorTotal: total });
+            document.getElementById('enc-qtd').value = "1"; document.getElementById('enc-produto').value = ""; calcularPreviaValorEncomenda(); renderEncomendas(); alert("Encomenda salva!");
+        }
+        function renderEncomendas() {
+            const tbody = document.getElementById('t-encomendas-corpo'); if(!tbody) return; tbody.innerHTML = "";
+            if(db.encomendas.length === 0) { tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #64748b;">Nenhuma encomenda.</td></tr>`; return; }
+            [...db.encomendas].reverse().forEach(e => { tbody.innerHTML += `<tr><td>${e.operador}</td><td style="color:#38bdf8;">${e.familia}</td><td>${e.produtoNome}</td><td>${e.quantidade}x</td><td>R$ ${e.valorUnitario.toFixed(2)}</td><td style="color:var(--success)">R$ ${e.valorTotal.toFixed(2)}</td><td><button class="btn-delete" onclick="removerEncomenda(${e.id})"><i class="fas fa-trash"></i></button></td></tr>`; });
+        }
+        function removerEncomenda(id) { db.encomendas = db.encomendas.filter(e => e.id !== id); renderEncomendas(); }
+
+        // --- SISTEMAS DE AJUSTES E CONFIGS ---
         function renderBoxesFamilias() {
-            const grid = document.getElementById('grid-caixas-familias'); 
-            if(!grid) return; 
-            grid.innerHTML = "";
-            
+            const grid = document.getElementById('grid-caixas-familias'); if(!grid) return; grid.innerHTML = "";
             Object.keys(db.familias).forEach(nomeDaFamilia => {
-                let linhasTabela = ""; 
-                db.familias[nomeDaFamilia].forEach(p => { 
-                    linhasTabela += `<tr><td style="font-weight: 600;">${p.nome}</td><td style="color: #38bdf8; font-weight: 600;">R$ ${p.valor.toFixed(2)}</td><td><button class="btn-delete" onclick="removerProdutoDaFamilia('${nomeDaFamilia}', ${p.id})"><i class="fas fa-trash"></i></button></td></tr>`; 
-                });
-                grid.innerHTML += `<div class="info-box-wrapper" style="min-width: 100%;"><h3 style="margin-bottom: 15px; font-size: 15px; color: #e2e8f0; border-bottom: 1px solid var(--border); padding-bottom: 10px;"><i class="fas fa-users" style="color: #38bdf8; margin-right: 6px;"></i> Família: ${nomeDaFamilia}</h3><table><thead><tr><th>Produto</th><th>Valor Unidade</th><th style="width: 40px;">Ações</th></tr></thead><tbody>${linhasTabela}</tbody></table></div>`;
+                let linhasTabela = ""; db.familias[nomeDaFamilia].forEach(p => { linhasTabela += `<tr><td>${p.nome}</td><td>R$ ${p.valor.toFixed(2)}</td><td><button class="btn-delete" onclick="removerProdutoDaFamilia('${nomeDaFamilia}', ${p.id})"><i class="fas fa-trash"></i></button></td></tr>`; });
+                grid.innerHTML += `<div class="info-box-wrapper"><h3 style="font-size:14px; border-bottom:1px solid var(--border); padding-bottom:5px;">Família: ${nomeDaFamilia}</h3><table><tbody>${linhasTabela}</tbody></table></div>`;
             });
-            
-            // Toda vez que as famílias mudarem nas configurações, atualiza os selects na aba encomenda
-            atualizarSelectsFamiliasEncomenda();
+            atualizarSelectsGeraisVendaseEncomendas();
         }
-
         function adicionarProdutoFamilia() {
-            const fIn = document.getElementById('fam-nome-grupo'); const nIn = document.getElementById('fam-nome'); const vIn = document.getElementById('fam-valor');
-            const f = fIn.value.trim(); const n = nIn.value.trim(); const v = parseFloat(vIn.value);
-            if(!f || !n || isNaN(v) || v <= 0) { alert("Preencha corretamente!"); return; }
-            if(!db.familias[f]) { db.familias[f] = []; } 
-            db.familias[f].push({ id: Date.now(), nome: n, valor: v });
-            nIn.value = ""; vIn.value = ""; 
-            renderBoxesFamilias();
+            const f = document.getElementById('fam-nome-grupo').value.trim(); const n = document.getElementById('fam-nome').value.trim(); const v = parseFloat(document.getElementById('fam-valor').value);
+            if(!f || !n || isNaN(v)) return; if(!db.familias[f]) db.familias[f] = []; db.familias[f].push({ id: Date.now(), nome: n, valor: v });
+            document.getElementById('fam-nome').value = ""; document.getElementById('fam-valor').value = ""; renderBoxesFamilias();
         }
+        function removerProdutoDaFamilia(f, id) { db.familias[f] = db.familias[f].filter(p => p.id !== id); if(db.familias[f].length === 0) delete db.familias[f]; renderBoxesFamilias(); }
 
-        function removerProdutoDaFamilia(nomeFamilia, idProduto) {
-            db.familias[nomeFamilia] = db.familias[nomeFamilia].filter(p => p.id !== idProduto);
-            if(db.familias[nomeFamilia].length === 0) { delete db.familias[nomeFamilia]; } 
-            renderBoxesFamilias();
-            atualizarSelectProdutosEncomenda();
+        function renderProdutos() {
+            const tbody = document.getElementById('t-produtos-corpo'); if(!tbody) return; tbody.innerHTML = "";
+            db.produtos.forEach(p => { tbody.innerHTML += `<tr><td>${p.nome}</td><td style="color: var(--success);">R$ ${p.valor.toFixed(2)}</td><td><button class="btn-delete" onclick="removerProduto(${p.id})"><i class="fas fa-trash"></i></button></td></tr>`; });
+            atualizarSelectsGeraisVendaseEncomendas();
         }
+        function adicionarProduto() {
+            const n = document.getElementById('prod-nome').value.trim(); const v = parseFloat(document.getElementById('prod-valor').value);
+            if(!n || isNaN(v)) return; db.produtos.push({ id: Date.now(), nome: n, valor: v }); document.getElementById('prod-nome').value = ""; document.getElementById('prod-valor').value = ""; renderProdutos();
+        }
+        function removerProduto(id) { db.produtos = db.produtos.filter(p => p.id !== id); renderProdutos(); }
 
         // --- DASHBOARD CONTABILIDADE ---
         function renderContabilidadeDashboard() {
             document.getElementById('banco-saldo').innerText = `R$ ${db.financeiro.saldoAtual.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
             document.getElementById('banco-entradas').innerText = `R$ ${db.financeiro.totalEntradas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
             document.getElementById('banco-saidas').innerText = `R$ ${db.financeiro.totalSaidas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
-            const tbody = document.getElementById('t-financeiro-corpo'); if(tbody) tbody.innerHTML = "";
+            
+            const tbody = document.getElementById('t-financeiro-corpo'); if(!tbody) return; tbody.innerHTML = "";
+            [...db.financeiro.historico].reverse().forEach(m => {
+                const cor = m.tipo === "ENTRADA" ? "var(--success)" : "var(--danger)";
+                tbody.innerHTML += `<tr><td><b>${m.operador}</b></td><td><span class="badge ${m.tipo === "ENTRADA"?'online':'offline'}">${m.tipo}</span></td><td>${m.descricao}</td><td style="color:${cor}; font-weight:700;">R$ ${m.valor.toFixed(2)}</td><td>R$ ${m.resultante.toFixed(2)}</td></tr>`;
+            });
         }
         function salvarValoresDiretos() {
-            const sIn = document.getElementById('edit-saldo').value; const eIn = document.getElementById('edit-entradas').value; const saIn = document.getElementById('edit-saidas').value;
-            if(sIn !== "") db.financeiro.saldoAtual = parseFloat(sIn); if(eIn !== "") db.financeiro.totalEntradas = parseFloat(eIn); if(saIn !== "") db.financeiro.totalSaidas = parseFloat(saIn);
-            document.getElementById('edit-saldo').value = ""; document.getElementById('edit-entradas').value = ""; document.getElementById('edit-saidas').value = "";
-            renderContabilidadeDashboard(); alert("Valores alterados!");
-        }
-        function registrarMovimentacaoBancaria() {
-            const tipo = document.getElementById('fin-tipo').value; const valor = parseFloat(document.getElementById('fin-valor').value); const desc = document.getElementById('fin-desc').value.trim();
-            if(isNaN(valor) || valor <= 0 || !desc) return;
-            if(tipo === "ENTRADA") { db.financeiro.saldoAtual += valor; db.financeiro.totalEntradas += valor; } else { db.financeiro.saldoAtual -= valor; db.financeiro.totalSaidas += valor; }
-            document.getElementById('fin-valor').value = ""; document.getElementById('fin-desc').value = ""; renderContabilidadeDashboard();
+            const s = document.getElementById('edit-saldo').value; const e = document.getElementById('edit-entradas').value; const sa = document.getElementById('edit-saidas').value;
+            if(s !== "") db.financeiro.saldoAtual = parseFloat(s); if(e !== "") db.financeiro.totalEntradas = parseFloat(e); if(sa !== "") db.financeiro.totalSaidas = parseFloat(sa);
+            document.getElementById('edit-saldo').value=""; document.getElementById('edit-entradas').value=""; document.getElementById('edit-saidas').value=""; renderContabilidadeDashboard(); alert("Caixa ajustado!");
         }
 
-        // --- CONFIGS GERAIS E AUTH ---
+        // --- ESTRUTURA BASE E LOGOUT ---
         function renderMembros() {
             const tbody = document.getElementById('t-membros-corpo'); if(!tbody) return; tbody.innerHTML = "";
-            db.membros.forEach(m => {
-                const statusBadge = m.online ? `<span class="badge online">Conectado</span>` : `<span class="badge offline">Offline</span>`;
-                tbody.innerHTML += `<tr><td>#${m.id}</td><td>${m.nome}</td><td>${m.discord}</td><td>${m.cargo}</td><td>${statusBadge}</td><td><button class="btn-delete" onclick="deletarMembro('${m.id}')"><i class="fas fa-user-minus"></i></button></td></tr>`;
-            });
+            db.membros.forEach(m => { tbody.innerHTML += `<tr><td>#${m.id}</td><td>${m.nome}</td><td>${m.discord}</td><td>${m.cargo}</td><td><span class="badge ${m.online?'online':'offline'}">${m.online?'Conectado':'Offline'}</span></td><td><button class="btn-delete" onclick="deletarMembro('${m.id}')"><i class="fas fa-user-minus"></i></button></td></tr>`; });
         }
         function registrarNovoMembroLogin() {
             const n = document.getElementById('mem-nome').value.trim(); const id = document.getElementById('mem-id').value.trim(); const d = document.getElementById('mem-discord').value.trim(); const c = document.getElementById('mem-cargo').value.trim();
-            if(!n || !id || !d || !c) return; db.membros.push({ id: id, nome: n, discord: d, senha: "1234", cargo: c, online: false });
-            renderMembros();
+            if(!n || !id || !d || !c) return; db.membros.push({ id: id, nome: n, discord: d, senha: "1234", cargo: c, online: false }); document.getElementById('mem-nome').value=""; document.getElementById('mem-id').value=""; document.getElementById('mem-discord').value=""; document.getElementById('mem-cargo').value=""; renderMembros();
         }
         function deletarMembro(id) { db.membros = db.membros.filter(m => m.id !== id); renderMembros(); }
         function toggleSidebarMenu(t) { const m = document.getElementById('sidebar-menu-list'); t.classList.toggle('open'); m.style.maxHeight = m.style.maxHeight === '0px' || !m.style.maxHeight ? m.scrollHeight + 'px' : '0px'; }
-        function aplicarBackgrounds() {}
         function auth() {
             const u = document.getElementById('user-in').value.trim(); const p = document.getElementById('pass-in').value.trim();
             const user = db.membros.find(m => (m.nome.toLowerCase() === u.toLowerCase() || m.id === u) && m.senha === p);
-            if (user) { usuarioLogado = user; user.online = true; document.getElementById('nav-username').innerText = user.nome; document.getElementById('nav-userid').innerText = `#${user.id}`; document.getElementById('nav-status-dot').className = "status-dot online"; document.getElementById('nav-status-text').innerText = "Online"; document.getElementById('login-screen').style.display = 'none'; document.getElementById('main-panel').style.display = 'flex'; toggleSidebarMenu(document.querySelector('.dropdown-trigger')); renderMembros(); renderEncomendas(); } else { document.getElementById('login-err').style.display = 'block'; }
+            if (user) { usuarioLogado = user; user.online = true; document.getElementById('nav-username').innerText = user.nome; document.getElementById('nav-userid').innerText = `#${user.id}`; document.getElementById('nav-status-dot').className = "status-dot online"; document.getElementById('nav-status-text').innerText = "Online"; document.getElementById('login-screen').style.display = 'none'; document.getElementById('main-panel').style.display = 'flex'; toggleSidebarMenu(document.querySelector('.dropdown-trigger')); renderMembros(); renderEncomendas(); renderVendas(); } else { document.getElementById('login-err').style.display = 'block'; }
         }
         function logout() { location.reload(); }
         function tab(id, el) { document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); document.querySelectorAll('.menu-list li').forEach(li => li.classList.remove('active')); document.getElementById(id).classList.add('active'); el.classList.add('active'); }
