@@ -36,7 +36,7 @@
             background: var(--bg); display: flex; justify-content: center; align-items: center; z-index: 9999;
             background-size: cover !important;
             background-position: center !important;
-            background-repeat: no-repeat !important;
+            background-repeat: no-repeat !repeat;
         }
         .login-box {
             background: rgba(15, 12, 28, 0.9); padding: 40px; border-radius: 20px;
@@ -875,7 +875,7 @@
                 instancePie.update();
             } else {
                 instancePie = new Chart(ctxPie, {
-                    type: 'doughnut',
+                    type: 'pie', /* VOLTOU TOTALMENTE PARA GRÁFICO DE PIZZA AQUI */
                     data: {
                         labels: ['Saldo em Caixa', 'Entradas', 'Saídas'],
                         datasets: [{ data: dadosPie, backgroundColor: ['#a855f7', '#22c55e', '#ef4444'], borderWidth: 1, borderColor: 'rgba(255,255,255,0.05)' }]
