@@ -16,32 +16,46 @@
             --border: rgba(255, 255, 255, 0.08);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background: var(--bg); color: #fff; height: 100vh; overflow: hidden; display: flex; }
+        body { 
+            background: var(--bg); 
+            color: #fff; 
+            height: 100vh; 
+            overflow: hidden; 
+            display: flex;
+            background-size: cover !important;
+            background-position: center !important;
+            background-repeat: no-repeat !important;
+        }
 
         /* --- TELA DE LOGIN --- */
         #login-screen {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: var(--bg); display: flex; justify-content: center; align-items: center; z-index: 9999;
+            background-size: cover !important;
+            background-position: center !important;
+            background-repeat: no-repeat !important;
         }
         .login-box {
-            background: rgba(15, 12, 28, 0.8); padding: 40px; border-radius: 20px;
+            background: rgba(15, 12, 28, 0.85); padding: 40px; border-radius: 20px;
             border: 1px solid var(--border); width: 100%; max-width: 360px; text-align: center;
+            backdrop-filter: blur(10px);
         }
 
         /* --- ESTRUTURA CORE DO PAINEL --- */
-        #main-panel { display: none; width: 100vw; height: 100vh; display: flex; }
+        #main-panel { display: none; width: 100vw; height: 100vh; display: flex; width: 100%; }
         
         .sidebar {
-            width: 260px; height: 100%; background: rgba(15, 12, 28, 0.7);
+            width: 260px; height: 100%; background: rgba(15, 12, 28, 0.75);
             border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 25px;
+            backdrop-filter: blur(10px);
+            flex-shrink: 0;
         }
         
         .sidebar-dropdown {
             margin-top: 30px;
             flex-grow: 1;
-            overflow-y: auto; /* Permite scroll no menu se a tela for pequena */
+            overflow-y: auto;
         }
-        /* Esconder a barra de scroll do menu lateral para manter limpo */
         .sidebar-dropdown::-webkit-scrollbar { width: 0px; }
 
         .dropdown-trigger {
@@ -74,82 +88,63 @@
             gap: 12px;
             width: 100%;
         }
-        
         .user-row-top {
             display: flex;
             align-items: center;
             justify-content: space-between;
             width: 100%;
         }
-
-        .user-meta-info {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .user-name-tag {
-            font-weight: 700; 
-            font-size: 15px;
-            color: #fff;
-            letter-spacing: 0.3px;
-            line-height: 1.2;
-        }
-        .user-id-tag {
-            font-weight: 500;
-            font-size: 12px;
-            color: rgba(168, 85, 247, 0.8);
-            margin-top: 1px;
-        }
-
-        .status-container {
-            display: flex; 
-            align-items: center; 
-            gap: 6px; 
-            font-size: 13px; 
-            color: #94a3b8;
-            font-weight: 500;
-        }
+        .user-meta-info { display: flex; flex-direction: column; }
+        .user-name-tag { font-weight: 700; font-size: 15px; color: #fff; letter-spacing: 0.3px; line-height: 1.2; }
+        .user-id-tag { font-weight: 500; font-size: 12px; color: rgba(168, 85, 247, 0.8); margin-top: 1px; }
+        .status-container { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #94a3b8; font-weight: 500; }
         .status-dot { width: 8px; height: 8px; background: #64748b; border-radius: 50%; display: inline-block; }
         .status-dot.online { background: var(--success); box-shadow: 0 0 8px var(--success); }
 
         .btn-logout {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            background: rgba(239, 68, 68, 0.08);
-            border: 1px solid rgba(239, 68, 68, 0.15);
-            padding: 8px 12px;
-            border-radius: 8px;
-            color: var(--danger);
-            font-size: 11px;
-            font-weight: 700;
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            transition: all 0.2s ease;
-            width: 100%;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+            background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.15);
+            padding: 8px 12px; border-radius: 8px; color: var(--danger); font-size: 11px;
+            font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px;
+            transition: all 0.2s ease; width: 100%;
         }
-        .btn-logout:hover {
-            background: var(--danger);
-            color: #fff;
-            box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
-        }
+        .btn-logout:hover { background: var(--danger); color: #fff; box-shadow: 0 0 10px rgba(239, 68, 68, 0.3); }
 
-        .main-content { flex-grow: 1; padding: 40px; overflow-y: auto; }
+        .main-content { flex-grow: 1; padding: 40px; overflow-y: auto; background: rgba(11, 8, 19, 0.4); }
         .section { display: none; }
         .section.active { display: block; }
 
+        /* --- COMPONENTES DA CARD DE CONFIGURAÇÃO --- */
+        .config-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 600px;
+            margin-top: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            color: #94a3b8;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
         /* --- COMPONENTES PADRÃO --- */
         input, select {
-            width: 100%; padding: 12px; background: rgba(0,0,0,0.3);
-            border: 1px solid var(--border); border-radius: 10px; color: #fff; margin-bottom: 15px; outline: none;
+            width: 100%; padding: 12px; background: rgba(0,0,0,0.4);
+            border: 1px solid var(--border); border-radius: 10px; color: #fff; margin-bottom: 5px; outline: none;
         }
         input:focus { border-color: var(--primary); }
         button {
             width: 100%; padding: 12px; background: var(--primary); border: none;
-            border-radius: 10px; color: #fff; font-weight: 600; cursor: pointer;
+            border-radius: 10px; color: #fff; font-weight: 600; cursor: pointer; transition: background 0.2s;
         }
+        button:hover { background: #9333ea; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th { text-align: left; padding: 10px; color: #64748b; font-size: 12px; text-transform: uppercase; }
         td { padding: 14px 10px; border-bottom: 1px solid var(--border); font-size: 14px; }
@@ -247,28 +242,50 @@
             </section>
 
             <section id="configuracao" class="section">
-                <h2>Configuração</h2>
-                <p style="color: #94a3b8; margin-top: 10px;">Configurações gerais do sistema e gerenciamento do catálogo.</p>
+                <h2>Configuração do Sistema</h2>
+                <p style="color: #94a3b8; margin-top: 10px;">Personalize a identidade visual e planos de fundo do seu ecossistema.</p>
+                
+                <div class="config-card">
+                    <h3 style="margin-bottom: 20px; font-size: 16px; letter-spacing: 0.5px; color: var(--primary);"><i class="fas fa-image"></i> Personalização de Telas (via Link)</h3>
+                    
+                    <div class="form-group">
+                        <label for="cfg-bg-login">URL do Background da Tela de Login</label>
+                        <input type="text" id="cfg-bg-login" placeholder="Ex: https://site.com/imagem-login.jpg">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cfg-bg-panel">URL do Background do Painel Interno</label>
+                        <input type="text" id="cfg-bg-panel" placeholder="Ex: https://site.com/imagem-painel.jpg">
+                    </div>
+
+                    <button onclick="salvarConfiguracoes Visuais()" style="margin-top: 10px;"><i class="fas fa-save"></i> SALVAR CONFIGURAÇÕES</button>
+                </div>
             </section>
         </main>
     </div>
 
     <script>
+        // Banco de Dados contendo os membros e a nova chave de configurações visuais
         let db = {
             membros: [
                 { id: "3461", nome: "Megan", senha: "1234", cargo: "Chefe", online: false },
                 { id: "1002", nome: "Operador Padrão", senha: "999", cargo: "Suporte", online: false }
-            ]
+            ],
+            config: {
+                bgLogin: "",
+                bgPanel: ""
+            }
         };
 
         let usuarioLogado = null;
 
         window.onload = function() {
             document.getElementById('main-panel').style.display = 'none';
+            // Carrega imagens caso já existam salvas na inicialização
+            aplicarBackgrounds();
             renderMembros();
         };
 
-        // Atualizado para recalcular o tamanho correto com as novas abas inclusas
         function toggleSidebarMenu(triggerElement) {
             const menu = document.getElementById('sidebar-menu-list');
             triggerElement.classList.toggle('open');
@@ -277,6 +294,38 @@
             } else {
                 menu.style.maxHeight = menu.scrollHeight + 'px';
             }
+        }
+
+        // Atualiza a tela aplicando os links salvos no db
+        function aplicarBackgrounds() {
+            const loginScreen = document.getElementById('login-screen');
+            const mainBody = document.body;
+
+            // Se houver link configurado para o Login
+            if (db.config.bgLogin && db.config.bgLogin.trim() !== "") {
+                loginScreen.style.background = `url('${db.config.bgLogin.trim()}')`;
+            } else {
+                loginScreen.style.background = "var(--bg)";
+            }
+
+            // Se houver link configurado para o Painel Interno
+            if (db.config.bgPanel && db.config.bgPanel.trim() !== "") {
+                mainBody.style.background = `url('${db.config.bgPanel.trim()}')`;
+            } else {
+                mainBody.style.background = "var(--bg)";
+            }
+        }
+
+        // Salva os inputs dentro do objeto db.config e roda a atualização
+        function salvarConfiguracoesVisuais() {
+            const urlLogin = document.getElementById('cfg-bg-login').value;
+            const urlPanel = document.getElementById('cfg-bg-panel').value;
+
+            db.config.bgLogin = urlLogin;
+            db.config.bgPanel = urlPanel;
+
+            aplicarBackgrounds();
+            alert("Planos de fundo atualizados com sucesso!");
         }
 
         function auth() {
