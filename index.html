@@ -36,52 +36,89 @@
             border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 25px;
         }
         
-        /* --- NOVO MENU RETRÁTIL (ABRE PRA BAIXO) --- */
         .sidebar-dropdown {
             margin-top: 30px;
             flex-grow: 1;
         }
         .dropdown-trigger {
-            width: 100%;
-            padding: 12px 15px;
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            color: #fff;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            cursor: pointer;
-            user-select: none;
-            transition: background 0.2s;
+            width: 100%; padding: 12px 15px; background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border); border-radius: 10px; color: #fff;
+            font-weight: 600; display: flex; align-items: center; justify-content: space-between;
+            cursor: pointer; user-select: none; transition: background 0.2s;
         }
         .dropdown-trigger:hover { background: rgba(255, 255, 255, 0.05); }
         .dropdown-trigger i.chevron { transition: transform 0.3s; }
-        
-        /* Estado Aberto do Botão Principal */
         .dropdown-trigger.open i.chevron { transform: rotate(180deg); }
 
         .menu-list { 
-            list-style: none; 
-            max-height: 0; /* Começa fechado */
-            overflow: hidden; 
-            transition: max-height 0.3s ease-out; /* Desliza suavemente para baixo */
-            padding-left: 5px;
-            margin-top: 5px;
+            list-style: none; max-height: 0; overflow: hidden; 
+            transition: max-height 0.3s ease-out; padding-left: 5px; margin-top: 5px;
         }
-        
         .menu-list li {
             padding: 12px 15px; border-radius: 10px; color: #94a3b8;
-            cursor: pointer; display: flex; align-items: center; gap: 12px; margin-bottom: 5px;
-            margin-top: 5px;
+            cursor: pointer; display: flex; align-items: center; gap: 12px; margin-bottom: 5px; margin-top: 5px;
         }
         .menu-list li:hover { background: rgba(255,255,255,0.03); color: #fff; }
         .menu-list li.active { background: rgba(168, 85, 247, 0.15); color: #fff; font-weight: 600; }
         
-        .user-footer { border-top: 1px solid var(--border); padding-top: 15px; }
+        /* --- RODAPÉ DO OPERADOR REESTILIZADO --- */
+        .user-footer { 
+            border-top: 1px solid var(--border); 
+            padding-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .user-meta-box {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+        .user-name-tag {
+            font-weight: 700; 
+            font-size: 15px;
+            color: #fff;
+            letter-spacing: 0.3px;
+        }
+        .user-id-tag {
+            font-weight: 500;
+            font-size: 13px;
+            color: rgba(168, 85, 247, 0.8); /* Cor roxa sutil para destacar o ID */
+            margin-left: 4px;
+        }
+        .status-container {
+            display: flex; 
+            align-items: center; 
+            gap: 6px; 
+            font-size: 12px; 
+            color: #94a3b8;
+        }
         .status-dot { width: 8px; height: 8px; background: #64748b; border-radius: 50%; display: inline-block; }
         .status-dot.online { background: var(--success); box-shadow: 0 0 8px var(--success); }
+
+        /* Botão Sair Estilizado */
+        .btn-logout {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(239, 68, 68, 0.08);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            padding: 5px 10px;
+            border-radius: 8px;
+            color: var(--danger);
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.2s ease;
+        }
+        .btn-logout:hover {
+            background: var(--danger);
+            color: #fff;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+        }
 
         .main-content { flex-grow: 1; padding: 40px; overflow-y: auto; }
         .section { display: none; }
@@ -135,10 +172,18 @@
             </div>
 
             <div class="user-footer">
-                <div style="font-weight: 600; font-size: 14px;" id="nav-username">Desconectado</div>
-                <div style="font-size: 12px; color: #94a3b8; display: flex; align-items: center; gap: 6px; margin-top: 4px;">
-                    <span class="status-dot" id="nav-status-dot"></span> <span id="nav-status-text">Offline</span>
-                    <span onclick="logout()" style="color: var(--danger); cursor: pointer; margin-left: auto; font-weight: 600;">Sair</span>
+                <div class="user-meta-box">
+                    <div>
+                        <span class="user-name-tag" id="nav-username">Desconectado</span>
+                        <span class="user-id-tag" id="nav-userid"></span>
+                    </div>
+                    <button class="btn-logout" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i> Sair
+                    </button>
+                </div>
+                <div class="status-container">
+                    <span class="status-dot" id="nav-status-dot"></span> 
+                    <span id="nav-status-text">Offline</span>
                 </div>
             </div>
         </aside>
@@ -177,16 +222,12 @@
             renderMembros();
         };
 
-        // Função Inteligente para Abrir e Fechar sem perder a sequência
         function toggleSidebarMenu(triggerElement) {
             const menu = document.getElementById('sidebar-menu-list');
-            
             triggerElement.classList.toggle('open');
-            
             if (menu.style.maxHeight && menu.style.maxHeight !== '0px') {
                 menu.style.maxHeight = '0px';
             } else {
-                // Seta dinamicamente o tamanho exato baseado no número de itens internos
                 menu.style.maxHeight = menu.scrollHeight + 'px';
             }
         }
@@ -200,14 +241,16 @@
                 usuarioLogado = user;
                 user.online = true;
 
+                // Insere nome e injeta o ID formatado ao lado
                 document.getElementById('nav-username').innerText = user.nome;
+                document.getElementById('nav-userid').innerText = `(#${user.id})`;
+                
                 document.getElementById('nav-status-dot').className = "status-dot online";
                 document.getElementById('nav-status-text').innerText = "Online";
 
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('main-panel').style.display = 'flex';
 
-                // Abre o menu lateral automaticamente ao fazer login
                 const trigger = document.querySelector('.dropdown-trigger');
                 if(!trigger.classList.contains('open')) {
                     toggleSidebarMenu(trigger);
@@ -226,10 +269,11 @@
             usuarioLogado = null;
 
             document.getElementById('nav-username').innerText = "Desconectado";
+            document.getElementById('nav-userid').innerText = ""; // Limpa o ID no logout
+            
             document.getElementById('nav-status-dot').className = "status-dot";
             document.getElementById('nav-status-text').innerText = "Offline";
 
-            // Fecha o menu lateral no logout para reiniciar limpo
             const trigger = document.querySelector('.dropdown-trigger');
             if(trigger.classList.contains('open')) {
                 toggleSidebarMenu(trigger);
