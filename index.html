@@ -156,7 +156,6 @@
             box-shadow: 0 0 10px rgba(168, 85, 247, 0.15);
         }
         
-        /* Garante que as caixas de opções de todas as abas fiquem escuras e legíveis */
         select option {
             background-color: #120e24 !important;
             color: #fff !important;
@@ -185,19 +184,16 @@
         .badge.offline { background: rgba(255, 255, 255, 0.04); color: #94a3b8; border: 1px solid rgba(255, 255, 255, 0.06); }
         .badge.system { background: rgba(168, 85, 247, 0.12); color: var(--primary); border: 1px solid rgba(168, 85, 247, 0.2); }
         
-        /* Tag ID */
         .id-badge { background: rgba(255, 255, 255, 0.05); color: #94a3b8; font-family: monospace; font-weight: 600; padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border); }
         
-        /* Discord Tag Minimalista */
         .discord-user-tag { display: flex; align-items: center; gap: 8px; color: #5865F2; font-weight: 500; font-size: 13px; }
         .discord-user-tag i { font-size: 15px; }
 
-        /* Log Real-Time Styles */
         .log-item { padding: 10px 15px; border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 13px; display: flex; justify-content: space-between; align-items: center; }
         .log-item:hover { background: rgba(255,255,255,0.01); }
         .log-time { color: #64748b; font-size: 11px; font-family: monospace; }
 
-        /* --- NOVO DESIGN ESTILIZADO E FOFO DO MURAL (ABA IMPORTANTE) --- */
+        /* --- NOVO DESIGN ESTILIZADO E FOFO DO MURAL --- */
         .mural-container {
             background: rgba(255, 255, 255, 0.02);
             border: 2px dashed rgba(168, 85, 247, 0.2);
@@ -239,121 +235,43 @@
             align-items: center;
             gap: 8px;
         }
-        .cute-card-note h3 i {
-            color: #ec4899;
-            font-size: 14px;
-        }
-        .cute-card-note p {
-            color: #d4d4d8;
-            font-size: 13.5px;
-            line-height: 1.6;
-            flex-grow: 1;
-        }
-        .cute-card-note i.cute-btn-delete-container {
-            margin-top: 20px;
-            display: flex;
-            justify-content: flex-end;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-            padding-top: 12px;
-        }
+        .cute-card-note h3 i { color: #ec4899; font-size: 14px; }
+        .cute-card-note p { color: #d4d4d8; font-size: 13.5px; line-height: 1.6; flex-grow: 1; }
+        .cute-card-note i.cute-btn-delete-container { margin-top: 20px; display: flex; justify-content: flex-end; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 12px; }
         .btn-cute-delete {
-            background: rgba(239, 68, 68, 0.1);
-            color: #f87171;
-            border: 1px solid rgba(239, 68, 68, 0.2);
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 4px;
+            background: rgba(239, 68, 68, 0.1); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2);
+            padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 600; cursor: pointer;
+            transition: all 0.2s; display: flex; align-items: center; gap: 4px;
         }
-        .btn-cute-delete:hover {
-            background: #ef4444;
-            color: #fff;
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-        }
+        .btn-cute-delete:hover { background: #ef4444; color: #fff; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); }
 
-        /* --- NOVO ESTILO BONITO E COESÃO PARA O BANCO DE FAMÍLIAS (CONFIGURAÇÃO) --- */
+        /* --- NOVO ESTILO PARA O BANCO DE FAMÍLIAS --- */
         .cute-family-card {
             background: linear-gradient(135deg, rgba(56, 189, 248, 0.06), rgba(15, 12, 28, 0.8));
-            border: 1px solid rgba(56, 189, 248, 0.2);
-            border-top: 3px solid #38bdf8;
-            border-radius: 16px;
-            padding: 20px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-            transition: all 0.2s ease;
+            border: 1px solid rgba(56, 189, 248, 0.2); border-top: 3px solid #38bdf8;
+            border-radius: 16px; padding: 20px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3); transition: all 0.2s ease;
         }
-        .cute-family-card:hover {
-            border-color: rgba(56, 189, 248, 0.4);
-            box-shadow: 0 10px 28px rgba(56, 189, 248, 0.15);
-        }
+        .cute-family-card:hover { border-color: rgba(56, 189, 248, 0.4); box-shadow: 0 10px 28px rgba(56, 189, 248, 0.15); }
         .cute-family-card h3 {
-            font-size: 15px;
-            font-weight: 700;
-            color: #38bdf8 !important;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            padding-bottom: 10px;
-            margin-bottom: 10px;
+            font-size: 15px; font-weight: 700; color: #38bdf8 !important; display: flex;
+            align-items: center; gap: 8px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding-bottom: 10px; margin-bottom: 10px;
         }
 
-        /* CONFIGURAÇÃO EXCLUSIVA PARA O ENCOLHIMENTO COMPLETO DA CAIXA */
+        /* CONFIGURAÇÃO EXCLUSIVA PARA O ENCOLHIMENTO DA CAIXA */
         .collapsible-box {
-            max-height: 500px;
-            opacity: 1;
-            overflow: hidden;
-            padding: 30px;
-            margin-top: 10px;
+            max-height: 500px; opacity: 1; overflow: hidden; padding: 30px; margin-top: 10px;
             transition: max-height 0.35s ease, opacity 0.3s ease, padding 0.35s ease, margin 0.35s ease;
         }
-        .collapsible-box.closed {
-            max-height: 0px;
-            opacity: 0;
-            padding-top: 0px;
-            padding-bottom: 0px;
-            margin-top: 0px;
-            border: none;
-        }
+        .collapsible-box.closed { max-height: 0px; opacity: 0; padding-top: 0px; padding-bottom: 0px; margin-top: 0px; border: none; }
         
-        /* Nova barra de título fixa para controlar a abertura/fechamento do box */
         .cfg-header-bar {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-left: 4px solid var(--warning);
-            border-radius: 12px;
-            padding: 15px 25px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            user-select: none;
-            transition: background 0.2s;
+            background: var(--card); border: 1px solid var(--border); border-left: 4px solid var(--warning);
+            border-radius: 12px; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center;
+            cursor: pointer; user-select: none; transition: background 0.2s;
         }
-        .cfg-header-bar:hover {
-            background: rgba(255, 255, 255, 0.03);
-        }
-        .cfg-header-bar h3 {
-            color: var(--warning) !important;
-            font-size: 15px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .toggle-cfg-btn {
-            background: transparent;
-            border: none;
-            color: var(--warning);
-            font-size: 16px;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-        }
+        .cfg-header-bar:hover { background: rgba(255, 255, 255, 0.03); }
+        .cfg-header-bar h3 { color: var(--warning) !important; font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+        .toggle-cfg-btn { background: transparent; border: none; color: var(--warning); font-size: 16px; cursor: pointer; display: inline-flex; align-items: center; }
     </style>
 </head>
 <body>
@@ -677,7 +595,8 @@
     </div>
 
     <script>
-        let db = {
+        // CONFIGURAÇÃO DOS DADOS PADRÃO DO SISTEMA
+        const defaultDB = {
             membros: [
                 { id: "3461", nome: "Megan", discord: "megan_vortex", senha: "1234", cargo: "Chefe", online: false }
             ],
@@ -703,16 +622,40 @@
             },
             logs: [
                 { data: new Date().toLocaleTimeString('pt-BR'), operador: "Sistema", acao: "Painel Vortex initialized com sucesso.", tag: "system" }
-            ]
+            ],
+            bgLogin: "",
+            bgMain: ""
         };
 
+        let db = {};
         let usuarioLogado = null;
         let carrinhoVendaAtual = []; 
         let carrinhoEncomendaAtual = []; 
         let instancePie = null;
         let instanceBar = null;
 
+        // FUNÇÃO ATUALIZADA: CARREGA OS DADOS SALVOS DO NAVEGADOR
+        function loadDatabase() {
+            const savedData = localStorage.getItem('vortex_panel_db');
+            if (savedData) {
+                try {
+                    db = JSON.parse(savedData);
+                } catch(e) {
+                    db = JSON.parse(JSON.stringify(defaultDB));
+                }
+            } else {
+                db = JSON.parse(JSON.stringify(defaultDB));
+            }
+        }
+
+        // FUNÇÃO ATUALIZADA: SALVA OS DADOS AUTOMATICAMENTE NO NAVEGADOR
+        function saveDatabase() {
+            localStorage.setItem('vortex_panel_db', JSON.stringify(db));
+        }
+
         window.onload = function() {
+            loadDatabase();
+            aplicarFundosSalvosAoCarregar();
             renderMembros();
             renderProdutos();
             renderBoxesFamilias();
@@ -721,10 +664,19 @@
             renderVendas();
             renderMuralNotas();
             atualizarSelectsGeraisVendaseEncomendas();
-            registrarLog("Painel", "Sistema carregou o banco de dados local.", "system");
         };
 
-        /* LÓGICA ATUALIZADA: REGISTRO DE MOVIMENTAÇÃO REAL DE ENTRADA / RETIRADA */
+        function aplicarFundosSalvosAoCarregar() {
+            if(db.bgLogin && db.bgLogin !== "") {
+                document.getElementById('login-screen').style.background = `url('${db.bgLogin}')`;
+                document.getElementById('cfg-bg-login').value = db.bgLogin;
+            }
+            if(db.bgMain && db.bgMain !== "") {
+                document.body.style.background = `url('${db.bgMain}')`;
+                document.getElementById('cfg-bg-main').value = db.bgMain;
+            }
+        }
+
         function executarMovimentacaoReal() {
             const acao = document.getElementById('edit-op-acao').value;
             const descricaoInput = document.getElementById('edit-op-desc').value.trim();
@@ -767,10 +719,10 @@
 
             registrarLog(nomeOperador, `Registrou ${tipoHistorico}: ${descricaoInput} no valor de R$ ${valorAlvo.toFixed(2)}`, tagLog);
             
-            // Limpa os campos após registrar com sucesso
             document.getElementById('edit-op-desc').value = "";
             document.getElementById('edit-op-valor').value = "";
             
+            saveDatabase();
             renderContabilidadeDashboard();
             if(document.getElementById('movimentacao').classList.contains('active')) {
                 initOuUpdateGraficos();
@@ -778,11 +730,9 @@
             alert("Movimentação registrada com sucesso no caixa!");
         }
 
-        /* LÓGICA DO RECOLHIMENTO DA CAIXA DE PAPEL DE PAREDE */
         function toggleCaixaPapelParede() {
             const box = document.getElementById('wrapper-papeis-parede');
             const icon = document.querySelector('#btn-cfg-icon i');
-            
             if(box.classList.contains('closed')) {
                 box.classList.remove('closed');
                 icon.className = "fas fa-minus";
@@ -792,21 +742,29 @@
             }
         }
 
-        /* LÓGICA DO PAPEL DE PAREDE */
         function aplicarPapeisDeParede() {
             const bgLoginUrl = document.getElementById('cfg-bg-login').value.trim();
             const bgMainUrl = document.getElementById('cfg-bg-main').value.trim();
 
+            db.bgLogin = bgLoginUrl;
+            db.bgMain = bgMainUrl;
+
             if(bgLoginUrl !== "") {
                 document.getElementById('login-screen').style.background = `url('${bgLoginUrl}')`;
+            } else {
+                document.getElementById('login-screen').style.background = var(--bg);
             }
+            
             if(bgMainUrl !== "") {
                 document.body.style.background = `url('${bgMainUrl}')`;
+            } else {
+                document.body.style.background = var(--bg);
             }
 
             let op = usuarioLogado ? usuarioLogado.nome : "Sistema";
             registrarLog(op, "Alterou as configurações de imagem de fundo do painel.", "system");
-            alert("Novos papéis de parede aplicados com sucesso!");
+            saveDatabase();
+            alert("Novos papéis de parede aplicados e salvos com sucesso!");
         }
 
         function salvarValoresDiretos() {
@@ -853,6 +811,7 @@
             document.getElementById('edit-entradas').value = "";
             document.getElementById('edit-saidas').value = "";
 
+            saveDatabase();
             renderContabilidadeDashboard();
             if(document.getElementById('movimentacao').classList.contains('active')) {
                 initOuUpdateGraficos();
@@ -863,6 +822,7 @@
         function registrarLog(operador, acao, tag = "user") {
             const hora = new Date().toLocaleTimeString('pt-BR');
             db.logs.unshift({ data: hora, operador: operador, acao: acao, tag: tag });
+            saveDatabase();
             renderLogsPainel();
         }
 
@@ -1036,6 +996,8 @@
             carrinhoEncomendaAtual = [];
             document.getElementById('enc-familia').disabled = false;
             document.getElementById('enc-familia').value = "";
+            
+            saveDatabase();
             renderCarrinhoProvisorioEncomenda();
             renderEncomendas();
             renderContabilidadeDashboard();
@@ -1051,6 +1013,7 @@
         function removerEncomenda(id) {
             if(confirm("Deseja apagar esta encomenda?")) {
                 db.encomendas = db.encomendas.filter(e => e.id !== id);
+                saveDatabase();
                 renderEncomendas();
             }
         }
@@ -1110,22 +1073,38 @@
             if(!usuarioLogado || carrinhoVendaAtual.length === 0) return;
             const fam = document.getElementById('ven-familia').value;
             let totalFaturamentoPedido = 0;
-            let resumoProdutos = carrinhoVendaAtual.map(i => `${i.quantidade}x ${i.nome}`).join(", ");
+            let resumeProdutos = carrinhoVendaAtual.map(i => `${i.quantidade}x ${i.nome}`).join(", ");
             carrinhoVendaAtual.forEach(i => totalFaturamentoPedido += i.subtotal);
 
-            db.vendas.push({ id: Date.now(), operador: usuarioLogado.nome, familia: fam, resumoItens: resumoProdutos, valorTotal: totalFaturamentoPedido });
+            db.vendas.push({ id: Date.now(), operador: usuarioLogado.nome, familia: fam, resumoItens: resumeProdutos, valorTotal: totalFaturamentoPedido });
             db.financeiro.saldoAtual += totalFaturamentoPedido;
             db.financeiro.totalEntradas += totalFaturamentoPedido;
-            db.financeiro.historico.push({ operador: usuarioLogado.nome, tipo: "ENTRADA", descricao: `Pedido Grande para Família ${fam} [${resumoProdutos}]`, valor: totalFaturamentoPedido, resulting: db.financeiro.saldoAtual });
+            db.financeiro.historico.push({ operador: usuarioLogado.nome, tipo: "ENTRADA", descricao: `Pedido Grande para Família ${fam} [${resumeProdutos}]`, valor: totalFaturamentoPedido, resulting: db.financeiro.saldoAtual });
 
             registrarLog(usuarioLogado.nome, `Concluiu venda para a Família ${fam}. Total: R$ ${totalFaturamentoPedido.toFixed(2)}`, "entrada");
             carrinhoVendaAtual = [];
             document.getElementById('ven-familia').disabled = false;
             document.getElementById('ven-familia').value = "";
+            
+            saveDatabase();
             renderCarrinhoProvisorio();
             renderVendas();
             renderContabilidadeDashboard();
             alert("Venda com múltiplos produtos fechada e contabilizada!");
+        }
+
+        function renderVendas() {
+            const tbody = document.getElementById('t-vendas-corpo'); if(!tbody) return; tbody.innerHTML = "";
+            if(db.vendas.length === 0) { tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #64748b; font-style: italic;">Nenhuma venda registrada.</td></tr>`; return; }
+            [...db.vendas].reverse().forEach(v => { tbody.innerHTML += `<tr><td>${v.operador}</td><td>${v.familia}</td><td>${v.resumoItens}</td><td>R$ ${v.valorTotal.toFixed(2)}</td><td><button class="btn-delete" onclick="removerVenda(${v.id})"><i class="fas fa-trash"></i></button></td></tr>`; });
+        }
+
+        function removerVenda(id) {
+            if(confirm("Deseja apagar esta venda?")) {
+                db.vendas = db.vendas.filter(v => v.id !== id);
+                saveDatabase();
+                renderVendas();
+            }
         }
 
         function renderBoxesFamilias() {
@@ -1144,11 +1123,15 @@
         function adicionarProdutoFamilia() {
             const f = document.getElementById('fam-nome-grupo').value.trim(); const n = document.getElementById('fam-nome').value.trim(); const v = parseFloat(document.getElementById('fam-valor').value);
             if(!f || !n || isNaN(v)) return; if(!db.familias[f]) db.familias[f] = []; db.familias[f].push({ id: Date.now(), nome: n, valor: v });
-            document.getElementById('fam-nome').value = ""; document.getElementById('fam-valor').value = ""; renderBoxesFamilias();
+            document.getElementById('fam-nome').value = ""; document.getElementById('fam-valor').value = ""; 
+            saveDatabase();
+            renderBoxesFamilias();
         }
 
         function removerProdutoDaFamilia(f, id) { 
-            db.familias[f] = db.familias[f].filter(p => p.id !== id); if(db.familias[f].length === 0) delete db.familias[f]; renderBoxesFamilias(); 
+            db.familias[f] = db.familias[f].filter(p => p.id !== id); if(db.familias[f].length === 0) delete db.familias[f]; 
+            saveDatabase();
+            renderBoxesFamilias(); 
         }
 
         function renderProdutos() {
@@ -1160,10 +1143,12 @@
         function adicionarProduto() {
             const n = document.getElementById('prod-nome').value.trim(); const v = parseFloat(document.getElementById('prod-valor').value);
             if(!n || isNaN(v)) return; db.produtos.push({ id: Date.now(), nome: n, valor: v }); 
-            document.getElementById('prod-nome').value = ""; document.getElementById('prod-valor').value = ""; renderProdutos();
+            document.getElementById('prod-nome').value = ""; document.getElementById('prod-valor').value = ""; 
+            saveDatabase();
+            renderProdutos();
         }
 
-        function removerProduto(id) { db.produtos = db.produtos.filter(p => p.id !== id); renderProdutos(); }
+        function removerProduto(id) { db.produtos = db.produtos.filter(p => p.id !== id); saveDatabase(); renderProdutos(); }
 
         function renderContabilidadeDashboard() {
             document.getElementById('banco-saldo').innerText = `R$ ${db.financeiro.saldoAtual.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
@@ -1212,23 +1197,30 @@
             document.getElementById('mem-discord').value=""; 
             document.getElementById('mem-cargo').value=""; 
             
-            renderMembros();
             if(usuarioLogado) {
                 registrarLog(usuarioLogado.nome, `Registrou um novo acesso corporativo para ${n} (#${id})`, "system");
             }
+            saveDatabase();
+            renderMembros();
         }
 
-        function deletarMembro(id) { db.membros = db.membros.filter(m => m.id !== id); renderMembros(); }
+        function deletarMembro(id) { 
+            db.membros = db.membros.filter(m => m.id !== id); 
+            saveDatabase();
+            renderMembros(); 
+        }
 
         function toggleSidebarMenu(t) { const m = document.getElementById('sidebar-menu-list'); t.classList.toggle('open'); m.style.maxHeight = m.style.maxHeight === '0px' || !m.style.maxHeight ? m.scrollHeight + 'px' : '0px'; }
         
         function adicionarNota() {
             const t = document.getElementById('nota-titulo').value.trim(); const c = document.getElementById('nota-conteudo').value.trim();
             if(!t || !c) return; db.anotacoes.push({ id: Date.now(), titulo: t, conteudo: c });
-            document.getElementById('nota-titulo').value = ""; document.getElementById('nota-conteudo').value = ""; renderMuralNotas();
+            document.getElementById('nota-titulo').value = ""; document.getElementById('nota-conteudo').value = ""; 
+            saveDatabase();
+            renderMuralNotas();
         }
 
-        function removerNota(id) { db.anotacoes = db.anotacoes.filter(n => n.id !== id); renderMuralNotas(); }
+        function removerNota(id) { db.anotacoes = db.anotacoes.filter(n => n.id !== id); saveDatabase(); renderMuralNotas(); }
         
         function renderMuralNotas() {
             const grid = document.getElementById('grid-mural-notas'); if(!grid) return; grid.innerHTML = "";
@@ -1269,6 +1261,7 @@
                 document.getElementById('main-panel').style.display = 'flex'; 
                 toggleSidebarMenu(document.querySelector('.dropdown-trigger')); 
                 
+                saveDatabase();
                 renderMembros(); 
                 renderEncomendas(); 
                 renderVendas(); 
@@ -1282,7 +1275,13 @@
             }
         }
         
-        function logout() { location.reload(); }
+        function logout() { 
+            if(usuarioLogado) {
+                usuarioLogado.online = false;
+                saveDatabase();
+            }
+            location.reload(); 
+        }
         
         function tab(id, el) { 
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); 
