@@ -243,7 +243,7 @@
             line-height: 1.6;
             flex-grow: 1;
         }
-        .cute-btn-delete-container {
+        .cute-card-note i.cute-btn-delete-container {
             margin-top: 20px;
             display: flex;
             justify-content: flex-end;
@@ -377,6 +377,32 @@
                     <div class="fin-card"><div class="fin-card-info"><h3>Saldo Atual</h3><p id="banco-saldo">R$ 0,00</p></div><div class="fin-card-icon" style="background: rgba(168, 85, 247, 0.15); color: var(--primary);"><i class="fas fa-wallet"></i></div></div>
                     <div class="fin-card"><div class="fin-card-info"><h3>Total Entradas</h3><p id="banco-entradas" style="color: var(--success);">R$ 0,00</p></div><div class="fin-card-icon" style="background: rgba(34, 197, 94, 0.15); color: var(--success);"><i class="fas fa-arrow-trend-up"></i></div></div>
                     <div class="fin-card"><div class="fin-card-info"><h3>Total Saídas</h3><p id="banco-saidas" style="color: var(--danger);">R$ 0,00</p></div><div class="fin-card-icon" style="background: rgba(239, 68, 68, 0.15); color: var(--danger);"><i class="fas fa-arrow-trend-down"></i></div></div>
+                </div>
+
+                <div class="info-box-wrapper" style="border: 1px dashed rgba(34, 197, 94, 0.4); margin-bottom: -5px;">
+                    <h3 style="margin-bottom: 15px; font-size: 14px; color: var(--success);"><i class="fas fa-calculator"></i> Editar Valores Atuais (Somar / Subtrair)</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Mudar Qual Valor?</label>
+                            <select id="edit-op-campo">
+                                <option value="saldo">Saldo Atual</option>
+                                <option value="entradas">Total Entradas</option>
+                                <option value="saidas">Total Saídas</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Ação Matemática</label>
+                            <select id="edit-op-acao">
+                                <option value="somar">Somar (+)</option>
+                                <option value="subtrair">Subtrair (-)</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="flex: 1.5;">
+                            <label>Valor Monetário (R$)</label>
+                            <input type="number" id="edit-op-valor" step="0.01" placeholder="Ex: 1500.00">
+                        </div>
+                        <button onclick="editarValoresOperacaoMatematica()" style="background: var(--success);"><i class="fas fa-check"></i> Executar Operação</button>
+                    </div>
                 </div>
 
                 <div class="info-box-wrapper" style="border: 1px dashed rgba(168, 85, 247, 0.4);">
@@ -666,6 +692,63 @@
             atualizarSelectsGeraisVendaseEncomendas();
             registrarLog("Painel", "Sistema carregou o banco de dados local.", "system");
         };
+
+        /* LÓGICA EXCLUSIVA: EDITAR VALORES ATUAIS (SOMAR / SUBTRAIR) */
+        function editarValoresOperacaoMatematica() {
+            const campo = document.getElementById('edit-op-campo').value;
+            const acao = document.getElementById('edit-op-acao').value;
+            const valorInput = document.getElementById('edit-op-valor').value;
+
+            if (valorInput === "" || isNaN(parseFloat(valorInput)) || parseFloat(valorInput) <= 0) {
+                alert("Por favor, insira um valor válido maior que zero!");
+                return;
+            }
+
+            const valorAlvo = parseFloat(valorInput);
+            let nomeOperador = usuarioLogado ? usuarioLogado.nome : "Operador";
+            let descricaoLog = "";
+            let tipoLog = "SYSTEM";
+
+            // Definir o multiplicador (+1 para somar, -1 para subtrair)
+            const multiplicador = acao === "somar" ? 1 : -1;
+            const termoAcao = acao === "somar" ? "Adição" : "Subtração";
+
+            if (campo === "saldo") {
+                db.financeiro.saldoAtual += (valorAlvo * multiplicador);
+                descricaoLog = `${termoAcao} manual de R$ ${valorAlvo.toFixed(2)} no Saldo`;
+                tipoLog = acao === "somar" ? "ENTRADA" : "SAIDA";
+            } else if (campo === "entradas") {
+                db.financeiro.totalEntradas += (valorAlvo * multiplicador);
+                descricaoLog = `${termoAcao} manual de R$ ${valorAlvo.toFixed(2)} no Total de Entradas`;
+                tipoLog = "SYSTEM";
+            } else if (campo === "saidas") {
+                db.financeiro.totalSaidas += (valorAlvo * multiplicador);
+                descricaoLog = `${termoAcao} manual de R$ ${valorAlvo.toFixed(2)} no Total de Saídas`;
+                tipoLog = "SYSTEM";
+            }
+
+            // Registrar no histórico do Dashboard
+            db.financeiro.historico.push({
+                operador: nomeOperador,
+                tipo: tipoLog,
+                descricao: descricaoLog,
+                valor: valorAlvo,
+                resulting: db.financeiro.saldoAtual
+            });
+
+            // Registrar log geral
+            registrarLog(nomeOperador, `Modificou finanças via operação: ${descricaoLog}`, "system");
+
+            // Limpar campo
+            document.getElementById('edit-op-valor').value = "";
+
+            // Atualizar telas
+            renderContabilidadeDashboard();
+            if(document.getElementById('movimentacao').classList.contains('active')) {
+                initOuUpdateGraficos();
+            }
+            alert("Operação matemática realizada e aplicada com sucesso!");
+        }
 
         /* LÓGICA DE RECOLHER/EXPANDIR A CAIXA DE PAPEL DE PAREDE */
         function toggleCaixaPapelParede(btn) {
