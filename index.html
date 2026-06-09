@@ -930,10 +930,59 @@
         }
 
         function salvarValoresDiretos() {
-            const s = document.getElementById('edit-saldo').value; const e = document.getElementById('edit-entradas').value; const sa = document.getElementById('edit-saidas').value;
-            if(s !== "") db.financeiro.saldoAtual = parseFloat(s); if(e !== "") db.financeiro.totalEntradas = parseFloat(e); if(sa !== "") db.financeiro.totalSaidas = parseFloat(sa);
-            registrarLog(usuarioLogado ? usuarioLogado.nome : "Operador", `Realizou um ajuste forçado direto nos valores globais do caixa da Dashboard.`, "system");
-            document.getElementById('edit-saldo').value=""; document.getElementById('edit-entradas').value=""; document.getElementById('edit-saidas').value=""; renderContabilidadeDashboard(); initOuUpdateGraficos(); alert("Caixa ajustado!");
+    const s = document.getElementById('edit-saldo').value;
+    const e = document.getElementById('edit-entradas').value;
+    const sa = document.getElementById('edit-saidas').value;
+    
+    let mudouAlgo = false; // Corrigido o espaço que quebrava o script
+    let nomeOperador = usuarioLogado ? usuarioLogado.nome : "Operador";
+    let descricaoAlteracoes = "Ajuste manual:";
+
+    if(s !== "") { 
+        db.financeiro.saldoAtual = parseFloat(s); 
+        descricaoAlteracoes += ` [Novo Saldo: R$ ${db.financeiro.saldoAtual.toFixed(2)}]`;
+        mudouAlgo = true; 
+    }
+    if(e !== "") { 
+        db.financeiro.totalEntradas = parseFloat(e); 
+        descricaoAlteracoes += ` [Novas Entradas: R$ ${db.financeiro.totalEntradas.toFixed(2)}]`;
+        mudouAlgo = true; 
+    }
+    if(sa !== "") { 
+        db.financeiro.totalSaidas = parseFloat(sa); 
+        descricaoAlteracoes += ` [Novas Saídas: R$ ${db.financeiro.totalSaidas.toFixed(2)}]`;
+        mudouAlgo = true; 
+    }
+
+    if(!mudouAlgo) {
+        alert("Preencha pelo menos um campo para aplicar os novos valores!");
+        return;
+    }
+
+    // Adiciona no histórico contábil da dashboard
+    db.financeiro.historico.push({
+        operador: nomeOperador,
+        tipo: "SYSTEM",
+        descricao: descricaoAlteracoes,
+        valor: 0,
+        resultante: db.financeiro.saldoAtual
+    });
+
+    // Registra nos logs gerais de auditoria da aba Movimentação
+    registrarLog(nomeOperador, `Modificou manualmente as finanças: ${descricaoAlteracoes}`, "system");
+
+    // Limpa os campos após salvar
+    document.getElementById('edit-saldo').value = "";
+    document.getElementById('edit-entradas').value = "";
+    document.getElementById('edit-saidas').value = "";
+
+    // Atualiza tudo de forma síncrona
+    renderContabilidadeDashboard();
+    if(document.getElementById('movimentacao').classList.contains('active')) {
+        initOuUpdateGraficos();
+    }
+    alert("Valores do Caixa atualizados e logs sincronizados!");
+}
         }
 
         function renderMembros() {
