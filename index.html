@@ -146,9 +146,10 @@
         th { text-align: left; padding: 12px 15px; opacity: 0.5; font-size: 11px; text-transform: uppercase; }
         td { padding: 16px 15px; border-bottom: 1px solid var(--border); font-size: 14px; }
 
-        .charts-wrapper { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 25px; margin-bottom: 25px; }
+        .charts-wrapper { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; margin-bottom: 25px; width: 100%; }
         .chart-box { background: var(--glass); backdrop-filter: var(--blur); border: 1px solid var(--border); padding: 20px; border-radius: 16px; display: flex; flex-direction: column; align-items: center; }
-        .chart-container { position: relative; width: 100%; height: 280px; }
+        .chart-box h4 { font-size: 13px; font-weight: 600; text-transform: uppercase; margin-bottom: 15px; opacity: 0.8; letter-spacing: 0.5px; }
+        .chart-container { position: relative; width: 100%; height: 260px; }
         
         .log-timeline { display: flex; flex-direction: column; gap: 12px; max-height: 300px; overflow-y: auto; padding-right: 5px; }
         .log-item { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border); padding: 14px 18px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
@@ -319,7 +320,14 @@
             <section id="mov" class="section">
                 <div class="box-list">
                     <div class="charts-wrapper">
-                        <div class="chart-box"><div class="chart-container"><canvas id="chartFinanceiro"></canvas></div></div>
+                        <div class="chart-box">
+                            <h4><i class="fas fa-wallet"></i> Fluxo Financeiro (Caixa / Banco)</h4>
+                            <div class="chart-container"><canvas id="chartFinanceiro"></canvas></div>
+                        </div>
+                        <div class="chart-box">
+                            <h4><i class="fas fa-exchange-alt"></i> Movimentação de Pedidos (Vendas x Encomendas)</h4>
+                            <div class="chart-container"><canvas id="chartDemandas"></canvas></div>
+                        </div>
                     </div>
                     <div class="box-title"><i class="fas fa-history"></i> Mural de Histórico de Logs do Sistema</div>
                     <div class="log-timeline" id="log-container"></div>
@@ -370,6 +378,7 @@
         let currentUser = null; let db = null;
         let data = { membros: [], encomendas: [], vendas: [], movimentos: [], catalogo: [], notes: [], caixa: [], dash: { base: 0 } };
         let chartFinInstancia = null;
+        let chartDemInstancia = null;
 
         window.onload = function() {
             resetFormulariosMultiplos();
@@ -576,6 +585,7 @@
                     <td><button class="btn-table-delete" onclick="removerVenda('${key}')">X</button></td>
                 </tr>`;
             }); 
+            renderEstatisticas();
         }
 
         function addEncomendaRow() {
@@ -660,16 +670,56 @@
             }
         }
         function renderMembros() { const t = document.getElementById('t-membros'); if(t) { t.innerHTML = ""; data.membros.forEach(m => t.innerHTML += `<tr><td>#${m.uid}</td><td>${m.nome}</td><td>${m.cargo}</td><td>${m.senha}</td><td>-</td></tr>`); } }
-        function renderEncomendas() { const t = document.getElementById('tab-enc'); if(t) { t.innerHTML = "<tr><th>Família</th><th>Produto</th><th>Qtd</th><th>Total</th></tr>"; data.encomendas.forEach(e => t.innerHTML += `<tr><td>${e.emp}</td><td>${e.pro}</td><td>${e.q}</td><td>R$ ${e.v}</td></tr>`); } }
+        function renderEncomendas() { const t = document.getElementById('tab-enc'); if(t) { t.innerHTML = "<tr><th>Família</th><th>Produto</th><th>Qtd</th><th>Total</th></tr>"; data.encomendas.forEach(e => t.innerHTML += `<tr><td>${e.emp}</td><td>${e.pro}</td><td>${e.q}</td><td>R$ ${e.v}</td></tr>`); } renderEstatisticas(); }
         function renderLogs() { const c = document.getElementById('log-container'); if(c) { c.innerHTML = ""; data.movimentos.forEach(m => c.innerHTML += `<div class="log-item"><span><strong>${m.user}</strong>: ${m.txt}</span></div>`); } }
         function addNota() { const titulo = document.getElementById('g-titulo').value; const txt = document.getElementById('g-nota').value; if(titulo && txt) { const n = { titulo, txt }; data.notes.push(n); if(db) db.ref('notes').set(data.notes); else { atualizarLocalStorage('notes'); renderNotas(); } } }
         function renderNotas() { const m = document.getElementById('mural'); if(m) { m.innerHTML = ""; data.notes.forEach(n => m.innerHTML += `<div class="note-card"><h5>${n.titulo}</h5><p>${n.txt}</p></div>`); } }
         function saveBG() { const val = document.getElementById('c-bg').value.trim(); if(db) db.ref('bg').set(val); else { localStorage.setItem('vortex_bg', val); aplicasPlanoDeFundo(val); } }
+        
+        // --- ATUALIZAÇÃO DOS GRÁFICOS EM TEMPO REAL ---
         function renderEstatisticas() {
-            const cv = document.getElementById('chartFinanceiro'); if (!cv) return;
-            let ent = 0; let sai = 0; data.caixa.forEach(c => { if(c.tipo==='ENTRADA') ent+=c.valor; else sai+=c.valor; });
-            if (chartFinInstancia) chartFinInstancia.destroy();
-            chartFinInstancia = new Chart(cv, { type: 'doughnut', data: { labels: ['Entradas', 'Retiradas'], datasets: [{ data: [ent, sai], backgroundColor: ['#22c55e', '#ef4444'] }] }, options: { responsive: true, maintainAspectRatio: false } });
+            // 1. Renderiza Gráfico Financeiro (Doughnut)
+            const cvFin = document.getElementById('chartFinanceiro'); 
+            if (cvFin) {
+                let ent = 0; let sai = 0; data.caixa.forEach(c => { if(c.tipo==='ENTRADA') ent+=c.valor; else sai+=c.valor; });
+                if (chartFinInstancia) chartFinInstancia.destroy();
+                chartFinInstancia = new Chart(cvFin, { 
+                    type: 'doughnut', 
+                    data: { labels: ['Entradas', 'Retiradas'], datasets: [{ data: [ent, sai], backgroundColor: ['#22c55e', '#ef4444'], borderColor: 'rgba(11, 8, 19, 0.6)', borderWidth: 2 }] }, 
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#fff' } } } } 
+                });
+            }
+
+            // 2. Renderiza Gráfico de Demandas (Vendas x Encomendas)
+            const cvDem = document.getElementById('chartDemandas');
+            if (cvDem) {
+                let totalVendas = data.vendas.length;
+                let totalEncomendas = data.encomendas.length;
+                
+                if (chartDemInstancia) chartDemInstancia.destroy();
+                chartDemInstancia = new Chart(cvDem, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Nossas Vendas', 'Encomendas'],
+                        datasets: [{
+                            label: 'Quantidade de Registros',
+                            data: [totalVendas, totalEncomendas],
+                            backgroundColor: ['#a855f7', '#3b82f6'],
+                            borderWidth: 0,
+                            borderRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', stepSize: 1 } },
+                            x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+                        }
+                    }
+                });
+            }
         }
     </script>
 </body>
