@@ -249,23 +249,64 @@
             <section id="dash" class="section active">
                 <div class="collapsible-box" id="box-dash-form">
                     <div class="collapsible-header" onclick="toggleBox('box-dash-form')">
-                        <span>Banco da Família</span>
+                        <span>Lançar Movimentação de Caixa (Entradas / Retiradas)</span>
                         <span class="icon-indicator">+</span>
                     </div>
                     <div class="collapsible-content">
-                        <div style="display: flex; gap: 15px;">
-                            <input type="number" id="in-saldo" placeholder="Saldo Inicial">
-                            <input type="number" id="in-ent" placeholder="Entradas">
-                            <input type="number" id="in-sai" placeholder="Saídas">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                            <div>
+                                <label style="font-size: 11px; opacity:0.6; display:block; margin-bottom:5px;">Tipo de Operação</label>
+                                <select id="in-dash-tipo">
+                                    <option value="ENTRADA">🟢 ENTRADA (+)</option>
+                                    <option value="RETIRADA">🔴 RETIRADA (-)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="font-size: 11px; opacity:0.6; display:block; margin-bottom:5px;">Valor da Operação (R$)</label>
+                                <input type="number" id="in-dash-valor" placeholder="Ex: 50000">
+                            </div>
+                            <div>
+                                <label style="font-size: 11px; opacity:0.6; display:block; margin-bottom:5px;">Operador / Responsável</label>
+                                <input type="text" id="in-dash-responsavel" placeholder="Quem está mexendo?">
+                            </div>
                         </div>
-                        <button style="margin-top: 15px;" onclick="upDash()">ATUALIZAR BANCO DA FAMÍLIA</button>
+                        <div style="margin-bottom: 15px;">
+                            <label style="font-size: 11px; opacity:0.6; display:block; margin-bottom:5px;">Descrição / Motivo</label>
+                            <input type="text" id="in-dash-obs" placeholder="Ex: Carga de investimentos ou Retirada de lucro">
+                        </div>
+                        <hr style="border:0; border-top:1px solid var(--border); margin: 20px 0;">
+                        <div style="margin-bottom: 15px; background: rgba(255,255,255,0.02); padding: 15px; border-radius: 12px; border:1px solid var(--border);">
+                            <label style="font-size: 11px; opacity:0.6; display:block; margin-bottom:5px; color: var(--primary);">Definir/Ajustar Saldo Inicial de Segurança</label>
+                            <input type="number" id="in-saldo-base" placeholder="Defina um saldo base fixo inicial se necessário" style="max-width: 300px;">
+                        </div>
+
+                        <button onclick="lancarMovimentacaoCaixa()">SALVAR E ATUALIZAR SALDO</button>
                     </div>
                 </div>
 
                 <div class="grid-cards">
-                    <div class="card"><h4>Saldo Atual</h4><div class="value" id="v-saldo">R$ 0,00</div></div>
-                    <div class="card"><h4>Total Entrada</h4><div class="value" style="color: var(--success)" id="v-ent">R$ 0,00</div></div>
-                    <div class="card"><h4>Total Saída</h4><div class="value" style="color: var(--danger)" id="v-sai">R$ 0,00</div></div>
+                    <div class="card"><h4>Saldo Atual Geral (Calculado)</h4><div class="value" id="v-saldo" style="color:#60a5fa">R$ 0,00</div></div>
+                    <div class="card"><h4>Total de Entradas</h4><div class="value" style="color: var(--success)" id="v-ent">R$ 0,00</div></div>
+                    <div class="card"><h4>Total de Retiradas (Saídas)</h4><div class="value" style="color: var(--danger)" id="v-sai">R$ 0,00</div></div>
+                </div>
+
+                <div class="box-list">
+                    <div class="box-title"><i class="fas fa-list-alt"></i> Livro Caixa: Histórico Completo de Entradas e Retiradas</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Data/Hora</th>
+                                <th>Tipo</th>
+                                <th>Valor</th>
+                                <th>Responsável/Operador</th>
+                                <th>Descrição/Motivo</th>
+                                <th>Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody id="t-caixa-historico">
+                            <tr><td colspan="6" style="text-align:center; opacity:0.4;">Nenhum registro lançado no livro caixa.</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </section>
 
@@ -314,8 +355,7 @@
                         </div>
 
                         <label style="font-size: 12px; text-transform: uppercase; opacity: 0.6; display: block; margin-bottom: 8px;">Itens Recebidos desta Família</label>
-                        <div id="container-rows-encomendas">
-                            </div>
+                        <div id="container-rows-encomendas"></div>
                         <button type="button" class="button btn-add-row" onclick="addEncomendaRow()"><i class="fas fa-plus"></i> Adicionar Mais um Item</button>
                         <br>
                         <button style="margin-top: 5px;" onclick="submitEncomendas()">REGISTRAR ENCOMENDA COMPLETA</button>
@@ -342,8 +382,7 @@
                         </div>
 
                         <label style="font-size: 12px; text-transform: uppercase; opacity: 0.6; display: block; margin-bottom: 8px;">Produtos Vendidos desta Família</label>
-                        <div id="container-rows-vendas">
-                            </div>
+                        <div id="container-rows-vendas"></div>
                         <button type="button" class="button btn-add-row" onclick="addVendaRow()"><i class="fas fa-plus"></i> Adicionar Mais um Item</button>
                         <br>
                         <button style="margin-top: 5px;" onclick="submitVendas()">CONFIRMAR VENDA COMPLETA</button>
@@ -393,9 +432,7 @@
                 
                 <div class="box-list">
                     <div class="box-title"><i class="fas fa-sticky-note"></i> Quadro de Notas Permanentes da Liderança</div>
-                    <div class="notes-grid" id="mural">
-                        <div style="text-align: center; opacity: 0.4; padding: 20px; font-size: 13px; grid-column: 1/-1;">Nenhum registro importante inserido no mural ainda.</div>
-                    </div>
+                    <div class="notes-grid" id="mural"></div>
                 </div>
             </section>
 
@@ -423,8 +460,7 @@
                         </div>
                         
                         <label style="font-size: 12px; text-transform: uppercase; opacity: 0.6; display: block; margin-bottom: 8px;">Produtos deste Fornecedor</label>
-                        <div id="container-rows-catalogo">
-                            </div>
+                        <div id="container-rows-catalogo"></div>
                         <button type="button" class="button btn-add-row" onclick="addCatalogoRow()"><i class="fas fa-plus"></i> Adicionar Mais um Produto</button>
                         <br>
                         <button style="margin-top: 5px;" onclick="submitCatalogo()">SALVAR TODOS E VINCULAR</button>
@@ -433,9 +469,7 @@
 
                 <div class="box-list">
                     <div class="box-title"><i class="fas fa-cubes"></i> Blocos de Notas: Catálogos de Famílias Salvas</div>
-                    <div id="container-familias" class="grid-families">
-                        <div style="text-align: center; opacity: 0.4; padding: 20px; font-size: 13px; grid-column: 1/-1;">Nenhuma família ou produto configurado até o momento.</div>
-                    </div>
+                    <div id="container-familias" class="grid-families"></div>
                 </div>
             </section>
 
@@ -461,7 +495,18 @@
 
         let currentUser = null;
         let db = null;
-        let data = { membros: [], encomendas: [], vendas: [], movimentos: [], catalogo: [], notes: [], dash: { s: 0, e: 0, sa: 0 } };
+        
+        // Estrutura de dados unificada
+        let data = { 
+            membros: [], 
+            encomendas: [], 
+            vendas: [], 
+            movimentos: [], 
+            catalogo: [], 
+            notes: [], 
+            caixa: [],            // <- Armazena as entradas/retiradas do livro caixa
+            dash: { base: 0 }     // <- Saldo inicial base configurável
+        };
         
         let chartFinInstancia = null;
         let chartProdInstancia = null;
@@ -475,7 +520,7 @@
                     ativarSincronizacaoFirebase();
                     console.log("VORTEX: Banco em Nuvem do Firebase Ativado com Sucesso.");
                 } catch(e) {
-                    console.error("Erro nas chaves do Firebase. Executando LocalStorage de segurança.");
+                    console.error("Erro nas chaves do Firebase. Executando LocalStorage.");
                     carregarDadosLocalStorage();
                 }
             } else {
@@ -498,13 +543,14 @@
             data.movimentos = JSON.parse(localStorage.getItem('vortex_movimentos')) || [];
             data.catalogo = JSON.parse(localStorage.getItem('vortex_catalogo')) || [];
             data.notes = JSON.parse(localStorage.getItem('vortex_notes')) || [];
-            data.dash = JSON.parse(localStorage.getItem('vortex_dash')) || { s: 0, e: 0, sa: 0 };
+            data.caixa = JSON.parse(localStorage.getItem('vortex_caixa')) || [];
+            data.dash = JSON.parse(localStorage.getItem('vortex_dash')) || { base: 0 };
 
             const bgSalvo = localStorage.getItem('vortex_bg');
             if(bgSalvo) aplicasPlanoDeFundo(bgSalvo);
 
             renderMembros();
-            renderDash();
+            calcularEAtualizarDashboard();
             updateGlobalFamilyDropdowns();
             renderFamilies();
             renderEncomendas();
@@ -559,30 +605,141 @@
             });
             db.ref('movimentos').on('value', s => { data.movimentos = s.val() || []; renderEstatisticas(); renderLogs(); });
             db.ref('notes').on('value', s => { data.notes = s.val() || []; renderNotas(); });
-            db.ref('dash').on('value', s => { data.dash = s.val() || {s:0,e:0,sa:0}; renderDash(); renderEstatisticas(); });
+            db.ref('caixa').on('value', s => { 
+                const val = s.val() || [];
+                data.caixa = Object.keys(val).map(k => ({...val[k], id: k}));
+                calcularEAtualizarDashboard(); 
+            });
+            db.ref('dash').on('value', s => { 
+                data.dash = s.val() || { base: 0 }; 
+                calcularEAtualizarDashboard(); 
+            });
             db.ref('bg').on('value', s => { if(s.val()) aplicasPlanoDeFundo(s.val()); });
         }
 
-        // --- ATUALIZAÇÃO DOS MENUS DE SELEÇÃO E FILTROS DE FAMÍLIA ---
+        // --- SISTEMA AUTOMATIZADO DE CALCULO DE SALDO ---
+        function lancarMovimentacaoCaixa() {
+            const tipo = document.getElementById('in-dash-tipo').value;
+            const valor = parseFloat(document.getElementById('in-dash-valor').value) || 0;
+            const responsavel = document.getElementById('in-dash-responsavel').value.trim();
+            const obs = document.getElementById('in-dash-obs').value.trim() || "Sem descrição";
+            const baseInput = parseFloat(document.getElementById('in-saldo-base').value);
+
+            // Se alterou a base fixa inicial
+            if(!isNaN(baseInput)) {
+                data.dash.base = baseInput;
+                if(db) db.ref('dash').set(data.dash);
+                else atualizarLocalStorage('dash');
+            }
+
+            if(valor <= 0 || !responsavel) {
+                if(isNaN(baseInput)) alert("Por favor, preencha o valor da operação e o responsável!");
+                else {
+                    calcularEAtualizarDashboard();
+                    toggleBox('box-dash-form');
+                    document.getElementById('in-saldo-base').value = '';
+                }
+                return;
+            }
+
+            const novaMovimentacao = {
+                data: new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'}),
+                tipo: tipo,
+                valor: valor,
+                responsavel: responsavel,
+                obs: obs
+            };
+
+            if(db) {
+                db.ref('caixa').push().set(novaMovimentacao);
+            } else {
+                novaMovimentacao.id = 'cx_' + Date.now() + Math.random();
+                data.caixa.push(novaMovimentacao);
+                atualizarLocalStorage('caixa');
+                calcularEAtualizarDashboard();
+            }
+
+            registrarAcaoNoPainel(`Lançou uma ${tipo} no valor de R$ ${valor.toLocaleString('pt-BR')} (Responsável: ${responsavel}).`);
+            
+            // Limpa form
+            document.getElementById('in-dash-valor').value = '';
+            document.getElementById('in-dash-responsavel').value = '';
+            document.getElementById('in-dash-obs').value = '';
+            document.getElementById('in-saldo-base').value = '';
+            toggleBox('box-dash-form');
+        }
+
+        function calcularEAtualizarDashboard() {
+            let totalEntradas = 0;
+            let totalRetiradas = 0;
+
+            data.caixa.forEach(item => {
+                if(item.tipo === 'ENTRADA') totalEntradas += item.valor;
+                if(item.tipo === 'RETIRADA') totalRetiradas += item.valor;
+            });
+
+            // Regra matemática: Base + Entradas - Retiradas
+            let saldoFinalCalculado = (data.dash.base || 0) + totalEntradas - totalRetiradas;
+
+            // Renderiza na tela
+            document.getElementById('v-saldo').innerText = `R$ ${saldoFinalCalculado.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
+            document.getElementById('v-ent').innerText = `R$ ${totalEntradas.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
+            document.getElementById('v-sai').innerText = `R$ ${totalRetiradas.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
+
+            // Renderiza a tabela do histórico de Livro Caixa
+            const tbody = document.getElementById('t-caixa-historico');
+            if(!tbody) return;
+
+            if(data.caixa.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; opacity:0.4;">Nenhum registro lançado no livro caixa.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = '';
+            [...data.caixa].reverse().forEach(item => {
+                const corTipo = item.tipo === 'ENTRADA' ? 'var(--success)' : 'var(--danger)';
+                const sinal = item.tipo === 'ENTRADA' ? '+' : '-';
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${item.data}</td>
+                        <td><span style="color:${corTipo}; font-weight:700; font-size:12px;">● ${item.tipo}</span></td>
+                        <td style="color:${corTipo}; font-weight:700;">${sinal} R$ ${item.valor.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
+                        <td><strong>${item.responsavel}</strong></td>
+                        <td style="opacity:0.8;">${item.obs}</td>
+                        <td><button class="btn-table-delete" onclick="removerRegistroCaixa('${item.id}')"><i class="fas fa-trash-alt"></i></button></td>
+                    </tr>
+                `;
+            });
+
+            renderEstatisticas();
+        }
+
+        function removerRegistroCaixa(id) {
+            if(confirm("Deseja deletar permanentemente esse lançamento do Livro Caixa? O saldo recalculado mudará.")) {
+                if(db) {
+                    db.ref('caixa/' + id).remove();
+                } else {
+                    data.caixa = data.caixa.filter(c => c.id !== id);
+                    atualizarLocalStorage('caixa');
+                    calcularEAtualizarDashboard();
+                }
+                registrarAcaoNoPainel(`Excluiu um registro de lançamento de fluxo de caixa.`);
+            }
+        }
+
+
+        // --- CONFIGURAÇÕES DE DROPDOWNS DE FAMÍLIAS ---
         function updateGlobalFamilyDropdowns() {
             const eSelect = document.getElementById('e-global-family');
             const vSelect = document.getElementById('v-global-family');
             if(!eSelect || !vSelect) return;
 
-            // Pega nomes únicos de famílias registradas no catálogo
             let familiasUnicas = [...new Set(data.catalogo.map(c => c.emp))].sort();
-
             let optionsHtml = '<option value="">Escolha a Família primeiro...</option>';
-            familiasUnicas.forEach(f => {
-                optionsHtml += `<option value="${f}">${f}</option>`;
-            });
+            familiasUnicas.forEach(f => { optionsHtml += `<option value="${f}">${f}</option>`; });
 
-            const eVal = eSelect.value;
-            const vVal = vSelect.value;
-
-            eSelect.innerHTML = optionsHtml;
-            vSelect.innerHTML = optionsHtml;
-
+            const eVal = eSelect.value; const vVal = vSelect.value;
+            eSelect.innerHTML = optionsHtml; vSelect.innerHTML = optionsHtml;
             eSelect.value = familiasUnicas.includes(eVal) ? eVal : "";
             vSelect.value = familiasUnicas.includes(vVal) ? vVal : "";
 
@@ -616,17 +773,12 @@
             }
             let atual = selectElement.value;
             selectElement.innerHTML = '<option value="">Escolha o item...</option>';
-            
             data.catalogo.forEach((c, i) => {
-                if(c.emp === familiaSelecionada) {
-                    selectElement.innerHTML += `<option value="${i}">${c.pro}</option>`;
-                }
+                if(c.emp === familiaSelecionada) { selectElement.innerHTML += `<option value="${i}">${c.pro}</option>`; }
             });
             selectElement.value = atual;
         }
 
-
-        // --- MANIPULAÇÃO DINÂMICA DE MULTI-ITENS CORRIGIDA ---
         function resetFormulariosMultiplos() {
             document.getElementById('container-rows-encomendas').innerHTML = '';
             document.getElementById('container-rows-vendas').innerHTML = '';
@@ -634,18 +786,14 @@
             document.getElementById('c-global-family').value = '';
             if(document.getElementById('e-global-family')) document.getElementById('e-global-family').value = '';
             if(document.getElementById('v-global-family')) document.getElementById('v-global-family').value = '';
-            addEncomendaRow();
-            addVendaRow();
-            addCatalogoRow();
+            addEncomendaRow(); addVendaRow(); addCatalogoRow();
         }
 
-        // Aba Encomendas (Entrega) Dinâmica
         function addEncomendaRow() {
             const container = document.getElementById('container-rows-encomendas');
             const rowId = 'enc_row_' + Date.now() + Math.random().toString(36).substr(2, 5);
             const div = document.createElement('div');
-            div.className = 'dynamic-row';
-            div.id = rowId;
+            div.className = 'dynamic-row'; div.id = rowId;
             div.innerHTML = `
                 <select class="e-item-select" onchange="calcRowE('${rowId}')" style="flex: 2;"></select>
                 <input type="number" class="e-qtd-input" placeholder="Quantidade" oninput="calcRowE('${rowId}')" style="flex: 1;">
@@ -653,64 +801,45 @@
                 <button type="button" class="btn-remove-row" onclick="removeFormRow('${rowId}')"><i class="fas fa-times"></i></button>
             `;
             container.appendChild(div);
-            const fam = document.getElementById('e-global-family') ? document.getElementById('e-global-family').value : "";
-            populateProductsDropdownByFamily(div.querySelector('.e-item-select'), fam);
+            populateProductsDropdownByFamily(div.querySelector('.e-item-select'), document.getElementById('e-global-family').value);
         }
 
         function calcRowE(rowId) {
-            const row = document.getElementById(rowId);
-            if(!row) return;
-            const select = row.querySelector('.e-item-select').value;
-            const qtd = row.querySelector('.e-qtd-input').value;
+            const row = document.getElementById(rowId); if(!row) return;
+            const select = row.querySelector('.e-item-select').value; const qtd = row.querySelector('.e-qtd-input').value;
             if(select !== "" && qtd) {
                 const item = data.catalogo[select];
                 row.querySelector('.e-val-input').value = `R$ ${(item.pre * qtd).toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
-            } else {
-                row.querySelector('.e-val-input').value = '';
-            }
+            } else { row.querySelector('.e-val-input').value = ''; }
         }
 
         function submitEncomendas() {
             const famGlobal = document.getElementById('e-global-family').value;
-            if(!famGlobal) {
-                alert("Por favor, selecione uma Família/Fornecedor no topo antes de salvar!");
-                return;
-            }
-
+            if(!famGlobal) { alert("Selecione uma Família primeiro!"); return; }
             const rows = document.querySelectorAll('#container-rows-encomendas .dynamic-row');
             let adicionados = 0;
             rows.forEach(row => {
-                const idx = row.querySelector('.e-item-select').value;
-                const q = parseInt(row.querySelector('.e-qtd-input').value);
+                const idx = row.querySelector('.e-item-select').value; const q = parseInt(row.querySelector('.e-qtd-input').value);
                 if(idx !== "" && q) {
                     const c = data.catalogo[idx];
                     const novaEncomenda = { emp: famGlobal, pro: c.pro, q, v: c.pre * q };
-                    if(db) {
-                        db.ref('encomendas').push().set(novaEncomenda);
-                    } else {
-                        novaEncomenda.id = 'enc_' + Date.now() + Math.random();
-                        data.encomendas.push(novaEncomenda);
-                    }
+                    if(db) { db.ref('encomendas').push().set(novaEncomenda); } 
+                    else { novaEncomenda.id = 'enc_' + Date.now() + Math.random(); data.encomendas.push(novaEncomenda); }
                     adicionados++;
                 }
             });
             if(adicionados > 0) {
                 if(!db) atualizarLocalStorage('encomendas');
-                registrarAcaoNoPainel(`Registrou entrada de ${adicionados} item(ns) de encomendas da família '${famGlobal}'.`);
-                renderEncomendas();
-                renderEstatisticas();
-                resetFormulariosMultiplos();
-                toggleBox('box-enc-form');
+                registrarAcaoNoPainel(`Registrou entrada de ${adicionados} itens em encomendas (${famGlobal}).`);
+                renderEncomendas(); resetFormulariosMultiplos(); toggleBox('box-enc-form');
             }
         }
 
-        // Aba Vendas Dinâmica
         function addVendaRow() {
             const container = document.getElementById('container-rows-vendas');
             const rowId = 'ven_row_' + Date.now() + Math.random().toString(36).substr(2, 5);
             const div = document.createElement('div');
-            div.className = 'dynamic-row';
-            div.id = rowId;
+            div.className = 'dynamic-row'; div.id = rowId;
             div.innerHTML = `
                 <select class="v-item-select" onchange="calcRowV('${rowId}')" style="flex: 2;"></select>
                 <input type="number" class="v-qtd-input" placeholder="Quantidade" oninput="calcRowV('${rowId}')" style="flex: 1;">
@@ -718,64 +847,45 @@
                 <button type="button" class="btn-remove-row" onclick="removeFormRow('${rowId}')"><i class="fas fa-times"></i></button>
             `;
             container.appendChild(div);
-            const fam = document.getElementById('v-global-family') ? document.getElementById('v-global-family').value : "";
-            populateProductsDropdownByFamily(div.querySelector('.v-item-select'), fam);
+            populateProductsDropdownByFamily(div.querySelector('.v-item-select'), document.getElementById('v-global-family').value);
         }
 
         function calcRowV(rowId) {
-            const row = document.getElementById(rowId);
-            if(!row) return;
-            const select = row.querySelector('.v-item-select').value;
-            const qtd = row.querySelector('.v-qtd-input').value;
+            const row = document.getElementById(rowId); if(!row) return;
+            const select = row.querySelector('.v-item-select').value; const qtd = row.querySelector('.v-qtd-input').value;
             if(select !== "" && qtd) {
                 const item = data.catalogo[select];
                 row.querySelector('.v-val-input').value = `R$ ${(item.pre * qtd).toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
-            } else {
-                row.querySelector('.v-val-input').value = '';
-            }
+            } else { row.querySelector('.v-val-input').value = ''; }
         }
 
         function submitVendas() {
             const famGlobal = document.getElementById('v-global-family').value;
-            if(!famGlobal) {
-                alert("Por favor, selecione uma Família/Fornecedor no topo antes de salvar!");
-                return;
-            }
-
+            if(!famGlobal) { alert("Selecione uma Família primeiro!"); return; }
             const rows = document.querySelectorAll('#container-rows-vendas .dynamic-row');
             let adicionados = 0;
             rows.forEach(row => {
-                const idx = row.querySelector('.v-item-select').value;
-                const q = parseInt(row.querySelector('.v-qtd-input').value);
+                const idx = row.querySelector('.v-item-select').value; const q = parseInt(row.querySelector('.v-qtd-input').value);
                 if(idx !== "" && q) {
                     const c = data.catalogo[idx];
                     const novaVenda = { emp: famGlobal, pro: c.pro, q, v: c.pre * q };
-                    if(db) {
-                        db.ref('vendas').push().set(novaVenda);
-                    } else {
-                        novaVenda.id = 'ven_' + Date.now() + Math.random();
-                        data.vendas.push(novaVenda);
-                    }
+                    if(db) { db.ref('vendas').push().set(novaVenda); } 
+                    else { novaVenda.id = 'ven_' + Date.now() + Math.random(); data.vendas.push(novaVenda); }
                     adicionados++;
                 }
             });
             if(adicionados > 0) {
                 if(!db) atualizarLocalStorage('vendas');
-                registrarAcaoNoPainel(`Confirmou a venda de ${adicionados} item(ns) da família '${famGlobal}'.`);
-                renderVendas();
-                renderEstatisticas();
-                resetFormulariosMultiplos();
-                toggleBox('box-ven-form');
+                registrarAcaoNoPainel(`Confirmou a venda de ${adicionados} itens da família '${famGlobal}'.`);
+                renderVendas(); resetFormulariosMultiplos(); toggleBox('box-ven-form');
             }
         }
 
-        // Catálogo/Configuração Dinâmica
         function addCatalogoRow() {
             const container = document.getElementById('container-rows-catalogo');
             const rowId = 'cat_row_' + Date.now() + Math.random().toString(36).substr(2, 5);
             const div = document.createElement('div');
-            div.className = 'dynamic-row';
-            div.id = rowId;
+            div.className = 'dynamic-row'; div.id = rowId;
             div.innerHTML = `
                 <input type="text" class="c-pro-input" placeholder="Produto Comercializado" style="flex: 2;">
                 <input type="number" class="c-pre-input" placeholder="Preço Unitário (R$)" style="flex: 1;">
@@ -786,473 +896,127 @@
 
         function submitCatalogo() {
             const empGlobal = document.getElementById('c-global-family').value.trim();
-            if(!empGlobal) {
-                alert("Por favor, digite o nome da Família no topo antes de salvar!");
-                return;
-            }
-
+            if(!empGlobal) { alert("Digite o nome da Família!"); return; }
             const rows = document.querySelectorAll('#container-rows-catalogo .dynamic-row');
             let adicionados = 0;
             rows.forEach(row => {
-                const pro = row.querySelector('.c-pro-input').value.trim();
-                const pre = parseFloat(row.querySelector('.c-pre-input').value);
+                const pro = row.querySelector('.c-pro-input').value.trim(); const pre = parseFloat(row.querySelector('.c-pre-input').value);
                 if(pro && !isNaN(pre)) {
                     const novoItem = { emp: empGlobal, pro, pre };
-                    if(db) {
-                        db.ref('catalogo').push().set(novoItem);
-                    } else {
-                        novoItem.id = 'cat_' + Date.now() + Math.random();
-                        data.catalogo.push(novoItem);
-                    }
+                    if(db) db.ref('catalogo').push().set(novoItem);
+                    else { novoItem.id = 'cat_' + Date.now() + Math.random(); data.catalogo.push(novoItem); }
                     adicionados++;
                 }
             });
             if(adicionados > 0) {
-                if(!db) {
-                    atualizarLocalStorage('catalogo');
-                    updateGlobalFamilyDropdowns();
-                    renderFamilies();
-                    renderEstatisticas();
-                }
-                registrarAcaoNoPainel(`Cadastrou ${adicionados} produto(s) para a família '${empGlobal}'.`);
-                resetFormulariosMultiplos();
-                toggleBox('box-cfg-fam');
+                if(!db) { atualizarLocalStorage('catalogo'); updateGlobalFamilyDropdowns(); renderFamilies(); }
+                registrarAcaoNoPainel(`Cadastrou ${adicionados} produtos em '${empGlobal}'.`);
+                resetFormulariosMultiplos(); toggleBox('box-cfg-fam');
             }
         }
 
-        function removeFormRow(rowId) {
-            const row = document.getElementById(rowId);
-            if(row) row.remove();
-        }
+        function removeFormRow(rowId) { const row = document.getElementById(rowId); if(row) row.remove(); }
 
-        // --- SISTEMA DE REGISTRO DE LOGS AUTOMÁTICOS ---
         function registrarAcaoNoPainel(mensagem) {
             const userName = currentUser ? currentUser.nome : "Sistema";
-            const novoLog = {
-                user: userName,
-                txt: mensagem,
-                time: new Date().toLocaleTimeString('pt-BR') + ' - ' + new Date().toLocaleDateString('pt-BR')
-            };
+            const novoLog = { user: userName, txt: mensagem, time: new Date().toLocaleTimeString('pt-BR') + ' - ' + new Date().toLocaleDateString('pt-BR') };
             if(!data.movimentos) data.movimentos = [];
             data.movimentos.push(novoLog);
-            if(db) {
-                db.ref('movimentos').set(data.movimentos);
-            } else {
-                atualizarLocalStorage('movimentos');
-                renderLogs();
-            }
+            if(db) db.ref('movimentos').set(data.movimentos);
+            else { atualizarLocalStorage('movimentos'); renderLogs(); }
         }
 
         function renderLogs() {
-            const container = document.getElementById('log-container');
-            if(!container) return;
-            if(!data.movimentos || data.movimentos.length === 0) {
-                container.innerHTML = `<div style="text-align: center; opacity: 0.4; padding: 20px; font-size: 13px;">Nenhuma atividade registrada no painel ainda.</div>`;
-                return;
-            }
-            container.innerHTML = "";
-            [...data.movimentos].reverse().forEach(log => {
-                container.innerHTML += `
-                    <div class="log-item">
-                        <span><strong>${log.user}</strong>: ${log.txt}</span>
-                        <div class="log-time">${log.time}</div>
-                    </div>
-                `;
-            });
+            const container = document.getElementById('log-container'); if(!container) return;
+            if(!data.movimentos || data.movimentos.length === 0) { container.innerHTML = `<div style="text-align: center; opacity: 0.4; padding: 20px; font-size: 13px;">Nenhuma atividade ainda.</div>`; return; }
+            container.innerHTML = ""; [...data.movimentos].reverse().forEach(log => { container.innerHTML += `<div class="log-item"><span><strong>${log.user}</strong>: ${log.txt}</span><div class="log-time">${log.time}</div></div>`; });
         }
 
-        // --- MECANISMO DE AUTENTICAÇÃO ---
         function auth() {
-            const u = document.getElementById('user-in').value.trim();
-            const p = document.getElementById('pass-in').value.trim();
-            const errBox = document.getElementById('login-err');
-            errBox.style.display = 'none';
-
-            const found = data.membros.find(m => 
-                (m.nome.toLowerCase() === u.toLowerCase() || String(m.uid) === u) && String(m.senha) === p
-            );
-
+            const u = document.getElementById('user-in').value.trim(); const p = document.getElementById('pass-in').value.trim();
+            const found = data.membros.find(m => (m.nome.toLowerCase() === u.toLowerCase() || String(m.uid) === u) && String(m.senha) === p);
             if(found) {
-                currentUser = found;
-                currentUser.status = { online: true, lastSeen: Date.now() };
-                
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('main-panel').style.display = 'block';
+                currentUser = found; currentUser.status = { online: true, lastSeen: Date.now() };
+                document.getElementById('login-screen').style.display = 'none'; document.getElementById('main-panel').style.display = 'block';
                 document.getElementById('logged-name').innerText = `${currentUser.nome} | ${currentUser.uid}`;
-                
                 renderMembros();
-                if(db && currentUser.dbKey !== 'master_local') {
-                    db.ref('membros/' + currentUser.dbKey + '/status').set({ online: true, lastSeen: Date.now() });
-                }
-            } else {
-                errBox.style.display = 'block'; 
-            }
+                if(db && currentUser.dbKey !== 'master_local') db.ref('membros/' + currentUser.dbKey + '/status').set({ online: true, lastSeen: Date.now() });
+            } else { document.getElementById('login-err').style.display = 'block'; }
         }
 
         function logout() {
-            if(db && currentUser && currentUser.dbKey !== 'master_local') {
-                db.ref('membros/' + currentUser.dbKey + '/status').set({ online: false, lastSeen: Date.now() });
-            }
-            currentUser = null;
-            document.getElementById('user-in').value = "";
-            document.getElementById('pass-in').value = "";
-            document.getElementById('main-panel').style.display = 'none';
-            document.getElementById('login-screen').style.display = 'flex';
-            renderMembros();
+            if(db && currentUser && currentUser.dbKey !== 'master_local') db.ref('membros/' + currentUser.dbKey + '/status').set({ online: false, lastSeen: Date.now() });
+            currentUser = null; document.getElementById('main-panel').style.display = 'none'; document.getElementById('login-screen').style.display = 'flex';
         }
 
-        // --- CADASTRO E EDIÇÃO DE MEMBROS ---
         function saveMembro() {
-            const key = document.getElementById('m-key').value;
-            const uid = document.getElementById('m-id').value.trim();
-            const nome = document.getElementById('m-nome').value.trim();
-            const senha = document.getElementById('m-pass').value.trim();
-            const cargo = document.getElementById('m-cargo').value.trim();
-            
-            if(!uid || !nome || !senha || !cargo) return;
-
+            const key = document.getElementById('m-key').value; const uid = document.getElementById('m-id').value.trim();
+            const nome = document.getElementById('m-nome').value.trim(); const senha = document.getElementById('m-pass').value.trim();
+            const cargo = document.getElementById('m-cargo').value.trim(); if(!uid || !nome || !senha || !cargo) return;
             if(key) {
-                if(key === 'master_local') {
-                    data.membros[0] = { dbKey: "master_local", uid, nome, senha, cargo, status: { online: true, lastSeen: Date.now() } };
-                    if(currentUser && currentUser.dbKey === 'master_local') {
-                        document.getElementById('logged-name').innerText = `${nome} | ${uid}`;
-                    }
-                } else if(db) {
-                    db.ref('membros/' + key).update({ uid, nome, senha, cargo });
-                } else {
-                    const idx = data.membros.findIndex(m => m.dbKey === key);
-                    if(idx !== -1) data.membros[idx] = { dbKey: key, uid, nome, senha, cargo, status: data.membros[idx].status };
-                }
+                if(key === 'master_local') data.membros[0] = { dbKey: "master_local", uid, nome, senha, cargo, status: { online: true, lastSeen: Date.now() } };
+                else if(db) db.ref('membros/' + key).update({ uid, nome, senha, cargo });
+                else { const idx = data.membros.findIndex(m => m.dbKey === key); if(idx !== -1) data.membros[idx] = { dbKey: key, uid, nome, senha, cargo, status: data.membros[idx].status }; }
             } else {
                 const novo = { uid, nome, senha, cargo, status: { online: false, lastSeen: 0 } };
-                if(db) {
-                    db.ref('membros').push().set(novo);
-                } else {
-                    novo.dbKey = 'local_' + Date.now();
-                    data.membros.push(novo);
-                }
+                if(db) db.ref('membros').push().set(novo); else { novo.dbKey = 'local_' + Date.now(); data.membros.push(novo); }
             }
-            atualizarLocalStorage('membros');
-            cancelarEdicaoMembro();
-            renderMembros();
-            toggleBox('box-mem-form');
+            atualizarLocalStorage('membros'); cancelarEdicaoMembro(); renderMembros(); toggleBox('box-mem-form');
         }
 
         function prepararEdicaoMembro(key) {
-            const mem = data.membros.find(m => m.dbKey === key);
-            if(!mem) return;
-            document.getElementById('m-key').value = mem.dbKey;
-            document.getElementById('m-id').value = mem.uid;
-            document.getElementById('m-nome').value = mem.nome;
-            document.getElementById('m-pass').value = mem.senha;
-            document.getElementById('m-cargo').value = mem.cargo;
-            document.getElementById('form-mem-title').innerText = "Editar Credenciais do Membro";
-            document.getElementById('btn-save-mem').innerText = "SALVAR ALTERAÇÕES";
-            document.getElementById('btn-cancel-edit').style.display = "inline-block";
-            if(!document.getElementById('box-mem-form').classList.contains('open')) toggleBox('box-mem-form');
+            const mem = data.membros.find(m => m.dbKey === key); if(!mem) return;
+            document.getElementById('m-key').value = mem.dbKey; document.getElementById('m-id').value = mem.uid;
+            document.getElementById('m-nome').value = mem.nome; document.getElementById('m-pass').value = mem.senha;
+            document.getElementById('m-cargo').value = mem.cargo; toggleBox('box-mem-form');
         }
 
-        function cancelarEdicaoMembro() {
-            document.getElementById('m-key').value = "";
-            document.getElementById('m-id').value = "";
-            document.getElementById('m-nome').value = "";
-            document.getElementById('m-pass').value = "";
-            document.getElementById('m-cargo').value = "";
-            document.getElementById('form-mem-title').innerText = "Cadastrar Novo Membro / Acesso";
-            document.getElementById('btn-save-mem').innerText = "SALVAR NOVO MEMBRO";
-            document.getElementById('btn-cancel-edit').style.display = "none";
-        }
+        function cancelarEdicaoMembro() { document.getElementById('m-key').value = ""; document.getElementById('m-id').value = ""; document.getElementById('m-nome').value = ""; document.getElementById('m-pass').value = ""; document.getElementById('m-cargo').value = ""; }
+        function delMem(k) { if(confirm("Remover?")) { if(db && k !== 'master_local') db.ref('membros/'+k).remove(); else { data.membros = data.membros.filter(m => m.dbKey !== k); atualizarLocalStorage('membros'); renderMembros(); } } }
+        function toggleBox(id) { const box = document.getElementById(id); box.classList.toggle('open'); }
+        function toggleSidebar() { const side = document.getElementById('sidebar'); side.classList.toggle('collapsed'); }
+        function tab(id) { document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
 
-        function delMem(k) {
-            if(confirm("Remover este acesso?")) {
-                if(db && k !== 'master_local') db.ref('membros/'+k).remove();
-                else { 
-                    data.membros = data.membros.filter(m => m.dbKey !== k); 
-                    atualizarLocalStorage('membros');
-                    renderMembros(); 
-                }
+        function renderFamilies() {
+            const container = document.getElementById('container-familias'); if(!container) return;
+            if(!data.catalogo || data.catalogo.length === 0) { container.innerHTML = '<div style="opacity:0.4;padding:20px;">Vazio.</div>'; return; }
+            container.innerHTML = ""; let fams = {}; data.catalogo.forEach(c => { if(!fams[c.emp]) fams[c.emp] = []; fams[c.emp].push(c); });
+            for(let f in fams) {
+                let card = `<div class="family-card"><h4>${f}</h4><div class="family-products-list">`;
+                fams[f].forEach(p => { card += `<div class="family-item"><span>${p.pro}</span><strong>R$ ${p.pre.toLocaleString('pt-BR')}</strong></div>`; });
+                card += `</div></div>`; container.innerHTML += card;
             }
         }
 
-        // --- INTERFACES VISUAIS ---
-        function toggleBox(id) { const box = document.getElementById(id); box.classList.toggle('open'); const ind = box.querySelector('.icon-indicator'); if(ind) ind.innerText = box.classList.contains('open') ? '-' : '+'; }
-        function toggleSidebar() { const side = document.getElementById('sidebar'); const main = document.getElementById('main-content'); const icon = document.getElementById('t-icon'); side.classList.toggle('collapsed'); if(side.classList.contains('collapsed')) { icon.className = 'fas fa-chevron-right'; main.classList.add('expanded'); } else { icon.className = 'fas fa-chevron-left'; main.classList.remove('expanded'); } }
-        function tab(id) { document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); document.querySelectorAll('.menu-list li').forEach(l => l.classList.remove('active')); document.getElementById(id).classList.add('active'); event.currentTarget.classList.add('active'); if(id === 'mov') { setTimeout(() => { renderEstatisticas(); renderLogs(); }, 50); } else if(id === 'ger') { setTimeout(() => { renderNotas(); }, 50); } else if(id === 'cfg') { setTimeout(() => { renderFamilies(); }, 50); } else if(id === 'enc') { setTimeout(() => { renderEncomendas(); }, 50); } else if(id === 'ven') { setTimeout(() => { renderVendas(); }, 50); } }
+        function renderMembros() { const t = document.getElementById('t-membros'); if(!t) return; t.innerHTML = ""; data.membros.forEach(m => { t.innerHTML += `<tr><td><strong>#${m.uid}</strong></td><td>${m.nome}</td><td>${m.cargo}</td><td>${m.senha}</td><td>🟢</td><td><button onclick="prepararEdicaoMembro('${m.dbKey}')">Editar</button></td></tr>`; }); }
+        function renderEncomendas() { const t = document.getElementById('tab-enc'); if(!t) return; t.innerHTML = "<tr><th>Família</th><th>Produto</th><th>Qtd</th><th>Total</th></tr>"; data.encomendas.forEach(e => t.innerHTML += `<tr><td>${e.emp}</td><td>${e.pro}</td><td>${e.q}</td><td>R$ ${e.v.toLocaleString('pt-BR')}</td></tr>`); }
+        function renderVendas() { const t = document.getElementById('tab-ven'); if(!t) return; t.innerHTML = "<tr><th>Família</th><th>Produto</th><th>Qtd</th><th>Total</th></tr>"; data.vendas.forEach(v => t.innerHTML += `<tr><td>${v.emp}</td><td>${v.pro}</td><td>${v.q}</td><td>R$ ${v.v.toLocaleString('pt-BR')}</td></tr>`); }
 
-        // FINANCEIRO & DASHBOARD
-        function upDash() { 
-            const s = parseFloat(document.getElementById('in-saldo').value) || 0; 
-            const e = parseFloat(document.getElementById('in-ent').value) || 0; 
-            const sa = parseFloat(document.getElementById('in-sai').value) || 0; 
-            if(db) {
-                db.ref('dash').set({s, e, sa});
-            } else { 
-                data.dash = {s,e,sa}; 
-                atualizarLocalStorage('dash'); 
-                renderDash(); 
-                renderEstatisticas(); 
-            }
-            registrarAcaoNoPainel(`Atualizou o Banco da Família (Saldo: R$ ${s.toLocaleString('pt-BR')}, Entradas: R$ ${e.toLocaleString('pt-BR')}, Saídas: R$ ${sa.toLocaleString('pt-BR')})`);
-            toggleBox('box-dash-form'); 
-        }
-        function renderDash() { document.getElementById('v-saldo').innerText = `R$ ${(data.dash.s || 0).toLocaleString('pt-BR', {minimumFractionDigits:2})}`; document.getElementById('v-ent').innerText = `R$ ${(data.dash.e || 0).toLocaleString('pt-BR', {minimumFractionDigits:2})}`; document.getElementById('v-sai').innerText = `R$ ${(data.dash.sa || 0).toLocaleString('pt-BR', {minimumFractionDigits:2})}`; }
-
-        function removeCatItem(id) {
-            if(confirm("Deseja mesmo excluir este produto do catálogo de famílias?")) {
-                if(db) {
-                    db.ref('catalogo/' + id).remove();
-                } else {
-                    data.catalogo = data.catalogo.filter(c => c.id !== id);
-                    atualizarLocalStorage('catalogo');
-                    updateGlobalFamilyDropdowns();
-                    renderFamilies();
-                    renderEstatisticas();
-                }
-                registrarAcaoNoPainel(`Removeu um item do catálogo de configurações.`);
-            }
-        }
-
-        function renderFamilies() { 
-            const container = document.getElementById('container-familias'); 
-            if(!container) return; 
-            
-            if(!data.catalogo || data.catalogo.length === 0) {
-                container.innerHTML = `<div style="text-align: center; opacity: 0.4; padding: 20px; font-size: 13px; grid-column: 1/-1;">Nenhuma família ou produto configurado até o momento.</div>`;
-                return;
-            }
-
-            container.innerHTML = ""; 
-            let fams = {}; 
-            data.catalogo.forEach(c => { 
-                if(!fams[c.emp]) fams[c.emp] = []; 
-                fams[c.emp].push(c); 
-            }); 
-            
-            for(let f in fams) { 
-                let card = `
-                    <div class="family-card">
-                        <h4><i class="fas fa-sticky-note" style="color: var(--primary);"></i> ${f}</h4>
-                        <div class="family-products-list">
-                `;
-                fams[f].forEach(p => { 
-                    card += `
-                        <div class="family-item">
-                            <span>${p.pro}</span>
-                            <div style="display: flex; align-items: center; gap: 12px;">
-                                <strong>R$ ${p.pre.toLocaleString('pt-BR', {minimumFractionDigits:2})}</strong>
-                                <button class="btn-table-delete" onclick="removeCatItem('${p.id}')"><i class="fas fa-trash-alt"></i></button>
-                            </div>
-                        </div>
-                    `; 
-                }); 
-                card += `
-                        </div>
-                    </div>
-                `; 
-                container.innerHTML += card; 
-            } 
-        }
-
-        function removeEncomenda(id) {
-            if(confirm("Remover este registro de encomenda permanente?")) {
-                if(db) {
-                    db.ref('encomendas/' + id).remove();
-                } else {
-                    data.encomendas = data.encomendas.filter(e => e.id !== id);
-                    atualizarLocalStorage('encomendas');
-                    renderEncomendas();
-                    renderEstatisticas();
-                }
-                registrarAcaoNoPainel(`Removeu um registro do histórico de encomendas.`);
-            }
-        }
-
-        function renderMembros() { const t = document.getElementById('t-membros'); if(!t) return; t.innerHTML = ""; data.membros.forEach(m => { const isOnline = m.dbKey === 'master_local' ? (currentUser && currentUser.dbKey === 'master_local') : (m.status && m.status.online); t.innerHTML += `<tr><td><strong>#${m.uid}</strong></td><td>${m.nome}</td><td>${m.cargo}</td><td><span style="font-family:monospace; opacity:0.7">${m.senha}</span></td><td><span class="status-dot ${isOnline ? 'online' : 'offline'}"></span>${isOnline ? 'Online' : 'Offline'}</td><td><button class="btn-warning" style="padding:4px 10px; font-size:12px;" onclick="prepararEdicaoMembro('${m.dbKey}')">Editar</button> ${m.dbKey !== 'master_local' ? `<button class="btn-danger" style="padding:4px 10px; font-size:12px;" onclick="delMem('${m.dbKey}')">Deletar</button>` : ''}</td></tr>`; }); }
-        
-        function renderEncomendas() { 
-            const t = document.getElementById('tab-enc'); 
-            if(!t) return; 
-            t.innerHTML = "<tr><th>Família</th><th>Produto</th><th>Quantidade</th><th>Total</th><th>Status</th><th>Ações</th></tr>"; 
-            data.encomendas.forEach(e => t.innerHTML += `<tr><td>${e.emp}</td><td><strong>${e.pro}</strong></td><td>${e.q} un</td><td>R$ ${e.v.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td><td><span class="badge ${e.q < 5 ? 'badge-low' : 'badge-ok'}">${e.q < 5 ? 'REPOSIÇÃO' : 'OK'}</span></td><td><button class="btn-table-delete" onclick="removeEncomenda('${e.id}')"><i class="fas fa-trash-alt"></i></button></td></tr>`); 
-        }
-
-        function removeVenda(id) {
-            if(confirm("Deseja deletar permanentemente este registro de venda?")) {
-                if(db) {
-                    db.ref('vendas/' + id).remove();
-                } else {
-                    data.vendas = data.vendas.filter(v => v.id !== id);
-                    atualizarLocalStorage('vendas');
-                    renderVendas();
-                    renderEstatisticas();
-                }
-                registrarAcaoNoPainel(`Excluiu um registro de venda do sistema.`);
-            }
-        }
-
-        function renderVendas() { 
-            const t = document.getElementById('tab-ven'); 
-            if(!t) return; 
-            t.innerHTML = "<tr><th>Família</th><th>Produto</th><th>Qtd</th><th>Faturamento</th><th>Ações</th></tr>"; 
-            data.vendas.forEach(v => t.innerHTML += `<tr><td>${v.emp}</td><td><strong>${v.pro}</strong></td><td>${v.q} un</td><td style="color:var(--success); font-weight:700">R$ ${v.v.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td><td><button class="btn-table-delete" onclick="removeVenda('${v.id}')"><i class="fas fa-trash-alt"></i></button></td></tr>`); 
-        }
-
-        // --- SISTEMA DE GRÁFICOS ---
         function renderEstatisticas() {
-            const canvasFin = document.getElementById('chartFinanceiro');
-            const canvasProd = document.getElementById('chartProdutos');
-            if (!canvasFin || !canvasProd) return;
-
-            let produtosObj = {};
-            data.encomendas.forEach(e => {
-                if(!produtosObj[e.pro]) produtosObj[e.pro] = { comprado: 0, vendido: 0 };
-                produtosObj[e.pro].comprado += e.q;
-            });
-            data.vendas.forEach(v => {
-                if(!produtosObj[v.pro]) produtosObj[v.pro] = { comprado: 0, vendido: 0 };
-                produtosObj[v.pro].vendido += v.q;
-            });
-
-            let labelsProdutos = Object.keys(produtosObj);
-            let dadosComprados = labelsProdutos.map(p => produtosObj[p].comprado);
-            let dadosVendidos = labelsProdutos.map(p => produtosObj[p].vendido);
-
+            const canvasFin = document.getElementById('chartFinanceiro'); if (!canvasFin) return;
+            let totalE = 0; let totalR = 0;
+            data.caixa.forEach(c => { if(c.tipo==='ENTRADA') totalE+=c.valor; else totalR+=c.valor; });
             if (chartFinInstancia) chartFinInstancia.destroy();
-            if (chartProdInstancia) chartProdInstancia.destroy();
-
-            Chart.defaults.color = '#94a3b8';
-            Chart.defaults.font.family = "'Inter', sans-serif";
-
             chartFinInstancia = new Chart(canvasFin, {
                 type: 'doughnut',
-                data: {
-                    labels: ['Total Entrada', 'Total Saída'],
-                    datasets: [{
-                        data: [data.dash.e || 0, data.dash.sa || 0],
-                        backgroundColor: ['rgba(34, 197, 94, 0.65)', 'rgba(239, 68, 68, 0.65)'],
-                        borderColor: ['#22c55e', '#ef4444'],
-                        borderWidth: 1.5
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom' } }
-                }
-            });
-
-            chartProdInstancia = new Chart(canvasProd, {
-                type: 'bar',
-                data: {
-                    labels: labelsProdutos.length ? labelsProdutos : ['Sem Registros'],
-                    datasets: [
-                        {
-                            label: 'Encomendado (Volume)',
-                            data: dadosComprados.length ? dadosComprados : [0],
-                            backgroundColor: 'rgba(168, 85, 247, 0.5)',
-                            borderColor: '#a855f7',
-                            borderWidth: 1
-                        },
-                        {
-                            label: 'Vendido (Saídas)',
-                            data: dadosVendidos.length ? dadosVendidos : [0],
-                            backgroundColor: 'rgba(34, 197, 94, 0.5)',
-                            borderColor: '#22c55e',
-                            borderWidth: 1
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.04)' } },
-                        x: { grid: { display: false } }
-                    },
-                    plugins: { legend: { position: 'bottom' } }
-                }
+                data: { labels: ['Entradas', 'Retiradas'], datasets: [{ data: [totalE, totalR], backgroundColor: ['#22c55e', '#ef4444'] }] },
+                options: { responsive: true, maintainAspectRatio: false }
             });
         }
 
-        // --- MURAL DE ANOTAÇÕES DA GERÊNCIA ---
-        function addNota() { 
-            const titulo = document.getElementById('g-titulo').value.trim();
-            const txt = document.getElementById('g-nota').value.trim(); 
-            if(!titulo || !txt) return; 
-            
-            const novaNota = { 
-                id: 'nota_' + Date.now(),
-                titulo: titulo,
-                txt: txt, 
-                u: currentUser ? currentUser.nome : "Liderança", 
-                d: new Date().toLocaleDateString('pt-BR') + ' às ' + new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})
-            };
-            
-            data.notes = data.notes || [];
-            data.notes.push(novaNota); 
-            
-            if(db) {
-                db.ref('notes').set(data.notes);
-            } else { 
-                localStorage.setItem('vortex_notes', JSON.stringify(data.notes));
-                renderNotas(); 
-            }
-            
-            document.getElementById('g-titulo').value = "";
-            document.getElementById('g-nota').value = ""; 
+        function addNota() {
+            const t = document.getElementById('g-titulo').value; const txt = document.getElementById('g-nota').value;
+            if(!t || !txt) return; const n = { id: 'nt_'+Date.now(), titulo: t, txt: txt, u: currentUser?currentUser.nome:"Líder", d: new Date().toLocaleDateString('pt-BR') };
+            data.notes.push(n); if(db) db.ref('notes').set(data.notes); else { atualizarLocalStorage('notes'); renderNotas(); }
+            document.getElementById('g-titulo').value=''; document.getElementById('g-nota').value='';
         }
 
-        function removeNota(id) {
-            if(confirm("Deseja apagar esta anotação permanente do mural?")) {
-                data.notes = (data.notes || []).filter(n => n.id !== id);
-                if(db) {
-                    db.ref('notes').set(data.notes);
-                } else {
-                    localStorage.setItem('vortex_notes', JSON.stringify(data.notes));
-                    renderNotas();
-                }
-            }
+        function renderNotas() {
+            const m = document.getElementById('mural'); if(!m) return; m.innerHTML = "";
+            data.notes.forEach(n => { m.innerHTML += `<div class="note-card"><h5>${n.titulo}</h5><p>${n.txt}</p><small>${n.u} - ${n.d}</small></div>`; });
         }
 
-        function renderNotas() { 
-            const m = document.getElementById('mural'); 
-            if(!m) return; 
-            
-            let notasParaExibir = [];
-            if(db) {
-                notasParaExibir = data.notes || [];
-            } else {
-                const salvas = localStorage.getItem('vortex_notes');
-                notasParaExibir = salvas ? JSON.parse(salvas) : [];
-                data.notes = notasParaExibir;
-            }
-
-            if(notasParaExibir.length === 0) {
-                m.innerHTML = `<div style="text-align: center; opacity: 0.4; padding: 20px; font-size: 13px; grid-column: 1/-1;">Nenhum registro importante inserido no mural ainda.</div>`;
-                return;
-            }
-
-            m.innerHTML = ""; 
-            [...notasParaExibir].reverse().forEach(n => {
-                m.innerHTML += `
-                    <div class="note-card">
-                        <div>
-                            <h5><i class="fas fa-thumbtack"></i> ${n.titulo || 'Anotação Geral'}</h5>
-                            <p>${n.txt}</p>
-                        </div>
-                        <div class="note-footer">
-                            <span>Por: <strong>${n.u}</strong></span>
-                            <span>${n.d}</span>
-                        </div>
-                        <button class="btn-danger" style="position: absolute; top: 12px; right: 12px; padding: 4px 8px; font-size: 10px; border-radius: 6px;" onclick="removeNota('${n.id}')">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                `;
-            });
-        }
-
-        function saveBG() { const val = document.getElementById('c-bg').value.trim(); if(db) db.ref('bg').set(val); else { localStorage.setItem('vortex_bg', val); aplicasPlanoDeFundo(val); } toggleBox('box-cfg-bg'); }
+        function saveBG() { const val = document.getElementById('c-bg').value.trim(); if(db) db.ref('bg').set(val); else { localStorage.setItem('vortex_bg', val); aplicasPlanoDeFundo(val); } }
     </script>
 </body>
 </html>
