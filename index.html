@@ -156,7 +156,7 @@
             box-shadow: 0 0 10px rgba(168, 85, 247, 0.15);
         }
         
-        /* CORREÇÃO AQUI: Garante que as caixas de opções de todas as abas fiquem escuras e legíveis */
+        /* Garante que as caixas de opções de todas as abas fiquem escuras e legíveis */
         select option {
             background-color: #120e24 !important;
             color: #fff !important;
@@ -302,14 +302,48 @@
             margin-bottom: 10px;
         }
 
-        /* CONFIGURAÇÃO EXCLUSIVA PARA O RECOLHIMENTO DA CAIXA DE PAPEL DE PAREDE */
-        .collapsible-wrapper {
+        /* CONFIGURAÇÃO EXCLUSIVA PARA O ENCOLHIMENTO COMPLETO DA CAIXA */
+        .collapsible-box {
             max-height: 500px;
+            opacity: 1;
             overflow: hidden;
-            transition: max-height 0.3s ease-out;
+            padding: 30px;
+            margin-top: 10px;
+            transition: max-height 0.35s ease, opacity 0.3s ease, padding 0.35s ease, margin 0.35s ease;
         }
-        .collapsible-wrapper.closed {
+        .collapsible-box.closed {
             max-height: 0px;
+            opacity: 0;
+            padding-top: 0px;
+            padding-bottom: 0px;
+            margin-top: 0px;
+            border: none;
+        }
+        
+        /* Nova barra de título fixa para controlar a abertura/fechamento do box */
+        .cfg-header-bar {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--warning);
+            border-radius: 12px;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s;
+        }
+        .cfg-header-bar:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+        .cfg-header-bar h3 {
+            color: var(--warning) !important;
+            font-size: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         .toggle-cfg-btn {
             background: transparent;
@@ -317,14 +351,8 @@
             color: var(--warning);
             font-size: 16px;
             cursor: pointer;
-            width: auto;
-            padding: 0 5px;
             display: inline-flex;
             align-items: center;
-        }
-        .toggle-cfg-btn:hover {
-            background: transparent;
-            transform: scale(1.1);
         }
     </style>
 </head>
@@ -628,13 +656,14 @@
                 
                 <div class="families-grid-container" id="grid-caixas-familias" style="margin-bottom: 20px;"></div>
 
-                <div class="info-box-wrapper" style="border-top: 3px solid var(--warning); margin-top: 10px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
-                        <h3 style="color: var(--warning) !important; border: none; margin: 0;"><i class="fas fa-image"></i> Personalização de Fundo</h3>
-                        <button class="toggle-cfg-btn" onclick="toggleCaixaPapelParede(this)"><i class="fas fa-plus"></i></button>
+                <div style="margin-top: 15px; width: 100%;">
+                    <div class="cfg-header-bar" onclick="toggleCaixaPapelParede()">
+                        <h3><i class="fas fa-image"></i> Personalização de Fundo</h3>
+                        <button class="toggle-cfg-btn" id="btn-cfg-icon"><i class="fas fa-plus"></i></button>
                     </div>
-                    <div id="wrapper-papeis-parede" class="collapsible-wrapper closed">
-                        <div class="form-row" style="margin-top: 15px; margin-bottom: 0;">
+                    
+                    <div id="wrapper-papeis-parede" class="info-box-wrapper collapsible-box closed">
+                        <div class="form-row" style="margin-bottom: 0;">
                             <div class="form-group" style="flex: 2;">
                                 <label>Link da Imagem para a Tela de Login</label>
                                 <input type="text" id="cfg-bg-login" placeholder="https://exemplo.com/imagem-login.jpg">
@@ -715,7 +744,6 @@
             let descricaoLog = "";
             let tipoLog = "SYSTEM";
 
-            // Definir o multiplicador (+1 para somar, -1 para subtrair)
             const multiplicador = acao === "somar" ? 1 : -1;
             const termoAcao = acao === "somar" ? "Adição" : "Subtração";
 
@@ -733,7 +761,6 @@
                 tipoLog = "SYSTEM";
             }
 
-            // Registrar no histórico do Dashboard
             db.financeiro.historico.push({
                 operador: nomeOperador,
                 tipo: tipoLog,
@@ -742,13 +769,8 @@
                 resulting: db.financeiro.saldoAtual
             });
 
-            // Registrar log geral
             registrarLog(nomeOperador, `Modificou finanças via operação: ${descricaoLog}`, "system");
-
-            // Limpar campo
             document.getElementById('edit-op-valor').value = "";
-
-            // Atualizar telas
             renderContabilidadeDashboard();
             if(document.getElementById('movimentacao').classList.contains('active')) {
                 initOuUpdateGraficos();
@@ -756,15 +778,16 @@
             alert("Operação matemática realizada e aplicada com sucesso!");
         }
 
-        /* LÓGICA DE RECOLHER/EXPANDIR A CAIXA DE PAPEL DE PAREDE */
-        function toggleCaixaPapelParede(btn) {
-            const wrapper = document.getElementById('wrapper-papeis-parede');
-            const icon = btn.querySelector('i');
-            if(wrapper.classList.contains('closed')) {
-                wrapper.classList.remove('closed');
+        /* LÓGICA CORRIGIDA: RECOLHER/EXPANDIR A CAIXA INTEIRA DE PAPEL DE PAREDE */
+        function toggleCaixaPapelParede() {
+            const box = document.getElementById('wrapper-papeis-parede');
+            const icon = document.querySelector('#btn-cfg-icon i');
+            
+            if(box.classList.contains('closed')) {
+                box.classList.remove('closed');
                 icon.className = "fas fa-minus";
             } else {
-                wrapper.classList.add('closed');
+                box.classList.add('closed');
                 icon.className = "fas fa-plus";
             }
         }
