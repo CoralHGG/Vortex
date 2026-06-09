@@ -242,19 +242,71 @@
 
             <section id="encomendas" class="section">
                 <h2>Gerenciador de Encomendas & Compras</h2>
-                <div class="info-box-wrapper">
-                    <h3 style="margin-bottom: 15px; color: var(--primary);"><i class="fas fa-cart-plus"></i> Registrar Nova Compra</h3>
-                    <div class="form-row">
-                        <div class="form-group"><label>Família Destino</label><select id="enc-familia" onchange="atualizarSelectProdutosEncomenda()"><option value="">-- Selecione a Família --</option></select></div>
-                        <div class="form-group"><label>Produto Cadastrado</label><select id="enc-produto" onchange="calcularPreviaValorEncomenda()"><option value="">-- Selecione o Produto --</option></select></div>
-                        <div class="form-group" style="max-width: 120px;"><label>Quantidade</label><input type="number" id="enc-qtd" value="1" min="1" oninput="calcularPreviaValorEncomenda()"></div>
-                        <div class="form-group" style="max-width: 180px;"><label>Valor Total Estimado</label><input type="text" id="enc-previa-total" value="R$ 0,00" readonly style="color: var(--success); font-weight: 700;"></div>
-                        <button onclick="salvarNovaEncomenda()"><i class="fas fa-shopping-basket"></i> Fechar Pedido</button>
+                
+                <div class="boxes-row-container">
+                    <div class="info-box-wrapper" style="flex: 1.3;">
+                        <h3 style="margin-bottom: 15px; color: #38bdf8;"><i class="fas fa-shopping-cart"></i> Montar Lista de Compra / Encomenda</h3>
+                        
+                        <div class="form-group">
+                            <label for="enc-familia">Família Fornecedora</label>
+                            <select id="enc-familia" onchange="atualizarSelectProdutosEncomenda()">
+                                <option value="">-- Selecione a Família --</option>
+                            </select>
+                        </div>
+
+                        <div style="border: 1px dashed rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; background: rgba(0,0,0,0.2); margin-bottom: 15px;">
+                            <span style="font-size: 11px; text-transform: uppercase; color: #38bdf8; font-weight: 700; display: block; margin-bottom: 10px;">Adicionar Insumo à Encomenda</span>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="enc-produto">Produto Cadastrado na Família</label>
+                                    <select id="enc-produto" onchange="calcularPreviaValorEncomenda()">
+                                        <option value="">-- Selecione o Produto --</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" style="max-width: 100px;">
+                                    <label for="enc-qtd">Quantidade</label>
+                                    <input type="number" id="enc-qtd" value="1" min="1" oninput="calcularPreviaValorEncomenda()">
+                                </div>
+                                <div class="form-group" style="max-width: 140px;">
+                                    <label>Preço Custo</label>
+                                    <input type="text" id="enc-previa-total" value="R$ 0,00" readonly style="color: #cbd5e1; background: rgba(0,0,0,0.3);">
+                                </div>
+                                <button onclick="adicionarItemAoCarrinhoEncomenda()" style="background: #38bdf8; height: 45px;"><i class="fas fa-plus"></i></button>
+                            </div>
+                        </div>
+
+                        <h4 style="font-size: 13px; color: #94a3b8; margin-top: 10px;"><i class="fas fa-boxes"></i> Insumos Solicitados neste Pedido:</h4>
+                        <table style="margin-bottom: 20px;">
+                            <thead>
+                                <tr><th>Insumo/Produto</th><th>Qtd</th><th>Custo Unitário</th><th>Subtotal</th><th style="width: 40px;"></th></tr>
+                            </thead>
+                            <tbody id="t-carrinho-encomenda-corpo">
+                                <tr><td colspan="5" style="text-align: center; color: #64748b; font-style: italic; font-size: 13px;">Nenhum item adicionado à lista.</td></tr>
+                            </tbody>
+                        </table>
+
+                        <div style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border); padding-top: 15px;">
+                            <div>
+                                <span style="font-size: 12px; color: #94a3b8; display: block;">Custo Total da Compra</span>
+                                <h2 id="enc-carrinho-total" style="color: var(--danger);">R$ 0,00</h2>
+                            </div>
+                            <button onclick="salvarEncomendaCompleta()" style="background: #38bdf8; width: auto; padding: 12px 30px;"><i class="fas fa-shopping-basket"></i> Finalizar e Computar Compra</button>
+                        </div>
                     </div>
                 </div>
+
                 <div class="info-box-wrapper">
+                    <h3><i class="fas fa-history"></i> Histórico de Encomendas / Gastos Computados</h3>
                     <table>
-                        <thead><tr><th>Operador</th><th>Família</th><th>Produto</th><th>Qtd</th><th>Unitário</th><th>Total</th><th style="width: 50px;">Ações</th></tr></thead>
+                        <thead>
+                            <tr>
+                                <th>Comprador</th>
+                                <th>Família Parceira</th>
+                                <th>Lista de Itens Comprados</th>
+                                <th>Custo Total Pago</th>
+                                <th style="width: 50px;">Ações</th>
+                            </tr>
+                        </thead>
                         <tbody id="t-encomendas-corpo"></tbody>
                     </table>
                 </div>
@@ -401,7 +453,8 @@
         };
 
         let usuarioLogado = null;
-        let carrinhoVendaAtual = []; // Armazena os múltiplos produtos da venda em andamento
+        let carrinhoVendaAtual = []; 
+        let carrinhoEncomendaAtual = []; // Armazena múltiplos insumos da compra atual em Encomendas
 
         window.onload = function() {
             renderMembros();
@@ -415,7 +468,7 @@
 
         function atualizarSelectsGeraisVendaseEncomendas() {
             const encFam = document.getElementById('enc-familia');
-            if(encFam) {
+            if(encFam && carrinhoEncomendaAtual.length === 0) {
                 encFam.innerHTML = '<option value="">-- Selecione a Família --</option>';
                 Object.keys(db.familias).forEach(f => encFam.innerHTML += `<option value="${f}">${f}</option>`);
             }
@@ -431,7 +484,168 @@
             }
         }
 
-        // --- SISTEMA DE MULTI-ITENS PARA VENDAS ---
+        // --- SISTEMA DE MULTI-ITENS PARA ENCOMENDAS (COMPRAS NOSSAS) ---
+        function atualizarSelectProdutosEncomenda() {
+            const familiaSelecionada = document.getElementById('enc-familia').value;
+            const selectProd = document.getElementById('enc-produto');
+            selectProd.innerHTML = '<option value="">-- Selecione o Produto --</option>';
+            if(!familiaSelecionada || !db.familias[familiaSelecionada]) { calcularPreviaValorEncomenda(); return; }
+            db.familias[familiaSelecionada].forEach(p => { selectProd.innerHTML += `<option value="${p.id}">${p.nome} (R$ ${p.valor.toFixed(2)})</option>`; });
+            calcularPreviaValorEncomenda();
+        }
+
+        function calcularPreviaValorEncomenda() {
+            const fam = document.getElementById('enc-familia').value; 
+            const prodId = document.getElementById('enc-produto').value;
+            const qtd = parseInt(document.getElementById('enc-qtd').value) || 0; 
+            const inputPrevia = document.getElementById('enc-previa-total');
+            if(!fam || !prodId || qtd <= 0) { inputPrevia.value = "R$ 0,00"; return; }
+            const produto = db.familias[fam].find(p => p.id == prodId);
+            if(produto) { inputPrevia.value = `R$ ${(produto.valor * qtd).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`; }
+        }
+
+        function adicionarItemAoCarrinhoEncomenda() {
+            const fam = document.getElementById('enc-familia').value;
+            const prodId = document.getElementById('enc-produto').value;
+            const qtd = parseInt(document.getElementById('enc-qtd').value) || 0;
+
+            if(!fam) { alert("Selecione primeiro a Família Fornecedora!"); return; }
+            if(!prodId || qtd <= 0) { alert("Selecione um insumo válido e digite a quantidade!"); return; }
+
+            const produto = db.familias[fam].find(p => p.id == prodId);
+            if(!produto) return;
+
+            document.getElementById('enc-familia').disabled = true;
+
+            const subtotal = produto.valor * qtd;
+            carrinhoEncomendaAtual.push({
+                produtoId: produto.id,
+                nome: produto.nome,
+                quantidade: qtd,
+                valorUnitario: produto.valor,
+                subtotal: subtotal
+            });
+
+            document.getElementById('enc-qtd').value = "1";
+            document.getElementById('enc-produto').value = "";
+            document.getElementById('enc-previa-total').value = "R$ 0,00";
+
+            renderCarrinhoProvisorioEncomenda();
+        }
+
+        function removerItemDoCarrinhoEncomenda(index) {
+            carrinhoEncomendaAtual.splice(index, 1);
+            if(carrinhoEncomendaAtual.length === 0) {
+                document.getElementById('enc-familia').disabled = false;
+            }
+            renderCarrinhoProvisorioEncomenda();
+        }
+
+        function renderCarrinhoProvisorioEncomenda() {
+            const tbody = document.getElementById('t-carrinho-encomenda-corpo');
+            const totalDisplay = document.getElementById('enc-carrinho-total');
+            if(!tbody) return;
+
+            if(carrinhoEncomendaAtual.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #64748b; font-style: italic; font-size: 13px;">Nenhum item adicionado à lista.</td></tr>`;
+                totalDisplay.innerText = "R$ 0,00";
+                return;
+            }
+
+            tbody.innerHTML = "";
+            let totalAcumulado = 0;
+
+            carrinhoEncomendaAtual.forEach((item, index) => {
+                totalAcumulado += item.subtotal;
+                tbody.innerHTML += `
+                    <tr>
+                        <td style="color:#38bdf8; font-weight:600;">${item.nome}</td>
+                        <td style="font-weight:700;">${item.quantidade}x</td>
+                        <td style="color:#94a3b8;">R$ ${item.valorUnitario.toFixed(2)}</td>
+                        <td style="color:var(--danger); font-weight:700;">R$ ${item.subtotal.toFixed(2)}</td>
+                        <td><button class="btn-delete" style="padding: 2px 6px;" onclick="removerItemDoCarrinhoEncomenda(${index})"><i class="fas fa-times"></i></button></td>
+                    </tr>
+                `;
+            });
+
+            totalDisplay.innerText = `R$ ${totalAcumulado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+        }
+
+        function salvarEncomendaCompleta() {
+            if(!usuarioLogado) { alert("Você precisa estar logado!"); return; }
+            if(carrinhoEncomendaAtual.length === 0) { alert("A lista de compras está vazia!"); return; }
+
+            const fam = document.getElementById('enc-familia').value;
+            let totalCustoPedido = 0;
+            
+            let resumoProdutos = carrinhoEncomendaAtual.map(i => `${i.quantidade}x ${i.nome}`).join(", ");
+            carrinhoEncomendaAtual.forEach(i => totalCustoPedido += i.subtotal);
+
+            // 1. Salva no banco definitivo de Encomendas (Histórico)
+            db.encomendas.push({
+                id: Date.now(),
+                operador: usuarioLogado.nome,
+                familia: fam,
+                resumoItens: resumoProdutos,
+                valorTotal: totalCustoPedido
+            });
+
+            // 2. Lança no financeiro global como SAÍDA (Custo/Gasto nosso)
+            db.financeiro.saldoAtual -= totalCustoPedido;
+            db.financeiro.totalSaidas += totalCustoPedido;
+            
+            db.financeiro.historico.push({
+                operador: usuarioLogado.nome,
+                tipo: "SAIDA",
+                descricao: `Compra realizada com a Família ${fam} [${resumoProdutos}]`,
+                valor: totalCustoPedido,
+                resultante: db.financeiro.saldoAtual
+            });
+
+            // Libera e limpa o painel
+            carrinhoEncomendaAtual = [];
+            document.getElementById('enc-familia').disabled = false;
+            document.getElementById('enc-familia').value = "";
+            document.getElementById('enc-produto').innerHTML = '<option value="">-- Selecione o Produto --</option>';
+            
+            renderCarrinhoProvisorioEncomenda();
+            renderEncomendas();
+            renderContabilidadeDashboard();
+            alert("Encomenda fechada e computada como saída de caixa!");
+        }
+
+        function renderEncomendas() {
+            const tbody = document.getElementById('t-encomendas-corpo');
+            if(!tbody) return;
+            tbody.innerHTML = "";
+
+            if(db.encomendas.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #64748b; font-style: italic;">Nenhuma encomenda registrada.</td></tr>`;
+                return;
+            }
+
+            [...db.encomendas].reverse().forEach(e => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td style="font-weight:600;"><i class="fas fa-user-tie" style="opacity:0.4; margin-right:5px;"></i>${e.operador}</td>
+                        <td style="color:#38bdf8; font-weight:600;">${e.familia}</td>
+                        <td style="color:#cbd5e1; font-size:13px; max-width:350px;">${e.resumoItens}</td>
+                        <td style="color:var(--danger); font-weight:700;">R$ ${e.valorTotal.toFixed(2)}</td>
+                        <td><button class="btn-delete" onclick="removerEncomenda(${e.id})"><i class="fas fa-trash"></i></button></td>
+                    </tr>
+                `;
+            });
+        }
+
+        function removerEncomenda(id) {
+            if(confirm("Deseja apagar esta encomenda do histórico?")) {
+                db.encomendas = db.encomendas.filter(e => e.id !== id);
+                renderEncomendas();
+            }
+        }
+
+
+        // --- SISTEMA DE MULTI-ITENS PARA VENDAS (NOSSAS VENDAS) ---
         function calcularPreviaValorVenda() {
             const prodId = document.getElementById('ven-produto').value;
             const qtd = parseInt(document.getElementById('ven-qtd').value) || 0;
@@ -452,11 +666,9 @@
             const produto = db.produtos.find(p => p.id == prodId);
             if(!produto) return;
 
-            // Bloqueia a alteração da família enquanto houver itens no carrinho
             document.getElementById('ven-familia').disabled = true;
 
             const subtotal = produto.valor * qtd;
-
             carrinhoVendaAtual.push({
                 produtoId: produto.id,
                 nome: produto.nome,
@@ -465,7 +677,6 @@
                 subtotal: subtotal
             });
 
-            // Reseta campos do item
             document.getElementById('ven-qtd').value = "1";
             document.getElementById('ven-produto').value = "";
             document.getElementById('ven-previa-total').value = "R$ 0,00";
@@ -513,16 +724,14 @@
 
         function salvarVendaCompleta() {
             if(!usuarioLogado) { alert("Você precisa estar logado!"); return; }
-            if(carrinhoVendaAtual.length === 0) { alert("O pedido está vazio! Adicione produtos primeiro."); return; }
+            if(carrinhoVendaAtual.length === 0) { alert("O pedido está vazio!"); return; }
 
             const fam = document.getElementById('ven-familia').value;
             let totalFaturamentoPedido = 0;
             
-            // Junta os textos dos produtos para exibição elegante no histórico
             let resumoProdutos = carrinhoVendaAtual.map(i => `${i.quantidade}x ${i.nome}`).join(", ");
             carrinhoVendaAtual.forEach(i => totalFaturamentoPedido += i.subtotal);
 
-            // 1. Salva no banco definitivo de vendas
             db.vendas.push({
                 id: Date.now(),
                 operador: usuarioLogado.nome,
@@ -531,7 +740,6 @@
                 valorTotal: totalFaturamentoPedido
             });
 
-            // 2. Lança no financeiro global
             db.financeiro.saldoAtual += totalFaturamentoPedido;
             db.financeiro.totalEntradas += totalFaturamentoPedido;
             
@@ -543,14 +751,13 @@
                 resultante: db.financeiro.saldoAtual
             });
 
-            // Libera e limpa o formulário
             carrinhoVendaAtual = [];
             document.getElementById('ven-familia').disabled = false;
             document.getElementById('ven-familia').value = "";
             renderCarrinhoProvisorio();
             renderVendas();
             renderContabilidadeDashboard();
-            alert("Venda com múltiplos produtos fechada e contabilizada com sucesso!");
+            alert("Venda com múltiplos produtos fechada e contabilizada!");
         }
 
         function renderVendas() {
@@ -583,36 +790,7 @@
             }
         }
 
-        // --- MANUTENÇÃO DAS FUNÇÕES ANTERIORES DE CONFIGURAÇÃO E ENCOMENDAS ---
-        function atualizarSelectProdutosEncomenda() {
-            const familiaSelecionada = document.getElementById('enc-familia').value;
-            const selectProd = document.getElementById('enc-produto');
-            selectProd.innerHTML = '<option value="">-- Selecione o Produto --</option>';
-            if(!familiaSelecionada || !db.familias[familiaSelecionada]) { calcularPreviaValorEncomenda(); return; }
-            db.familias[familiaSelecionada].forEach(p => { selectProd.innerHTML += `<option value="${p.id}">${p.nome} (R$ ${p.valor.toFixed(2)})</option>`; });
-            calcularPreviaValorEncomenda();
-        }
-        function calcularPreviaValorEncomenda() {
-            const fam = document.getElementById('enc-familia').value; const prodId = document.getElementById('enc-produto').value;
-            const qtd = parseInt(document.getElementById('enc-qtd').value) || 0; const inputPrevia = document.getElementById('enc-previa-total');
-            if(!fam || !prodId || qtd <= 0) { inputPrevia.value = "R$ 0,00"; return; }
-            const produto = db.familias[fam].find(p => p.id == prodId);
-            if(produto) { inputPrevia.value = `R$ ${(produto.valor * qtd).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`; }
-        }
-        function salvarNovaEncomenda() {
-            if(!usuarioLogado) return; const fam = document.getElementById('enc-familia').value; const prodId = document.getElementById('enc-produto').value; const qtd = parseInt(document.getElementById('enc-qtd').value) || 0;
-            if(!fam || !prodId || qtd <= 0) return; const produto = db.familias[fam].find(p => p.id == prodId); if(!produto) return;
-            const total = produto.valor * qtd;
-            db.encomendas.push({ id: Date.now(), operador: usuarioLogado.nome, familia: fam, produtoNome: produto.nome, quantidade: qtd, valorUnitario: produto.valor, valorTotal: total });
-            document.getElementById('enc-qtd').value = "1"; document.getElementById('enc-produto').value = ""; calcularPreviaValorEncomenda(); renderEncomendas(); alert("Encomenda salva!");
-        }
-        function renderEncomendas() {
-            const tbody = document.getElementById('t-encomendas-corpo'); if(!tbody) return; tbody.innerHTML = "";
-            if(db.encomendas.length === 0) { tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #64748b;">Nenhuma encomenda.</td></tr>`; return; }
-            [...db.encomendas].reverse().forEach(e => { tbody.innerHTML += `<tr><td>${e.operador}</td><td style="color:#38bdf8;">${e.familia}</td><td>${e.produtoNome}</td><td>${e.quantidade}x</td><td>R$ ${e.valorUnitario.toFixed(2)}</td><td style="color:var(--success)">R$ ${e.valorTotal.toFixed(2)}</td><td><button class="btn-delete" onclick="removerEncomenda(${e.id})"><i class="fas fa-trash"></i></button></td></tr>`; });
-        }
-        function removerEncomenda(id) { db.encomendas = db.encomendas.filter(e => e.id !== id); renderEncomendas(); }
-
+        // --- SISTEMAS DE AJUSTES E CONFIGS DE PRODUTOS ---
         function renderBoxesFamilias() {
             const grid = document.getElementById('grid-caixas-familias'); if(!grid) return; grid.innerHTML = "";
             Object.keys(db.familias).forEach(nomeDaFamilia => {
@@ -621,11 +799,13 @@
             });
             atualizarSelectsGeraisVendaseEncomendas();
         }
+
         function adicionarProdutoFamilia() {
             const f = document.getElementById('fam-nome-grupo').value.trim(); const n = document.getElementById('fam-nome').value.trim(); const v = parseFloat(document.getElementById('fam-valor').value);
             if(!f || !n || isNaN(v)) return; if(!db.familias[f]) db.familias[f] = []; db.familias[f].push({ id: Date.now(), nome: n, valor: v });
             document.getElementById('fam-nome').value = ""; document.getElementById('fam-valor').value = ""; renderBoxesFamilias();
         }
+
         function removerProdutoDaFamilia(f, id) { db.familias[f] = db.familias[f].filter(p => p.id !== id); if(db.familias[f].length === 0) delete db.familias[f]; renderBoxesFamilias(); }
 
         function renderProdutos() {
@@ -633,10 +813,12 @@
             db.produtos.forEach(p => { tbody.innerHTML += `<tr><td>${p.nome}</td><td style="color: var(--success);">R$ ${p.valor.toFixed(2)}</td><td><button class="btn-delete" onclick="removerProduto(${p.id})"><i class="fas fa-trash"></i></button></td></tr>`; });
             atualizarSelectsGeraisVendaseEncomendas();
         }
+
         function adicionarProduto() {
             const n = document.getElementById('prod-nome').value.trim(); const v = parseFloat(document.getElementById('prod-valor').value);
             if(!n || isNaN(v)) return; db.produtos.push({ id: Date.now(), nome: n, valor: v }); document.getElementById('prod-nome').value = ""; document.getElementById('prod-valor').value = ""; renderProdutos();
         }
+
         function removerProduto(id) { db.produtos = db.produtos.filter(p => p.id !== id); renderProdutos(); }
 
         function renderContabilidadeDashboard() {
@@ -649,6 +831,7 @@
                 tbody.innerHTML += `<tr><td><b>${m.operador}</b></td><td><span class="badge ${m.tipo === "ENTRADA"?'online':'offline'}">${m.tipo}</span></td><td>${m.descricao}</td><td style="color:${cor}; font-weight:700;">R$ ${m.valor.toFixed(2)}</td><td>R$ ${m.resultante.toFixed(2)}</td></tr>`;
             });
         }
+
         function salvarValoresDiretos() {
             const s = document.getElementById('edit-saldo').value; const e = document.getElementById('edit-entradas').value; const sa = document.getElementById('edit-saidas').value;
             if(s !== "") db.financeiro.saldoAtual = parseFloat(s); if(e !== "") db.financeiro.totalEntradas = parseFloat(e); if(sa !== "") db.financeiro.totalSaidas = parseFloat(sa);
@@ -659,17 +842,21 @@
             const tbody = document.getElementById('t-membros-corpo'); if(!tbody) return; tbody.innerHTML = "";
             db.membros.forEach(m => { tbody.innerHTML += `<tr><td>#${m.id}</td><td>${m.nome}</td><td>${m.discord}</td><td>${m.cargo}</td><td><span class="badge ${m.online?'online':'offline'}">${m.online?'Conectado':'Offline'}</span></td><td><button class="btn-delete" onclick="deletarMembro('${m.id}')"><i class="fas fa-user-minus"></i></button></td></tr>`; });
         }
+
         function registrarNovoMembroLogin() {
             const n = document.getElementById('mem-nome').value.trim(); const id = document.getElementById('mem-id').value.trim(); const d = document.getElementById('mem-discord').value.trim(); const c = document.getElementById('mem-cargo').value.trim();
             if(!n || !id || !d || !c) return; db.membros.push({ id: id, nome: n, discord: d, senha: "1234", cargo: c, online: false }); document.getElementById('mem-nome').value=""; document.getElementById('mem-id').value=""; document.getElementById('mem-discord').value=""; document.getElementById('mem-cargo').value=""; renderMembros();
         }
+
         function deletarMembro(id) { db.membros = db.membros.filter(m => m.id !== id); renderMembros(); }
         function toggleSidebarMenu(t) { const m = document.getElementById('sidebar-menu-list'); t.classList.toggle('open'); m.style.maxHeight = m.style.maxHeight === '0px' || !m.style.maxHeight ? m.scrollHeight + 'px' : '0px'; }
+        
         function auth() {
             const u = document.getElementById('user-in').value.trim(); const p = document.getElementById('pass-in').value.trim();
             const user = db.membros.find(m => (m.nome.toLowerCase() === u.toLowerCase() || m.id === u) && m.senha === p);
             if (user) { usuarioLogado = user; user.online = true; document.getElementById('nav-username').innerText = user.nome; document.getElementById('nav-userid').innerText = `#${user.id}`; document.getElementById('nav-status-dot').className = "status-dot online"; document.getElementById('nav-status-text').innerText = "Online"; document.getElementById('login-screen').style.display = 'none'; document.getElementById('main-panel').style.display = 'flex'; toggleSidebarMenu(document.querySelector('.dropdown-trigger')); renderMembros(); renderEncomendas(); renderVendas(); } else { document.getElementById('login-err').style.display = 'block'; }
         }
+        
         function logout() { location.reload(); }
         function tab(id, el) { document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); document.querySelectorAll('.menu-list li').forEach(li => li.classList.remove('active')); document.getElementById(id).classList.add('active'); el.classList.add('active'); }
     </script>
