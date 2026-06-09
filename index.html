@@ -130,7 +130,7 @@
             background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 30px;
             margin-top: 20px; flex: 1; min-width: 300px; box-shadow: 0 8px 24px 0 rgba(0, 0, 0, 0.4);
         }
-        .families-grid-container .info-box-wrapper, .notes-grid-container .info-box-wrapper { margin-top: 0; }
+        .families-grid-container .info-box-wrapper { margin-top: 0; }
 
         .form-row { display: flex; gap: 15px; margin-bottom: 20px; align-items: flex-end; flex-wrap: wrap; }
         .form-row .form-group { flex: 1; margin-bottom: 0; min-width: 140px; }
@@ -171,7 +171,7 @@
         .btn-delete:hover { background: var(--danger); color: #fff; box-shadow: 0 0 12px rgba(239, 68, 68, 0.3); }
 
         /* --- BADGES E ELEMENTOS VISUAIS --- */
-        .badge { padding: 5px 10px; border-radius: 8px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; display: inline-inline-block; }
+        .badge { padding: 5px 10px; border-radius: 8px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; display: inline-block; }
         .badge.online { background: rgba(34, 197, 94, 0.12); color: var(--success); border: 1px solid rgba(34, 197, 94, 0.2); }
         .badge.offline { background: rgba(255, 255, 255, 0.04); color: #94a3b8; border: 1px solid rgba(255, 255, 255, 0.06); }
         .badge.system { background: rgba(168, 85, 247, 0.12); color: var(--primary); border: 1px solid rgba(168, 85, 247, 0.2); }
@@ -187,6 +187,85 @@
         .log-item { padding: 10px 15px; border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 13px; display: flex; justify-content: space-between; align-items: center; }
         .log-item:hover { background: rgba(255,255,255,0.01); }
         .log-time { color: #64748b; font-size: 11px; font-family: monospace; }
+
+        /* --- NOVO DESIGN ESTILIZADO E FOFO DO MURAL (ABA IMPORTANTE) --- */
+        .mural-container {
+            background: rgba(255, 255, 255, 0.02);
+            border: 2px dashed rgba(168, 85, 247, 0.2);
+            border-radius: 24px;
+            padding: 30px;
+            margin-top: 25px;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.2);
+        }
+        .cute-card-note {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.12), rgba(236, 72, 153, 0.08));
+            border: 1px solid rgba(168, 85, 247, 0.25);
+            border-radius: 18px;
+            padding: 22px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        .cute-card-note::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 5px;
+            background: linear-gradient(90deg, #a855f7, #ec4899);
+        }
+        .cute-card-note:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 14px 28px rgba(168, 85, 247, 0.2);
+            border-color: rgba(236, 72, 153, 0.4);
+        }
+        .cute-card-note h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #f4f4f5;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .cute-card-note h3 i {
+            color: #ec4899;
+            font-size: 14px;
+        }
+        .cute-card-note p {
+            color: #d4d4d8;
+            font-size: 13.5px;
+            line-height: 1.6;
+            flex-grow: 1;
+        }
+        .cute-btn-delete-container {
+            margin-top: 20px;
+            display: flex;
+            justify-content: flex-end;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 12px;
+        }
+        .btn-cute-delete {
+            background: rgba(239, 68, 68, 0.1);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .btn-cute-delete:hover {
+            background: #ef4444;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
     </style>
 </head>
 <body>
@@ -305,7 +384,7 @@
                                 <div class="form-group">
                                     <label for="enc-produto">Produto Cadastrado na Família</label>
                                     <select id="enc-produto" onchange="calcularPreviaValorEncomenda()">
-                                        <option value="">-- Selecione o Produto --</option>
+                                        <option value="">-- Selecione the Produto --</option>
                                     </select>
                                 </div>
                                 <div class="form-group" style="max-width: 100px;">
@@ -419,13 +498,22 @@
             </section>
 
             <section id="importante" class="section">
-                <h2>Mural Importante</h2>
-                <div class="info-box-wrapper" style="max-width: 600px;">
-                    <div class="form-group"><label>Título</label><input type="text" id="nota-titulo"></div>
-                    <div class="form-group"><label>Conteúdo</label><textarea id="nota-conteudo"></textarea></div>
-                    <button onclick="adicionarNota()"><i class="fas fa-save"></i> Fixar</button>
+                <h2 style="margin-bottom: 5px;">Mural de Avisos</h2>
+                <p style="color: #64748b; font-size: 13px; margin-bottom: 25px;">Fixe avisos rápidos, regras e lembretes corporativos cruciais.</p>
+                
+                <div class="info-box-wrapper" style="max-width: 100%; border-radius: 20px; padding: 25px;">
+                    <h3 style="margin-bottom: 15px; font-size: 14px; color: var(--primary);"><i class="fas fa-pen-nib"></i> Escrever Novo Recado</h3>
+                    <div class="form-row" style="align-items: flex-start;">
+                        <div class="form-group" style="flex: 1; min-width: 200px;"><label>Título do Aviso</label><input type="text" id="nota-titulo" placeholder="Ex: Reunião Geral de Metas"></div>
+                        <div class="form-group" style="flex: 2; min-width: 250px;"><label>Conteúdo do Recado</label><textarea id="nota-conteudo" style="height: 45px; resize: none;" placeholder="Digite os detalhes importantes aqui..."></textarea></div>
+                        <button onclick="adicionarNota()" style="background: var(--primary); height: 45px; padding: 0 30px;"><i class="fas fa-thumbtack"></i> Fixar no Mural</button>
+                    </div>
                 </div>
-                <div class="notes-grid-container" id="grid-mural-notas"></div>
+                
+                <div class="mural-container">
+                    <span style="font-size: 11px; text-transform: uppercase; color: #94a3b8; font-weight: 700; letter-spacing: 1px; display: block; margin-bottom: 20px;"><i class="fas fa-clipboard-list" style="color:#ec4899;"></i> Recados Fixados</span>
+                    <div class="notes-grid-container" id="grid-mural-notas"></div>
+                </div>
             </section>
 
             <section id="configuracao" class="section">
@@ -715,7 +803,7 @@
         }
 
         function salvarEncomendaCompleta() {
-            if(!usuarioLogado || grannyEncomendaAtual.length === 0) return;
+            if(!usuarioLogado || carrinhoEncomendaAtual.length === 0) return;
             const fam = document.getElementById('enc-familia').value;
             let totalCustoPedido = 0;
             let resumoProdutos = carrinhoEncomendaAtual.map(i => `${i.quantidade}x ${i.nome}`).join(", ");
@@ -866,7 +954,6 @@
             });
         }
 
-        /* --- ATUALIZADO: RENDEREZAÇÃO DA ABA MEMBROS COM LOGO DISCORD --- */
         function renderMembros() {
             const tbody = document.getElementById('t-membros-corpo'); if(!tbody) return; tbody.innerHTML = "";
             db.membros.forEach(m => { 
@@ -893,7 +980,7 @@
             const c = document.getElementById('mem-cargo').value.trim();
             
             if(!n || !id || !d || !c) {
-                alert("Preencha todos os campos minimalistas para registrar!");
+                alert("Preencha todos os campos para registrar!");
                 return;
             }
             
@@ -911,17 +998,38 @@
 
         function deletarMembro(id) { db.membros = db.membros.filter(m => m.id !== id); renderMembros(); }
 
+        function toggleSidebarMenu(t) { const m = document.getElementById('sidebar-menu-list'); t.classList.toggle('open'); m.style.maxHeight = m.style.maxHeight === '0px' || !m.style.maxHeight ? m.scrollHeight + 'px' : '0px'; }
+        
+        /* --- AJUSTADO: ADICIONAR NOTA PRESERVANDO LÓGICA INTEGRA --- */
         function adicionarNota() {
             const t = document.getElementById('nota-titulo').value.trim(); const c = document.getElementById('nota-conteudo').value.trim();
             if(!t || !c) return; db.anotacoes.push({ id: Date.now(), titulo: t, conteudo: c });
             document.getElementById('nota-titulo').value = ""; document.getElementById('nota-conteudo').value = ""; renderMuralNotas();
         }
 
-        function toggleSidebarMenu(t) { const m = document.getElementById('sidebar-menu-list'); t.classList.toggle('open'); m.style.maxHeight = m.style.maxHeight === '0px' || !m.style.maxHeight ? m.scrollHeight + 'px' : '0px'; }
         function removerNota(id) { db.anotacoes = db.anotacoes.filter(n => n.id !== id); renderMuralNotas(); }
+        
+        /* --- NOVO: RENDERIZAÇÃO FOFA E MINIMALISTA DO MURAL EM GRID --- */
         function renderMuralNotas() {
             const grid = document.getElementById('grid-mural-notas'); if(!grid) return; grid.innerHTML = "";
-            db.anotacoes.forEach(n => { grid.innerHTML += `<div class="info-box-wrapper" style="border-left: 4px solid var(--warning);"><h3>${n.titulo}</h3><p style="margin-top:10px; color:#cbd5e1; font-size:14px; white-space:pre-line;">${n.conteudo}</p><button class="btn-delete" style="margin-top:15px;" onclick="removerNota(${n.id})">Remover Nota</button></div>`; });
+            if(db.anotacoes.length === 0) {
+                grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #64748b; font-style: italic; padding: 20px;">Nenhum recado fixado no momento... ✨</div>`;
+                return;
+            }
+            db.anotacoes.forEach(n => { 
+                grid.innerHTML += `
+                    <div class="cute-card-note">
+                        <div>
+                            <h3><i class="fas fa-star"></i> ${n.titulo}</h3>
+                            <p>${n.conteudo.replace(/\n/g, '<br>')}</p>
+                        </div>
+                        <div class="cute-btn-delete-container">
+                            <button class="btn-cute-delete" onclick="removerNota(${n.id})">
+                                <i class="fas fa-eraser"></i> Remover
+                            </button>
+                        </div>
+                    </div>`; 
+            });
         }
 
         function auth() {
