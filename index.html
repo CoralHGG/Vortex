@@ -289,15 +289,18 @@
             <section id="ven" class="section">
                 <div class="collapsible-box" id="box-ven-form">
                     <div class="collapsible-header" onclick="toggleBox('box-ven-form')">
-                        <span>Registrar Saída/Venda dos NOSSOS Produtos para Famílias</span>
+                        <span>Registrar Saída/Venda para Família</span>
                         <span class="icon-indicator">+</span>
                     </div>
                     <div class="collapsible-content">
-                        <p style="font-size: 12px; color: var(--primary); margin-bottom: 15px;">
-                            💡 Nota: Os produtos ofertados aqui são os cadastrados na categoria "Nosso Catálogo" na aba Configuração.
-                        </p>
+                        <div style="margin-bottom: 20px; background: rgba(255,255,255,0.02); padding: 15px; border-radius: 12px; border: 1px solid var(--border);">
+                            <label style="font-size: 12px; font-weight:600; color: var(--primary); display:block; margin-bottom: 8px;">FAMÍLIA DESTINATÁRIA (QUEM ESTÁ COMPRANDO?)</label>
+                            <select id="v-global-family-dest" style="max-width: 400px; font-weight: 600; border-color: rgba(168, 85, 247, 0.4);"></select>
+                        </div>
+                        
+                        <p style="font-size: 12px; opacity:0.7; margin-bottom: 10px;">📋 Selecione os nossos produtos abaixo para este mesmo destinatário:</p>
                         <div id="container-rows-vendas"></div>
-                        <button class="btn-add-row" onclick="addVendaRow()"><i class="fas fa-plus"></i> Adicionar Mais um Item na Venda</button>
+                        <button class="btn-add-row" onclick="addVendaRow()"><i class="fas fa-plus"></i> Adicionar Mais um Produto na Venda</button>
                         <br><br>
                         <button onclick="submitVendas()">CONFIRMAR VENDA E LANÇAR</button>
                     </div>
@@ -306,7 +309,7 @@
                     <div class="box-title">Histórico de Nossas Vendas para Famílias</div>
                     <table>
                         <thead>
-                            <tr><th>Nosso Produto</th><th>Família Compradora</th><th>Qtd</th><th>Total Venda</th></tr>
+                            <tr><th>Família Compradora</th><th>Nosso Produto</th><th>Qtd</th><th>Total Venda</th></tr>
                         </thead>
                         <tbody id="tab-ven"></tbody>
                     </table>
@@ -455,13 +458,36 @@
 
         function removerRegistroCaixa(id) { if(confirm("Remover do caixa?")) { if(db) db.ref('caixa/'+id).remove(); else { data.caixa=data.caixa.filter(c=>c.id!==id); atualizarLocalStorage('caixa'); calcularEAtualizarDashboard(); } } }
 
-        // --- PROGRAMAÇÃO DE VENDAS INVERTIDA ---
+        // --- DROPDOWNS SINCRONIZADOS COM A CONFIGURAÇÃO ---
         function updateGlobalFamilyDropdowns() {
-            const eSel = document.getElementById('e-global-family'); if(!eSel) return;
+            // Dropdown de Encomendas
+            const eSel = document.getElementById('e-global-family'); 
+            // Novo Dropdown global de Vendas (Destinatário Único)
+            const vFamSel = document.getElementById('v-global-family-dest');
+
             let fams = [...new Set(data.catalogo.map(c => c.emp))].sort();
-            eSel.innerHTML = '<option value="">Selecione a Família...</option>';
-            fams.forEach(f => eSel.innerHTML += `<option value="${f}">${f}</option>`);
-            updateEncomendasProductsDropdowns();
+            
+            // Filtra removendo o nosso próprio catálogo para as opções de clientes/compradores
+            let famsClientes = fams.filter(f => f.toLowerCase() !== 'nosso catálogo' && f.toLowerCase() !== 'nosso catalogo');
+
+            if(eSel) {
+                eSel.innerHTML = '<option value="">Selecione a Família...</option>';
+                fams.forEach(f => eSel.innerHTML += `<option value="${f}">${f}</option>`);
+                updateEncomendasProductsDropdowns();
+            }
+
+            if(vFamSel) {
+                vFamSel.innerHTML = '<option value="">Escolha qual Família está comprando...</option>';
+                famsClientes.forEach(f => vFamSel.innerHTML += `<option value="${f}">${f}</option>`);
+            }
+
+            // Atualizar os produtos das linhas de vendas abertas
+            document.querySelectorAll('#container-rows-vendas .dynamic-row').forEach(r => {
+                const s = r.querySelector('.v-item-select');
+                const valorAtual = s.value;
+                injectNossosProdutosOptions(s);
+                s.value = valorAtual;
+            });
         }
 
         function updateEncomendasProductsDropdowns() {
@@ -472,32 +498,32 @@
             });
         }
 
+        function injectNossosProdutosOptions(selectElement) {
+            selectElement.innerHTML = '<option value="">Escolha o produto...</option>';
+            data.catalogo.forEach((c, i) => {
+                if(c.emp.toLowerCase() === 'nosso catálogo' || c.emp.toLowerCase() === 'nosso catalogo') {
+                    selectElement.innerHTML += `<option value="${i}">${c.pro} (R$ ${c.pre})</option>`;
+                }
+            });
+        }
+
+        // --- SISTEMA DE VENDAS COMPACTO (UM SÓ DESTINATÁRIO) ---
         function addVendaRow() {
             const container = document.getElementById('container-rows-vendas');
             const rId = 'v_row_' + Date.now() + Math.random().toString(36).substr(2,3);
             const div = document.createElement('div'); div.className = 'dynamic-row'; div.id = rId;
             
-            // Filtra o que pertence a você ("Nosso Catálogo")
-            let optionsNossosProdutos = '<option value="">Escolha nosso produto...</option>';
-            data.catalogo.forEach((c, i) => {
-                if(c.emp.toLowerCase() === 'nosso catálogo' || c.emp.toLowerCase() === 'nosso catalogo') {
-                    optionsNossosProdutos += `<option value="${i}">${c.pro} (R$ ${c.pre})</option>`;
-                }
-            });
-
-            // Filtra as famílias clientes
-            let optionsFamiliasClientes = '<option value="">Para qual Família?</option>';
-            let fams = [...new Set(data.catalogo.map(c => c.emp))].filter(f => f.toLowerCase() !== 'nosso catálogo' && f.toLowerCase() !== 'nosso catalogo').sort();
-            fams.forEach(f => optionsFamiliasClientes += `<option value="${f}">${f}</option>`);
-
             div.innerHTML = `
-                <select class="v-item-select" onchange="calcRowV('${rId}')" style="flex: 2;">${optionsNossosProdutos}</select>
-                <select class="v-fam-select" style="flex: 2;">${optionsFamiliasClientes}</select>
+                <select class="v-item-select" onchange="calcRowV('${rId}')" style="flex: 3;"></select>
                 <input type="number" class="v-qtd-input" placeholder="Qtd" oninput="calcRowV('${rId}')" style="flex: 1;">
-                <input type="text" class="v-val-input" placeholder="Total" readonly style="flex: 1.2;">
+                <input type="text" class="v-val-input" placeholder="Total" readonly style="flex: 1.5;">
                 <button type="button" class="btn-remove-row" onclick="removeFormRow('${rId}')"><i class="fas fa-times"></i></button>
             `;
             container.appendChild(div);
+            
+            // Injeta nossos produtos cadastrados diretamente da aba de configuração
+            const selectProd = div.querySelector('.v-item-select');
+            injectNossosProdutosOptions(selectProd);
         }
 
         function calcRowV(rId) {
@@ -508,19 +534,25 @@
         }
 
         function submitVendas() {
+            const famDestino = document.getElementById('v-global-family-dest').value;
+            if(!famDestino) { alert("Por favor, selecione qual Família está comprando no topo!"); return; }
+
             const rows = document.querySelectorAll('#container-rows-vendas .dynamic-row'); let count = 0;
             rows.forEach(r => {
                 const idx = r.querySelector('.v-item-select').value;
-                const famDestino = r.querySelector('.v-fam-select').value;
                 const q = parseInt(r.querySelector('.v-qtd-input').value);
-                if(idx !== "" && famDestino && q) {
+                if(idx !== "" && q) {
                     const prod = data.catalogo[idx];
                     const nv = { pro: prod.pro, emp: famDestino, q, v: prod.pre * q };
                     if(db) db.ref('vendas').push().set(nv); else { nv.id='v_'+Date.now(); data.vendas.push(nv); }
                     count++;
                 }
             });
-            if(count > 0) { if(!db) { atualizarLocalStorage('vendas'); renderVendas(); } resetFormulariosMultiplos(); toggleBox('box-ven-form'); }
+            if(count > 0) { 
+                if(!db) { atualizarLocalStorage('vendas'); renderVendas(); } 
+                resetFormulariosMultiplos(); 
+                toggleBox('box-ven-form'); 
+            }
         }
 
         function addEncomendaRow() {
@@ -563,9 +595,18 @@
         }
 
         function removeFormRow(id) { const r = document.getElementById(id); if(r) r.remove(); }
+        
         function resetFormulariosMultiplos() {
-            document.getElementById('container-rows-encomendas').innerHTML = ''; document.getElementById('container-rows-vendas').innerHTML = ''; document.getElementById('container-rows-catalogo').innerHTML = '';
-            document.getElementById('c-global-family').value = ''; addEncomendaRow(); addVendaRow(); addCatalogoRow();
+            document.getElementById('container-rows-encomendas').innerHTML = ''; 
+            document.getElementById('container-rows-vendas').innerHTML = ''; 
+            document.getElementById('container-rows-catalogo').innerHTML = '';
+            document.getElementById('c-global-family').value = ''; 
+            const selectGlobalV = document.getElementById('v-global-family-dest');
+            if(selectGlobalV) selectGlobalV.value = '';
+            
+            addEncomendaRow(); 
+            addVendaRow(); 
+            addCatalogoRow();
         }
 
         function auth() {
@@ -597,7 +638,7 @@
         }
         function renderMembros() { const t = document.getElementById('t-membros'); if(t) { t.innerHTML = ""; data.membros.forEach(m => t.innerHTML += `<tr><td>#${m.uid}</td><td>${m.nome}</td><td>${m.cargo}</td><td>${m.senha}</td><td>-</td></tr>`); } }
         function renderEncomendas() { const t = document.getElementById('tab-enc'); if(t) { t.innerHTML = "<tr><th>Família</th><th>Produto</th><th>Qtd</th><th>Total</th></tr>"; data.encomendas.forEach(e => t.innerHTML += `<tr><td>${e.emp}</td><td>${e.pro}</td><td>${e.q}</td><td>R$ ${e.v}</td></tr>`); } }
-        function renderVendas() { const t = document.getElementById('tab-ven'); if(t) { t.innerHTML = "<tr><th>Nosso Produto</th><th>Família Destino</th><th>Qtd</th><th>Total Venda</th></tr>"; data.vendas.forEach(v => t.innerHTML += `<tr><td>${v.pro}</td><td>${v.emp}</td><td>${v.q}</td><td>R$ ${v.v.toLocaleString('pt-BR')}</td></tr>`); } }
+        function renderVendas() { const t = document.getElementById('tab-ven'); if(t) { t.innerHTML = "<tr><th>Família Destino</th><th>Nosso Produto</th><th>Qtd</th><th>Total Venda</th></tr>"; data.vendas.forEach(v => t.innerHTML += `<tr><td>${v.emp}</td><td>${v.pro}</td><td>${v.q}</td><td>R$ ${v.v.toLocaleString('pt-BR')}</td></tr>`); } }
         function renderLogs() { const c = document.getElementById('log-container'); if(c) { c.innerHTML = ""; data.movimentos.forEach(m => c.innerHTML += `<div class="log-item"><span><strong>${m.user}</strong>: ${m.txt}</span></div>`); } }
         function addNota() { const titulo = document.getElementById('g-titulo').value; const txt = document.getElementById('g-nota').value; if(titulo && txt) { const n = { titulo, txt }; data.notes.push(n); if(db) db.ref('notes').set(data.notes); else { atualizarLocalStorage('notes'); renderNotas(); } } }
         function renderNotas() { const m = document.getElementById('mural'); if(m) { m.innerHTML = ""; data.notes.forEach(n => m.innerHTML += `<div class="note-card"><h5>${n.titulo}</h5><p>${n.txt}</p></div>`); } }
