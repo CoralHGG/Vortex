@@ -258,14 +258,13 @@
                         <input type="text" id="cfg-bg-panel" placeholder="Ex: https://site.com/imagem-painel.jpg">
                     </div>
 
-                    <button onclick="salvarConfiguracoes Visuais()" style="margin-top: 10px;"><i class="fas fa-save"></i> SALVAR CONFIGURAÇÕES</button>
+                    <button onclick="salvarConfiguracoesVisuais()" style="margin-top: 10px;"><i class="fas fa-save"></i> SALVAR CONFIGURAÇÕES</button>
                 </div>
             </section>
         </main>
     </div>
 
     <script>
-        // Banco de Dados contendo os membros e a nova chave de configurações visuais
         let db = {
             membros: [
                 { id: "3461", nome: "Megan", senha: "1234", cargo: "Chefe", online: false },
@@ -281,7 +280,6 @@
 
         window.onload = function() {
             document.getElementById('main-panel').style.display = 'none';
-            // Carrega imagens caso já existam salvas na inicialização
             aplicarBackgrounds();
             renderMembros();
         };
@@ -296,27 +294,24 @@
             }
         }
 
-        // Atualiza a tela aplicando os links salvos no db
         function aplicarBackgrounds() {
             const loginScreen = document.getElementById('login-screen');
             const mainBody = document.body;
 
-            // Se houver link configurado para o Login
+            // Aplica com !important injetado diretamente via propriedade de estilo para sobrepor qualquer cor padrão
             if (db.config.bgLogin && db.config.bgLogin.trim() !== "") {
-                loginScreen.style.background = `url('${db.config.bgLogin.trim()}')`;
+                loginScreen.style.setProperty('background', `url('${db.config.bgLogin.trim()}')`, 'important');
             } else {
-                loginScreen.style.background = "var(--bg)";
+                loginScreen.style.setProperty('background', 'var(--bg)', 'important');
             }
 
-            // Se houver link configurado para o Painel Interno
             if (db.config.bgPanel && db.config.bgPanel.trim() !== "") {
-                mainBody.style.background = `url('${db.config.bgPanel.trim()}')`;
+                mainBody.style.setProperty('background', `url('${db.config.bgPanel.trim()}')`, 'important');
             } else {
-                mainBody.style.background = "var(--bg)";
+                mainBody.style.setProperty('background', 'var(--bg)', 'important');
             }
         }
 
-        // Salva os inputs dentro do objeto db.config e roda a atualização
         function salvarConfiguracoesVisuais() {
             const urlLogin = document.getElementById('cfg-bg-login').value;
             const urlPanel = document.getElementById('cfg-bg-panel').value;
