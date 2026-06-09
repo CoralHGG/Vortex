@@ -32,9 +32,6 @@
         #login-screen {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: var(--bg); display: flex; justify-content: center; align-items: center; z-index: 9999;
-            background-size: cover !important;
-            background-position: center !important;
-            background-repeat: no-repeat !important;
         }
         .login-box {
             background: rgba(15, 12, 28, 0.9); padding: 40px; border-radius: 20px;
@@ -54,15 +51,10 @@
         .sidebar {
             width: 260px; height: 100%; background: rgba(11, 8, 19, 0.9);
             border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 25px;
-            flex-shrink: 0;
-            z-index: 10;
+            flex-shrink: 0; z-index: 10;
         }
         
-        .sidebar-dropdown {
-            margin-top: 30px;
-            flex-grow: 1;
-            overflow-y: auto;
-        }
+        .sidebar-dropdown { margin-top: 30px; flex-grow: 1; overflow-y: auto; }
         .sidebar-dropdown::-webkit-scrollbar { width: 0px; }
 
         .dropdown-trigger {
@@ -81,26 +73,14 @@
         }
         .menu-list li {
             padding: 12px 15px; border-radius: 10px; color: #94a3b8;
-            cursor: pointer; display: flex; align-items: center; gap: 12px; margin-bottom: 5px; margin-top: 5px;
+            cursor: pointer; display: flex; align-items: center; gap: 12px; margin-bottom: 5px;
         }
         .menu-list li:hover { background: rgba(255,255,255,0.03); color: #fff; }
         .menu-list li.active { background: rgba(168, 85, 247, 0.15); color: #fff; font-weight: 600; }
         
         /* --- RODAPÉ DO OPERADOR --- */
-        .user-footer { 
-            border-top: 1px solid var(--border); 
-            padding-top: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            width: 100%;
-        }
-        .user-row-top {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            width: 100%;
-        }
+        .user-footer { border-top: 1px solid var(--border); padding-top: 20px; display: flex; flex-direction: column; gap: 12px; width: 100%; }
+        .user-row-top { display: flex; align-items: center; justify-content: space-between; width: 100%; }
         .user-meta-info { display: flex; flex-direction: column; }
         .user-name-tag { font-weight: 700; font-size: 15px; color: #fff; letter-spacing: 0.3px; line-height: 1.2; }
         .user-id-tag { font-weight: 500; font-size: 12px; color: rgba(168, 85, 247, 0.8); margin-top: 1px; }
@@ -112,180 +92,67 @@
             display: flex; align-items: center; justify-content: center; gap: 6px;
             background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.15);
             padding: 8px 12px; border-radius: 8px; color: var(--danger); font-size: 11px;
-            font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px;
-            transition: all 0.2s ease; width: 100%;
+            font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; width: 100%;
         }
-        .btn-logout:hover { background: var(--danger); color: #fff; box-shadow: 0 0 10px rgba(239, 68, 68, 0.3); }
+        .btn-logout:hover { background: var(--danger); color: #fff; }
 
         /* --- CONTEÚDO PRINCIPAL --- */
-        .main-content { 
-            flex-grow: 1; 
-            padding: 40px; 
-            overflow-y: auto; 
-            display: flex;
-            flex-direction: column;
-        }
+        .main-content { flex-grow: 1; padding: 40px; overflow-y: auto; display: flex; flex-direction: column; }
+        .section { display: none !important; flex-grow: 1; }
+        .section.active { display: flex !important; flex-direction: column; }
 
-        .section { 
-            display: none !important; 
-            flex-grow: 1;
-        }
-        .section.active { 
-            display: flex !important; 
-            flex-direction: column;
-        }
+        .boxes-row-container { display: flex; gap: 20px; width: 100%; flex-wrap: wrap; }
+        .families-grid-container, .notes-grid-container, .finance-cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; width: 100%; }
+        .families-grid-container, .notes-grid-container { margin-top: 20px; }
 
-        /* CONTAINERS DE LAYOUT */
-        .boxes-row-container {
-            display: flex;
-            gap: 20px;
-            width: 100%;
-            flex-wrap: wrap;
-        }
+        @media (max-width: 1024px) { .families-grid-container, .notes-grid-container, .finance-cards-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 768px) { .families-grid-container, .notes-grid-container, .finance-cards-grid { grid-template-columns: 1fr; } }
 
-        /* GRIDS */
-        .families-grid-container, .notes-grid-container, .finance-cards-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            width: 100%;
-        }
-        
-        .families-grid-container, .notes-grid-container {
-            margin-top: 20px;
-        }
-
-        @media (max-width: 1024px) {
-            .families-grid-container, .notes-grid-container, .finance-cards-grid { grid-template-columns: repeat(2, 1fr); }
-        }
-        @media (max-width: 768px) {
-            .families-grid-container, .notes-grid-container, .finance-cards-grid { grid-template-columns: 1fr; }
-        }
-
-        /* CARD FINANCEIRO */
         .fin-card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 20px 25px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px 25px;
+            display: flex; align-items: center; justify-content: space-between; box-shadow: 0 8px 20px rgba(0,0,0,0.3);
         }
         .fin-card-info h3 { font-size: 12px; text-transform: uppercase; color: #64748b; letter-spacing: 0.5px; margin-bottom: 4px; }
         .fin-card-info p { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
         .fin-card-icon { width: 45px; height: 45px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
 
-        /* BOX DE CONTRASTE */
         .info-box-wrapper {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 30px;
-            margin-top: 20px;
-            flex: 1;
-            min-width: 300px;
-            box-shadow: 0 8px 24px 0 rgba(0, 0, 0, 0.4);
+            background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 30px;
+            margin-top: 20px; flex: 1; min-width: 300px; box-shadow: 0 8px 24px 0 rgba(0, 0, 0, 0.4);
         }
+        .families-grid-container .info-box-wrapper, .notes-grid-container .info-box-wrapper { margin-top: 0; }
 
-        .families-grid-container .info-box-wrapper, .notes-grid-container .info-box-wrapper {
-            margin-top: 0; 
-        }
+        .form-row { display: flex; gap: 10px; margin-bottom: 20px; align-items: flex-end; flex-wrap: wrap; }
+        .form-row .form-group { flex: 1; margin-bottom: 0; min-width: 110px; }
+        .form-row button { width: auto; padding: 12px 20px; height: 45px; }
 
-        /* FORMULÁRIO EM LINHA */
-        .form-row {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            align-items: flex-end;
-            flex-wrap: wrap;
-        }
-        .form-row .form-group {
-            flex: 1;
-            margin-bottom: 0;
-            min-width: 110px;
-        }
-        .form-row button {
-            width: auto;
-            padding: 12px 20px;
-            height: 45px;
-        }
+        .note-card-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 15px; }
 
-        .note-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 12px;
-            margin-bottom: 15px;
-        }
-
-        /* BOX COLAPSÁVEL */
         .collapsible-wrapper {
-            background: rgba(15, 12, 28, 0.85);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            max-width: 600px;
-            width: 100%;
-            overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-            margin-top: 40px; 
-            flex-shrink: 0;
+            background: rgba(15, 12, 28, 0.85); border: 1px solid var(--border); border-radius: 12px;
+            max-width: 600px; width: 100%; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.5); margin-top: 40px; flex-shrink: 0;
         }
-
-        .collapsible-header {
-            padding: 15px 20px;
-            background: rgba(255, 255, 255, 0.02);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            user-select: none;
-            transition: background 0.2s;
-        }
-        .collapsible-header:hover { background: rgba(255, 255, 255, 0.05); }
-        .collapsible-header h3 {
-            font-size: 14px; letter-spacing: 0.5px; color: #cbd5e1;
-            display: flex; align-items: center; gap: 10px;
-        }
-
-        .collapsible-content {
-            max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; padding: 0 20px;
-        }
-        .collapsible-content.open {
-            padding: 20px; border-top: 1px solid var(--border);
-        }
+        .collapsible-header { padding: 15px 20px; background: rgba(255, 255, 255, 0.02); display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
+        .collapsible-header h3 { font-size: 14px; letter-spacing: 0.5px; color: #cbd5e1; display: flex; align-items: center; gap: 10px; }
+        .collapsible-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; padding: 0 20px; }
+        .collapsible-content.open { padding: 20px; border-top: 1px solid var(--border); }
 
         .form-group { margin-bottom: 15px; }
-        .form-group label {
-            display: block; font-size: 12px; color: #94a3b8; margin-bottom: 6px; font-weight: 600;
-        }
+        .form-group label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 6px; font-weight: 600; }
 
-        /* COMPONENTES PADRÃO */
-        input, textarea, select {
-            width: 100%; padding: 12px; background: rgba(0,0,0,0.5);
-            border: 1px solid var(--border); border-radius: 10px; color: #fff; margin-bottom: 5px; outline: none;
-        }
+        input, textarea, select { width: 100%; padding: 12px; background: rgba(0,0,0,0.5); border: 1px solid var(--border); border-radius: 10px; color: #fff; margin-bottom: 5px; outline: none; }
         input, select { height: 45px; }
         textarea { height: 100px; resize: none; font-size: 14px; }
         input:focus, textarea:focus, select:focus { border-color: var(--primary); }
         
-        button {
-            width: 100%; padding: 12px; background: var(--primary); border: none;
-            border-radius: 10px; color: #fff; font-weight: 600; cursor: pointer; transition: background 0.2s;
-        }
+        button { width: 100%; padding: 12px; background: var(--primary); border: none; border-radius: 10px; color: #fff; font-weight: 600; cursor: pointer; transition: background 0.2s; }
         button:hover { background: #9333ea; }
         
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         th { text-align: left; padding: 12px 10px; color: #64748b; font-size: 12px; text-transform: uppercase; border-bottom: 1px solid var(--border); }
         td { padding: 14px 10px; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 14px; }
         
-        .btn-delete {
-            background: rgba(239, 68, 68, 0.1); color: var(--danger);
-            border: 1px solid rgba(239, 68, 68, 0.2); padding: 6px 12px;
-            border-radius: 6px; font-size: 12px; cursor: pointer; width: auto;
-        }
+        .btn-delete { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; width: auto; }
         .btn-delete:hover { background: var(--danger); color: #fff; }
 
         .badge { padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; }
@@ -337,99 +204,43 @@
                         <span id="nav-status-text">Offline</span>
                     </div>
                 </div>
-                <button class="btn-logout" onclick="logout()">
-                    <i class="fas fa-sign-out-alt"></i> Sair da Conta
-                </button>
+                <button class="btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Sair</button>
             </div>
         </aside>
 
         <main class="main-content">
             <section id="dash" class="section active">
                 <h2 style="margin-bottom: 20px;">Fluxo Bancário & Caixa</h2>
-                
                 <div class="finance-cards-grid">
-                    <div class="fin-card">
-                        <div class="fin-card-info">
-                            <h3>Saldo Atual</h3>
-                            <p id="banco-saldo" style="color: #fff;">R$ 15.000,00</p>
-                        </div>
-                        <div class="fin-card-icon" style="background: rgba(168, 85, 247, 0.15); color: var(--primary);">
-                            <i class="fas fa-wallet"></i>
-                        </div>
-                    </div>
-                    <div class="fin-card">
-                        <div class="fin-card-info">
-                            <h3>Total Entradas</h3>
-                            <p id="banco-entradas" style="color: var(--success);">R$ 20.000,00</p>
-                        </div>
-                        <div class="fin-card-icon" style="background: rgba(34, 197, 94, 0.15); color: var(--success);">
-                            <i class="fas fa-arrow-trend-up"></i>
-                        </div>
-                    </div>
-                    <div class="fin-card">
-                        <div class="fin-card-info">
-                            <h3>Total Saídas</h3>
-                            <p id="banco-saidas" style="color: var(--danger);">R$ 5.000,00</p>
-                        </div>
-                        <div class="fin-card-icon" style="background: rgba(239, 68, 68, 0.15); color: var(--danger);">
-                            <i class="fas fa-arrow-trend-down"></i>
-                        </div>
+                    <div class="fin-card"><div class="fin-card-info"><h3>Saldo Atual</h3><p id="banco-saldo">R$ 0,00</p></div><div class="fin-card-icon" style="background: rgba(168, 85, 247, 0.15); color: var(--primary);"><i class="fas fa-wallet"></i></div></div>
+                    <div class="fin-card"><div class="fin-card-info"><h3>Total Entradas</h3><p id="banco-entradas" style="color: var(--success);">R$ 0,00</p></div><div class="fin-card-icon" style="background: rgba(34, 197, 94, 0.15); color: var(--success);"><i class="fas fa-arrow-trend-up"></i></div></div>
+                    <div class="fin-card"><div class="fin-card-info"><h3>Total Saídas</h3><p id="banco-saidas" style="color: var(--danger);">R$ 0,00</p></div><div class="fin-card-icon" style="background: rgba(239, 68, 68, 0.15); color: var(--danger);"><i class="fas fa-arrow-trend-down"></i></div></div>
+                </div>
+
+                <div class="info-box-wrapper" style="border: 1px dashed rgba(168, 85, 247, 0.4);">
+                    <h3 style="margin-bottom: 15px; font-size: 14px; color: var(--primary);"><i class="fas fa-edit"></i> Ajustar Valores Globais</h3>
+                    <div class="form-row">
+                        <div class="form-group"><label>Novo Saldo</label><input type="number" id="edit-saldo" step="0.01"></div>
+                        <div class="form-group"><label>Novo Total Entradas</label><input type="number" id="edit-entradas" step="0.01"></div>
+                        <div class="form-group"><label>Novo Total Saídas</label><input type="number" id="edit-saidas" step="0.01"></div>
+                        <button onclick="salvarValoresDiretos()" style="background: #10b981;"><i class="fas fa-save"></i> Aplicar</button>
                     </div>
                 </div>
 
-                <div class="info-box-wrapper" style="max-width: 100%; border: 1px dashed rgba(168, 85, 247, 0.4);">
-                    <h3 style="margin-bottom: 15px; font-size: 14px; color: var(--primary);"><i class="fas fa-edit"></i> Ajustar/Editar Valores Globais Diretamente</h3>
+                <div class="info-box-wrapper">
+                    <h3 style="margin-bottom: 15px; font-size: 15px; color: #cbd5e1;"><i class="fas fa-cash-register"></i> Novo Lançamento Manual</h3>
                     <div class="form-row">
-                        <div class="form-group">
-                            <label for="edit-saldo">Novo Saldo Atual</label>
-                            <input type="number" id="edit-saldo" placeholder="Ex: 15000.00" step="0.01">
-                        </div>
-                        <div class="form-group">
-                            <label for="edit-entradas">Novo Total Entradas</label>
-                            <input type="number" id="edit-entradas" placeholder="Ex: 20000.00" step="0.01">
-                        </div>
-                        <div class="form-group">
-                            <label for="edit-saidas">Novo Total Saídas</label>
-                            <input type="number" id="edit-saidas" placeholder="Ex: 5000.00" step="0.01">
-                        </div>
-                        <button onclick="salvarValoresDiretos()" style="background: #10b981;"><i class="fas fa-save"></i> Aplicar Ajuste</button>
-                    </div>
-                </div>
-
-                <div class="info-box-wrapper" style="max-width: 100%;">
-                    <h3 style="margin-bottom: 15px; font-size: 15px; color: #cbd5e1;"><i class="fas fa-cash-register"></i> Novo Lançamento Financeiro</h3>
-                    <div class="form-row">
-                        <div class="form-group" style="max-width: 150px;">
-                            <label for="fin-tipo">Operação</label>
-                            <select id="fin-tipo">
-                                <option value="ENTRADA">Entrada (+)</option>
-                                <option value="SAIDA">Saída (-)</option>
-                            </select>
-                        </div>
-                        <div class="form-group" style="max-width: 200px;">
-                            <label for="fin-valor">Valor (R$)</label>
-                            <input type="number" id="fin-valor" placeholder="0.00" step="0.01">
-                        </div>
-                        <div class="form-group">
-                            <label for="fin-desc">Descrição / Motivo</label>
-                            <input type="text" id="fin-desc" placeholder="Ex: Recebimento de Carga ou Compra de Peças">
-                        </div>
+                        <div class="form-group" style="max-width: 150px;"><label>Operação</label><select id="fin-tipo"><option value="ENTRADA">Entrada (+)</option><option value="SAIDA">Saída (-)</option></select></div>
+                        <div class="form-group" style="max-width: 200px;"><label>Valor (R$)</label><input type="number" id="fin-valor" step="0.01"></div>
+                        <div class="form-group"><label>Descrição / Motivo</label><input type="text" id="fin-desc"></div>
                         <button onclick="registrarMovimentacaoBancaria()"><i class="fas fa-check"></i> Executar</button>
                     </div>
                 </div>
 
                 <div class="info-box-wrapper">
-                    <h3 style="font-size: 15px; color: #cbd5e1;"><i class="fas fa-history"></i> Histórico de Registro e Movimentações</h3>
+                    <h3><i class="fas fa-history"></i> Histórico Geral</h3>
                     <table>
-                        <thead>
-                            <tr>
-                                <th>Operador (Membro)</th>
-                                <th>Tipo</th>
-                                <th>Descrição</th>
-                                <th>Valor</th>
-                                <th>Saldo Resultante</th>
-                            </tr>
-                        </thead>
+                        <thead><tr><th>Operador</th><th>Tipo</th><th>Descrição</th><th>Valor</th><th>Saldo Resultante</th></tr></thead>
                         <tbody id="t-financeiro-corpo"></tbody>
                     </table>
                 </div>
@@ -437,60 +248,82 @@
 
             <section id="membros" class="section">
                 <h2>Controle e Registro de Membros</h2>
-                
-                <div class="info-box-wrapper" style="max-width: 100%; margin-bottom: 20px;">
-                    <h3 style="margin-bottom: 15px; font-size: 15px; color: var(--primary);"><i class="fas fa-user-plus"></i> Registrar Novo Membro (Gera Acesso ao Painel)</h3>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="mem-nome">Nome do Membro</label>
-                            <input type="text" id="mem-nome" placeholder="Ex: Megan">
-                        </div>
-                        <div class="form-group" style="max-width: 120px;">
-                            <label for="mem-id">ID In-Game</label>
-                            <input type="text" id="mem-id" placeholder="Ex: 3461">
-                        </div>
-                        <div class="form-group">
-                            <label for="mem-discord">ID do Discord</label>
-                            <input type="text" id="mem-discord" placeholder="Ex: megan_vortex">
-                        </div>
-                        <div class="form-group">
-                            <label for="mem-cargo">Cargo / Função</label>
-                            <input type="text" id="mem-cargo" placeholder="Ex: Recruta, Gerente, Chefe">
-                        </div>
-                        <button onclick="registrarNovoMembroLogin()" style="background: var(--primary);"><i class="fas fa-save"></i> Criar Acesso</button>
-                    </div>
-                    <small style="color: #64748b; display: block; margin-top: -5px;"><i class="fas fa-info-circle"></i> Atenção: Membros novos registrados conseguirão logar usando o seu <b>ID</b> ou <b>Nome</b> com a senha padrão inicial: <b>1234</b></small>
-                </div>
-
                 <div class="info-box-wrapper">
-                    <h3 style="font-size: 15px; color: #cbd5e1; margin-bottom: 10px;"><i class="fas fa-list"></i> Membros Ativos & Status</h3>
+                    <h3 style="margin-bottom: 15px; color: var(--primary);"><i class="fas fa-user-plus"></i> Novo Membro</h3>
+                    <div class="form-row">
+                        <div class="form-group"><label>Nome</label><input type="text" id="mem-nome"></div>
+                        <div class="form-group" style="max-width: 120px;"><label>ID In-Game</label><input type="text" id="mem-id"></div>
+                        <div class="form-group"><label>ID do Discord</label><input type="text" id="mem-discord"></div>
+                        <div class="form-group"><label>Cargo</label><input type="text" id="mem-cargo"></div>
+                        <button onclick="registrarNovoMembroLogin()"><i class="fas fa-save"></i> Criar Acesso</button>
+                    </div>
+                </div>
+                <div class="info-box-wrapper">
                     <table>
-                        <thead>
-                            <tr>
-                                <th>ID In-Game</th>
-                                <th>Nome</th>
-                                <th>ID Discord</th>
-                                <th>Cargo</th>
-                                <th>Status de Conexão</th>
-                                <th style="width: 60px; text-align: center;">Ações</th>
-                            </tr>
-                        </thead>
+                        <thead><tr><th>ID</th><th>Nome</th><th>Discord</th><th>Cargo</th><th>Status</th><th style="width: 60px;">Ações</th></tr></thead>
                         <tbody id="t-membros-corpo"></tbody>
                     </table>
                 </div>
             </section>
 
-            <section id="encomendas" class="section"><h2>Encomendas</h2><div class="info-box-wrapper"><p style="color: #cbd5e1;">Gerencie encomendas e pedidos pendentes.</p></div></section>
-            <section id="vendas" class="section"><h2>Vendas</h2><div class="info-box-wrapper"><p style="color: #cbd5e1;">Registro e controle de saídas e vendas.</p></div></section>
-            <section id="movimentacao" class="section"><h2>Movimentação</h2><div class="info-box-wrapper"><p style="color: #cbd5e1;">Histórico financeiro e fluxo de caixa.</p></div></section>
+            <section id="encomendas" class="section">
+                <h2>Gerenciador de Encomendas & Compras</h2>
+                
+                <div class="info-box-wrapper">
+                    <h3 style="margin-bottom: 15px; color: var(--primary);"><i class="fas fa-cart-plus"></i> Registrar Nova Compra</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="enc-familia">Família Destino</label>
+                            <select id="enc-familia" onchange="atualizarSelectProdutosEncomenda()">
+                                <option value="">-- Selecione a Família --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="enc-produto">Produto Cadastrado</label>
+                            <select id="enc-produto" onchange="calcularPreviaValorEncomenda()">
+                                <option value="">-- Selecione o Produto --</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="max-width: 120px;">
+                            <label for="enc-qtd">Quantidade</label>
+                            <input type="number" id="enc-qtd" value="1" min="1" oninput="calcularPreviaValorEncomenda()">
+                        </div>
+                        <div class="form-group" style="max-width: 180px;">
+                            <label>Valor Total Estimado</label>
+                            <input type="text" id="enc-previa-total" value="R$ 0,00" readonly style="background: rgba(255,255,255,0.03); color: var(--success); font-weight: 700;">
+                        </div>
+                        <button onclick="salvarNovaEncomenda()" style="background: var(--primary);"><i class="fas fa-shopping-basket"></i> Fechar Pedido</button>
+                    </div>
+                </div>
+
+                <div class="info-box-wrapper">
+                    <h3><i class="fas fa-boxes"></i> Histórico de Encomendas Registradas</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Operador</th>
+                                <th>Família</th>
+                                <th>Produto</th>
+                                <th>Qtd</th>
+                                <th>Valor Unitário</th>
+                                <th>Valor Total</th>
+                                <th style="width: 50px;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="t-encomendas-corpo"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="vendas" class="section"><h2>Vendas</h2><div class="info-box-wrapper"><p>Registro e controle de saídas e vendas.</p></div></section>
+            <section id="movimentacao" class="section"><h2>Movimentação</h2><div class="info-box-wrapper"><p>Histórico financeiro detalhado.</p></div></section>
 
             <section id="importante" class="section">
                 <h2>Mural Importante</h2>
-                <div class="info-box-wrapper" style="max-width: 600px; width: 100%;">
-                    <h3 style="margin-bottom: 15px; font-size: 16px; color: var(--primary);"><i class="fas fa-pen-nib"></i> Criar Nova Anotação / Aviso</h3>
-                    <div class="form-group"><label for="nota-titulo">Título do Aviso</label><input type="text" id="nota-titulo" placeholder="Ex: Meta da semana"></div>
-                    <div class="form-group"><label for="nota-conteudo">Conteúdo do Registro</label><textarea id="nota-conteudo" placeholder="Digite aqui..."></textarea></div>
-                    <button onclick="adicionarNota()"><i class="fas fa-save"></i> Fixar no Mural</button>
+                <div class="info-box-wrapper" style="max-width: 600px;">
+                    <div class="form-group"><label>Título</label><input type="text" id="nota-titulo"></div>
+                    <div class="form-group"><label>Conteúdo</label><textarea id="nota-conteudo"></textarea></div>
+                    <button onclick="adicionarNota()"><i class="fas fa-save"></i> Fixar</button>
                 </div>
                 <div class="notes-grid-container" id="grid-mural-notas"></div>
             </section>
@@ -499,39 +332,26 @@
                 <h2>Configuração do Sistema</h2>
                 <div class="boxes-row-container">
                     <div class="info-box-wrapper">
-                        <h3 style="margin-bottom: 20px; font-size: 16px; color: var(--primary);"><i class="fas fa-boxes"></i> Produtos Vortex</h3>
+                        <h3><i class="fas fa-boxes"></i> Produtos Vortex</h3>
                         <div class="form-row">
-                            <div class="form-group"><label for="prod-nome">Nome do Produto</label><input type="text" id="prod-nome" placeholder="Ex: Produto Alfa"></div>
-                            <div class="form-group" style="max-width: 120px; min-width: 90px;"><label for="prod-valor">Valor Unidade</label><input type="number" id="prod-valor" placeholder="0.00" step="0.01"></div>
+                            <div class="form-group"><label>Nome</label><input type="text" id="prod-nome"></div>
+                            <div class="form-group" style="max-width: 120px;"><label>Valor Unidade</label><input type="number" id="prod-valor" step="0.01"></div>
                             <button onclick="adicionarProduto()"><i class="fas fa-plus"></i></button>
                         </div>
-                        <table>
-                            <thead><tr><th>Produto</th><th>Valor Unidade</th><th style="width: 50px;">Ações</th></tr></thead>
-                            <tbody id="t-produtos-corpo"></tbody>
-                        </table>
+                        <table><thead><tr><th>Produto</th><th>Valor</th><th>Ações</th></tr></thead><tbody id="t-produtos-corpo"></tbody></table>
                     </div>
+                    
                     <div class="info-box-wrapper">
-                        <h3 style="margin-bottom: 20px; font-size: 16px; color: #38bdf8;"><i class="fas fa-handshake"></i> Gerenciador de Produtos das Famílias</h3>
+                        <h3><i class="fas fa-handshake"></i> Gerenciador de Produtos das Famílias</h3>
                         <div class="form-row">
-                            <div class="form-group"><label for="fam-nome-grupo">Nome da Família</label><input type="text" id="fam-nome-grupo" placeholder="Ex: Medici"></div>
-                            <div class="form-group"><label for="fam-nome">Nome do Produto</label><input type="text" id="fam-nome" placeholder="Ex: Item Externo"></div>
-                            <div class="form-group" style="max-width: 110px; min-width: 80px;"><label for="fam-valor">Valor Unidade</label><input type="number" id="fam-valor" placeholder="0.00" step="0.01"></div>
+                            <div class="form-group"><label>Nome da Família</label><input type="text" id="fam-nome-grupo" placeholder="Ex: Medici"></div>
+                            <div class="form-group"><label>Nome do Produto</label><input type="text" id="fam-nome" placeholder="Ex: Componente"></div>
+                            <div class="form-group" style="max-width: 110px;"><label>Valor Unidade</label><input type="number" id="fam-valor" step="0.01"></div>
                             <button onclick="adicionarProdutoFamilia()" style="background: #38bdf8;"><i class="fas fa-plus"></i></button>
                         </div>
                     </div>
                 </div>
                 <div class="families-grid-container" id="grid-caixas-familias"></div>
-                <div class="collapsible-wrapper">
-                    <div class="collapsible-header" onclick="toggleConfigBox()">
-                        <h3><i class="fas fa-image" style="color: var(--primary);"></i> Personalização de Telas (via Link)</h3>
-                        <i id="box-toggle-icon" class="fas fa-plus" style="color: #94a3b8;"></i>
-                    </div>
-                    <div id="box-toggle-content" class="collapsible-content">
-                        <div class="form-group"><label for="cfg-bg-login">URL do Background da Tela de Login</label><input type="text" id="cfg-bg-login" placeholder="Ex: link"></div>
-                        <div class="form-group"><label for="cfg-bg-panel">URL do Background do Painel Interno</label><input type="text" id="cfg-bg-panel" placeholder="Ex: link"></div>
-                        <button onclick="salvarConfiguracoesVisuais()"><i class="fas fa-save"></i> SALVAR CONFIGURAÇÕES</button>
-                    </div>
-                </div>
             </section>
         </main>
     </div>
@@ -539,308 +359,241 @@
     <script>
         let db = {
             membros: [
-                { id: "3461", nome: "Megan", discord: "megan_vortex", senha: "1234", cargo: "Chefe", online: false },
-                { id: "1002", nome: "Operador Padrão", discord: "suporte_vortex", senha: "999", cargo: "Suporte", online: false }
+                { id: "3461", nome: "Megan", discord: "megan_vortex", senha: "1234", cargo: "Chefe", online: false }
             ],
-            produtos: [
-                { id: 1, nome: "Kit de Reparo Premium", valor: 250.00 },
-                { id: 2, nome: "Colete Balístico V3", valor: 500.00 }
-            ],
+            produtos: [],
             familias: {
                 "Medici": [{ id: 1, nome: "Componente Mecânico Ext", valor: 180.00 }],
                 "Mazzini": [{ id: 2, nome: "Algema de Aço", valor: 90.00 }]
             },
-            anotacoes: [
-                { id: 1, titulo: "Aviso de Reunião", conteudo: "Reunião geral com os líderes no próximo domingo às 20h." }
-            ],
-            financeiro: {
-                saldoAtual: 15000.00,
-                totalEntradas: 20000.00,
-                totalSaidas: 5000.00,
-                historico: [
-                    { operador: "Megan", tipo: "ENTRADA", descricao: "Balanço Inicial de Caixa", valor: 20000.00, resultante: 20000.00 },
-                    { operador: "Megan", tipo: "SAIDA", descricao: "Compra de insumos metalúrgicos", valor: 5000.00, resultante: 15000.00 }
-                ]
-            },
+            encomendas: [], // Onde ficam salvas as compras feitas
+            anotacoes: [],
+            financeiro: { saldoAtual: 15000.00, totalEntradas: 20000.00, totalSaidas: 5000.00, historico: [] },
             config: { bgLogin: "", bgPanel: "" }
         };
 
         let usuarioLogado = null;
 
         window.onload = function() {
-            document.getElementById('main-panel').style.display = 'none';
-            document.getElementById('login-screen').style.display = 'flex';
             aplicarBackgrounds();
             renderMembros();
-            renderProdutos(); 
             renderBoxesFamilias();
-            renderMuralAnotacoes();
             renderContabilidadeDashboard();
+            renderEncomendas();
         };
 
-        // --- SISTEMA DE REGISTRO E RENDER DE MEMBROS (INTEGRADO AO LOGIN) ---
-        function renderMembros() {
-            const tbody = document.getElementById('t-membros-corpo'); 
-            if(!tbody) return; 
-            tbody.innerHTML = "";
+        // --- SISTEMA DINÂMICO DE ENCOMENDAS ---
+        
+        // Atualiza a lista de Famílias e Produtos na aba de Encomendas
+        function atualizarSelectsFamiliasEncomenda() {
+            const selectFam = document.getElementById('enc-familia');
+            if(!selectFam) return;
             
-            db.membros.forEach(m => {
-                const statusBadge = m.online ? 
-                    `<span class="badge online"><i class="fas fa-circle" style="font-size: 8px;"></i> Conectado</span>` : 
-                    `<span class="badge offline">Offline</span>`;
-                
+            // Salva o valor atualmente selecionado para não resetar à toa
+            const valorSelecionado = selectFam.value;
+            
+            selectFam.innerHTML = '<option value="">-- Selecione a Família --</option>';
+            Object.keys(db.familias).forEach(fam => {
+                selectFam.innerHTML += `<option value="${fam}">${fam}</option>`;
+            });
+            
+            // Restaura o valor se ele ainda existir
+            if(db.familias[valorSelecionado]) {
+                selectFam.value = valorSelecionado;
+            } else {
+                document.getElementById('enc-produto').innerHTML = '<option value="">-- Selecione o Produto --</option>';
+            }
+        }
+
+        // Quando o usuário escolhe a família, puxa os produtos cadastrados dela
+        function atualizarSelectProdutosEncomenda() {
+            const familiaSelecionada = document.getElementById('enc-familia').value;
+            const selectProd = document.getElementById('enc-produto');
+            
+            selectProd.innerHTML = '<option value="">-- Selecione o Produto --</option>';
+            
+            if(!familiaSelecionada || !db.familias[familiaSelecionada]) {
+                calcularPreviaValorEncomenda();
+                return;
+            }
+
+            db.familias[familiaSelecionada].forEach(p => {
+                selectProd.innerHTML += `<option value="${p.id}">${p.nome} (R$ ${p.valor.toFixed(2)})</option>`;
+            });
+            
+            calcularPreviaValorEncomenda();
+        }
+
+        // Calcula a prévia em tempo real (Valor Unitário * Qtd)
+        function calcularPreviaValorEncomenda() {
+            const fam = document.getElementById('enc-familia').value;
+            const prodId = document.getElementById('enc-produto').value;
+            const qtd = parseInt(document.getElementById('enc-qtd').value) || 0;
+            const inputPrevia = document.getElementById('enc-previa-total');
+
+            if(!fam || !prodId || qtd <= 0) {
+                inputPrevia.value = "R$ 0,00";
+                return;
+            }
+
+            const produto = db.familias[fam].find(p => p.id == prodId);
+            if(produto) {
+                const total = produto.valor * qtd;
+                inputPrevia.value = `R$ ${total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+            }
+        }
+
+        // Salva a encomenda no histórico
+        function salvarNovaEncomenda() {
+            if(!usuarioLogado) { alert("Você precisa estar logado!"); return; }
+            
+            const fam = document.getElementById('enc-familia').value;
+            const prodId = document.getElementById('enc-produto').value;
+            const qtd = parseInt(document.getElementById('enc-qtd').value) || 0;
+
+            if(!fam || !prodId || qtd <= 0) {
+                alert("Selecione a Família, o Produto e insira uma quantidade válida!");
+                return;
+            }
+
+            const produto = db.familias[fam].find(p => p.id == prodId);
+            if(!produto) return;
+
+            const valorTotal = produto.valor * qtd;
+
+            // Adiciona no banco interno de encomendas
+            db.encomendas.push({
+                id: Date.now(),
+                operador: usuarioLogado.nome,
+                familia: fam,
+                produtoNome: produto.nome,
+                quantidade: qtd,
+                valorUnitario: produto.valor,
+                valorTotal: valorTotal
+            });
+
+            // Opcional: desconta automaticamente das saídas de caixa do Dashboard? 
+            // Caso queira automatizar o caixa depois me avisa, por enquanto só registra na aba.
+
+            // Reseta formulário
+            document.getElementById('enc-qtd').value = "1";
+            document.getElementById('enc-produto').value = "";
+            calcularPreviaValorEncomenda();
+            
+            renderEncomendas();
+            alert("Encomenda registrada com sucesso!");
+        }
+
+        function renderEncomendas() {
+            const tbody = document.getElementById('t-encomendas-corpo');
+            if(!tbody) return;
+            tbody.innerHTML = "";
+
+            if(db.encomendas.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #64748b; font-style: italic;">Nenhuma encomenda registrada.</td></tr>`;
+                return;
+            }
+
+            [...db.encomendas].reverse().forEach(enc => {
                 tbody.innerHTML += `
                     <tr>
-                        <td style="font-weight: 600; color: #a855f7;">#${m.id}</td>
-                        <td style="font-weight: 600; color: #fff;">${m.nome}</td>
-                        <td style="color: #38bdf8;"><i class="fab fa-discord" style="margin-right: 5px;"></i>${m.discord || 'Não Informado'}</td>
-                        <td style="color: #cbd5e1;">${m.cargo}</td>
-                        <td>${statusBadge}</td>
-                        <td style="text-align: center;">
-                            <button class="btn-delete" onclick="deletarMembro('${m.id}')"><i class="fas fa-user-minus"></i></button>
-                        </td>
+                        <td style="font-weight:600;"><i class="fas fa-user-circle" style="opacity:0.4; margin-right:5px;"></i>${enc.operador}</td>
+                        <td style="color:#38bdf8; font-weight:600;">${enc.familia}</td>
+                        <td style="color:#fff;">${enc.produtoNome}</td>
+                        <td style="font-weight:700; color:var(--primary);">${enc.quantidade}x</td>
+                        <td style="color:#94a3b8;">R$ ${enc.valorUnitario.toFixed(2)}</td>
+                        <td style="color:var(--success); font-weight:700;">R$ ${enc.valorTotal.toFixed(2)}</td>
+                        <td><button class="btn-delete" onclick="removerEncomenda(${enc.id})"><i class="fas fa-trash"></i></button></td>
                     </tr>
                 `;
             });
         }
 
-        function registrarNovoMembroLogin() {
-            const nomeIn = document.getElementById('mem-nome');
-            const idIn = document.getElementById('mem-id');
-            const discIn = document.getElementById('mem-discord');
-            const cargoIn = document.getElementById('mem-cargo');
-
-            const nome = nomeIn.value.trim();
-            const id = idIn.value.trim();
-            const discord = discIn.value.trim();
-            const cargo = cargoIn.value.trim();
-
-            if(!nome || !id || !discord || !cargo) {
-                alert("Preencha todos os campos obrigatórios para registrar o membro corretamente!");
-                return;
+        function removerEncomenda(id) {
+            if(confirm("Deseja apagar o registro desta encomenda?")) {
+                db.encomendas = db.encomendas.filter(e => e.id !== id);
+                renderEncomendas();
             }
+        }
 
-            // Evita duplicidade de ID no banco de dados de login
-            const existe = db.membros.find(m => m.id === id || m.nome.toLowerCase() === nome.toLowerCase());
-            if(existe) {
-                alert("Erro: Já existe um membro registrado com este mesmo ID ou Nome!");
-                return;
-            }
-
-            // Insere o novo membro direto na lista de autenticação
-            db.membros.push({
-                id: id,
-                nome: nome,
-                discord: discord,
-                senha: "1234", // senha padrão inicial
-                cargo: cargo,
-                online: false
-            });
-
-            // Limpa inputs
-            nomeIn.value = ""; idIn.value = ""; discIn.value = ""; cargoIn.value = "";
+        // --- ATUALIZAÇÕES DOS MÉTODOS EXISTENTES PARA SUPORTAR O VÍNCULO ---
+        function renderBoxesFamilias() {
+            const grid = document.getElementById('grid-caixas-familias'); 
+            if(!grid) return; 
+            grid.innerHTML = "";
             
-            renderMembros();
-            alert(`Membro ${nome} registrado! Já pode acessar o painel usando ID: ${id} e senha: 1234`);
+            Object.keys(db.familias).forEach(nomeDaFamilia => {
+                let linhasTabela = ""; 
+                db.familias[nomeDaFamilia].forEach(p => { 
+                    linhasTabela += `<tr><td style="font-weight: 600;">${p.nome}</td><td style="color: #38bdf8; font-weight: 600;">R$ ${p.valor.toFixed(2)}</td><td><button class="btn-delete" onclick="removerProdutoDaFamilia('${nomeDaFamilia}', ${p.id})"><i class="fas fa-trash"></i></button></td></tr>`; 
+                });
+                grid.innerHTML += `<div class="info-box-wrapper" style="min-width: 100%;"><h3 style="margin-bottom: 15px; font-size: 15px; color: #e2e8f0; border-bottom: 1px solid var(--border); padding-bottom: 10px;"><i class="fas fa-users" style="color: #38bdf8; margin-right: 6px;"></i> Família: ${nomeDaFamilia}</h3><table><thead><tr><th>Produto</th><th>Valor Unidade</th><th style="width: 40px;">Ações</th></tr></thead><tbody>${linhasTabela}</tbody></table></div>`;
+            });
+            
+            // Toda vez que as famílias mudarem nas configurações, atualiza os selects na aba encomenda
+            atualizarSelectsFamiliasEncomenda();
         }
 
-        function deletarMembro(id) {
-            if(usuarioLogado && usuarioLogado.id === id) {
-                alert("Você não pode deletar a si mesmo enquanto estiver logado!");
-                return;
-            }
-            if(confirm("Tem certeza que deseja remover o acesso e o registro deste membro?")) {
-                db.membros = db.membros.filter(m => m.id !== id);
-                renderMembros();
-            }
+        function adicionarProdutoFamilia() {
+            const fIn = document.getElementById('fam-nome-grupo'); const nIn = document.getElementById('fam-nome'); const vIn = document.getElementById('fam-valor');
+            const f = fIn.value.trim(); const n = nIn.value.trim(); const v = parseFloat(vIn.value);
+            if(!f || !n || isNaN(v) || v <= 0) { alert("Preencha corretamente!"); return; }
+            if(!db.familias[f]) { db.familias[f] = []; } 
+            db.familias[f].push({ id: Date.now(), nome: n, valor: v });
+            nIn.value = ""; vIn.value = ""; 
+            renderBoxesFamilias();
         }
 
-        // --- CONTABILIDADE ---
+        function removerProdutoDaFamilia(nomeFamilia, idProduto) {
+            db.familias[nomeFamilia] = db.familias[nomeFamilia].filter(p => p.id !== idProduto);
+            if(db.familias[nomeFamilia].length === 0) { delete db.familias[nomeFamilia]; } 
+            renderBoxesFamilias();
+            atualizarSelectProdutosEncomenda();
+        }
+
+        // --- DASHBOARD CONTABILIDADE ---
         function renderContabilidadeDashboard() {
             document.getElementById('banco-saldo').innerText = `R$ ${db.financeiro.saldoAtual.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
             document.getElementById('banco-entradas').innerText = `R$ ${db.financeiro.totalEntradas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
             document.getElementById('banco-saidas').innerText = `R$ ${db.financeiro.totalSaidas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
-
-            const tbody = document.getElementById('t-financeiro-corpo');
-            if(!tbody) return; tbody.innerHTML = "";
-
-            if(db.financeiro.historico.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #64748b; font-style: italic;">Nenhuma movimentação bancária registrada.</td></tr>`;
-                return;
-            }
-
-            [...db.financeiro.historico].reverse().forEach(mov => {
-                const corValor = mov.tipo === "ENTRADA" ? "var(--success)" : "var(--danger)";
-                const prefixo = mov.tipo === "ENTRADA" ? "+ R$" : "- R$";
-                const badgeTipo = mov.tipo === "ENTRADA" ? 
-                    `<span class="badge online" style="background: rgba(34, 197, 94, 0.1); color: var(--success);">ENTRADA</span>` : 
-                    `<span class="badge offline" style="background: rgba(239, 68, 68, 0.1); color: var(--danger);">SAÍDA</span>`;
-
-                tbody.innerHTML += `
-                    <tr>
-                        <td style="font-weight: 600; color: #f8fafc;"><i class="fas fa-user-circle" style="color: rgba(255,255,255,0.3); margin-right: 5px;"></i> ${mov.operador}</td>
-                        <td>${badgeTipo}</td>
-                        <td style="color: #cbd5e1;">${mov.descricao}</td>
-                        <td style="color: ${corValor}; font-weight: 700;">${prefixo} ${mov.valor.toFixed(2)}</td>
-                        <td style="font-weight: 600; color: #94a3b8;">R$ ${mov.resultante.toFixed(2)}</td>
-                    </tr>
-                `;
-            });
+            const tbody = document.getElementById('t-financeiro-corpo'); if(tbody) tbody.innerHTML = "";
         }
-
         function salvarValoresDiretos() {
-            const sIn = document.getElementById('edit-saldo').value;
-            const eIn = document.getElementById('edit-entradas').value;
-            const saIn = document.getElementById('edit-saidas').value;
-
-            if(sIn !== "") db.financeiro.saldoAtual = parseFloat(sIn);
-            if(eIn !== "") db.financeiro.totalEntradas = parseFloat(eIn);
-            if(saIn !== "") db.financeiro.totalSaidas = parseFloat(saIn);
-
-            document.getElementById('edit-saldo').value = "";
-            document.getElementById('edit-entradas').value = "";
-            document.getElementById('edit-saidas').value = "";
-
-            renderContabilidadeDashboard();
-            alert("Valores do cabeçalho alterados com sucesso!");
+            const sIn = document.getElementById('edit-saldo').value; const eIn = document.getElementById('edit-entradas').value; const saIn = document.getElementById('edit-saidas').value;
+            if(sIn !== "") db.financeiro.saldoAtual = parseFloat(sIn); if(eIn !== "") db.financeiro.totalEntradas = parseFloat(eIn); if(saIn !== "") db.financeiro.totalSaidas = parseFloat(saIn);
+            document.getElementById('edit-saldo').value = ""; document.getElementById('edit-entradas').value = ""; document.getElementById('edit-saidas').value = "";
+            renderContabilidadeDashboard(); alert("Valores alterados!");
         }
-
         function registrarMovimentacaoBancaria() {
-            if(!usuarioLogado) {
-                alert("Erro crítico: Você precisa estar logado para efetuar transações!");
-                return;
-            }
-            const tipo = document.getElementById('fin-tipo').value;
-            const valorIn = document.getElementById('fin-valor');
-            const descIn = document.getElementById('fin-desc');
-            const valor = parseFloat(valorIn.value);
-            const descricao = descIn.value.trim();
-
-            if(isNaN(valor) || valor <= 0 || !descricao) {
-                alert("Por favor, preencha o valor correto!");
-                return;
-            }
-
-            if(tipo === "ENTRADA") { db.financeiro.saldoAtual += valor; db.financeiro.totalEntradas += valor; } 
-            else { db.financeiro.saldoAtual -= valor; db.financeiro.totalSaidas += valor; }
-
-            db.financeiro.historico.push({ operador: usuarioLogado.nome, tipo: tipo, descricao: descricao, valor: valor, resultante: db.financeiro.saldoAtual });
-            valorIn.value = ""; descIn.value = "";
-            renderContabilidadeDashboard();
+            const tipo = document.getElementById('fin-tipo').value; const valor = parseFloat(document.getElementById('fin-valor').value); const desc = document.getElementById('fin-desc').value.trim();
+            if(isNaN(valor) || valor <= 0 || !desc) return;
+            if(tipo === "ENTRADA") { db.financeiro.saldoAtual += valor; db.financeiro.totalEntradas += valor; } else { db.financeiro.saldoAtual -= valor; db.financeiro.totalSaidas += valor; }
+            document.getElementById('fin-valor').value = ""; document.getElementById('fin-desc').value = ""; renderContabilidadeDashboard();
         }
 
-        // --- SISTEMAS ADICIONAIS ---
-        function renderMuralAnotacoes() {
-            const grid = document.getElementById('grid-mural-notas'); if(!grid) return; grid.innerHTML = "";
-            if(db.anotacoes.length === 0) return;
-            db.anotacoes.forEach(nota => {
-                grid.innerHTML += `<div class="info-box-wrapper" style="min-width: 100%;"><div class="note-card-header"><h4 style="font-size: 15px; color: #f8fafc; font-weight: 700;"><i class="fas fa-sticky-note" style="color: var(--primary); margin-right: 6px;"></i> ${nota.titulo}</h4><button class="btn-delete" style="padding: 4px 8px; font-size: 10px;" onclick="removerNota(${nota.id})"><i class="fas fa-trash"></i></button></div><p style="color: #cbd5e1; font-size: 14px; line-height: 1.5; white-space: pre-wrap;">${nota.conteudo}</p></div>`;
+        // --- CONFIGS GERAIS E AUTH ---
+        function renderMembros() {
+            const tbody = document.getElementById('t-membros-corpo'); if(!tbody) return; tbody.innerHTML = "";
+            db.membros.forEach(m => {
+                const statusBadge = m.online ? `<span class="badge online">Conectado</span>` : `<span class="badge offline">Offline</span>`;
+                tbody.innerHTML += `<tr><td>#${m.id}</td><td>${m.nome}</td><td>${m.discord}</td><td>${m.cargo}</td><td>${statusBadge}</td><td><button class="btn-delete" onclick="deletarMembro('${m.id}')"><i class="fas fa-user-minus"></i></button></td></tr>`;
             });
         }
-        function adicionarNota() {
-            const tIn = document.getElementById('nota-titulo'); const cIn = document.getElementById('nota-conteudo');
-            const t = tIn.value.trim(); const c = cIn.value.trim();
-            if(!t || !c) return; db.anotacoes.push({ id: Date.now(), titulo: t, conteudo: c }); tIn.value = ""; cIn.value = ""; renderMuralAnotacoes();
-        }
-        function removerNota(id) { db.anotacoes = db.anotacoes.filter(n => n.id !== id); renderMuralAnotacoes(); }
-
-        function renderProdutos() {
-            const tbody = document.getElementById('t-produtos-corpo'); if(!tbody) return; tbody.innerHTML = "";
-            db.produtos.forEach(p => { tbody.innerHTML += `<tr><td style="font-weight: 600;">${p.nome}</td><td style="color: var(--success); font-weight: 600;">R$ ${p.valor.toFixed(2)}</td><td><button class="btn-delete" onclick="removerProduto(${p.id})"><i class="fas fa-trash"></i></button></td></tr>`; });
-        }
-        function adicionarProduto() {
-            const nIn = document.getElementById('prod-nome'); const vIn = document.getElementById('prod-valor');
-            if(!nIn.value.trim() || isNaN(parseFloat(vIn.value))) return;
-            db.produtos.push({ id: Date.now(), nome: nIn.value.trim(), valor: parseFloat(vIn.value) }); nIn.value = ""; vIn.value = ""; renderProdutos();
-        }
-        function removerProduto(id) { db.produtos = db.produtos.filter(p => p.id !== id); renderProdutos(); }
-
-        function renderBoxesFamilias() {
-            const grid = document.getElementById('grid-caixas-familias'); if(!grid) return; grid.innerHTML = "";
-            Object.keys(db.familias).forEach(nomeDaFamilia => {
-                let linhasTabela = ""; db.familias[nomeDaFamilia].forEach(p => { linhasTabela += `<tr><td style="font-weight: 600;">${p.nome}</td><td style="color: #38bdf8; font-weight: 600;">R$ ${p.valor.toFixed(2)}</td><td><button class="btn-delete" onclick="removerProdutoDaFamilia('${nomeDaFamilia}', ${p.id})"><i class="fas fa-trash"></i></button></td></tr>`; });
-                grid.innerHTML += `<div class="info-box-wrapper" style="min-width: 100%;"><h3 style="margin-bottom: 15px; font-size: 15px; color: #e2e8f0; border-bottom: 1px solid var(--border); padding-bottom: 10px;"><i class="fas fa-users" style="color: #38bdf8; margin-right: 6px;"></i> Família: ${nomeDaFamilia}</h3><table><thead><tr><th>Produto</th><th>Valor Unidade</th><th style="width: 40px;">Ações</th></tr></thead><tbody>${linhasTabela}</tbody></table></div>`;
-            });
-        }
-        function adicionarProdutoFamilia() {
-            const fIn = document.getElementById('fam-nome-grupo'); const nIn = document.getElementById('fam-nome'); const vIn = document.getElementById('fam-valor');
-            if(!fIn.value.trim() || !nIn.value.trim() || isNaN(parseFloat(vIn.value))) return;
-            if(!db.familias[fIn.value.trim()]) { db.familias[fIn.value.trim()] = []; }
-            db.familias[fIn.value.trim()].push({ id: Date.now(), nome: nIn.value.trim(), valor: parseFloat(vIn.value) });
-            nIn.value = ""; vIn.value = ""; renderBoxesFamilias();
-        }
-        function removerProdutoDaFamilia(nomeFamilia, idProduto) {
-            db.familias[nomeFamilia] = db.familias[nomeFamilia].filter(p => p.id !== idProduto);
-            if(db.familias[nomeFamilia].length === 0) { delete db.familias[nomeFamilia]; } renderBoxesFamilias();
-        }
-
-        function toggleConfigBox() {
-            const content = document.getElementById('box-toggle-content'); const icon = document.getElementById('box-toggle-icon');
-            if (content.classList.contains('open')) { content.style.maxHeight = '0px'; content.classList.remove('open'); icon.className = 'fas fa-plus'; } 
-            else { content.classList.add('open'); content.style.maxHeight = content.scrollHeight + 'px'; icon.className = 'fas fa-minus'; }
-        }
-        function toggleSidebarMenu(triggerElement) {
-            const menu = document.getElementById('sidebar-menu-list'); triggerElement.classList.toggle('open');
-            if (menu.style.maxHeight && menu.style.maxHeight !== '0px') { menu.style.maxHeight = '0px'; } 
-            else { menu.style.maxHeight = menu.scrollHeight + 'px'; }
-        }
-        function aplicarBackgrounds() {
-            const loginScreen = document.getElementById('login-screen'); const mainBody = document.body;
-            if (db.config.bgLogin) { loginScreen.style.setProperty('background', `url('${db.config.bgLogin.trim()}')`, 'important'); }
-            if (db.config.bgPanel) { mainBody.style.setProperty('background', `url('${db.config.bgPanel.trim()}')`, 'important'); }
-        }
-        function salvarConfiguracoesVisuais() {
-            db.config.bgLogin = document.getElementById('cfg-bg-login').value; db.config.bgPanel = document.getElementById('cfg-bg-panel').value;
-            aplicarBackgrounds(); alert("Planos de fundo atualizados!");
-        }
-
-        // --- SISTEMA DE AUTENTICAÇÃO ---
-        function auth() {
-            const inputUser = document.getElementById('user-in').value.trim(); 
-            const inputPass = document.getElementById('pass-in').value.trim();
-            
-            // Busca aceitando tanto o ID numérico quanto o Nome cadastrado
-            const user = db.membros.find(m => (m.nome.toLowerCase() === inputUser.toLowerCase() || m.id === inputUser) && m.senha === inputPass);
-            
-            if (user) {
-                usuarioLogado = user; 
-                user.online = true; // Atualiza o status para Online
-                
-                document.getElementById('nav-username').innerText = user.nome; 
-                document.getElementById('nav-userid').innerText = `#${user.id}`;
-                document.getElementById('nav-status-dot').className = "status-dot online"; 
-                document.getElementById('nav-status-text').innerText = "Online";
-                
-                document.getElementById('login-screen').style.display = 'none'; 
-                document.getElementById('main-panel').style.display = 'flex';
-                
-                const trigger = document.querySelector('.dropdown-trigger'); 
-                if(!trigger.classList.contains('open')) { toggleSidebarMenu(trigger); }
-                
-                renderMembros();
-                renderContabilidadeDashboard();
-            } else { 
-                document.getElementById('login-err').style.display = 'block'; 
-            }
-        }
-
-        function logout() {
-            if (usuarioLogado) { usuarioLogado.online = false; } // Volta para Offline ao deslogar
-            usuarioLogado = null;
-            document.getElementById('nav-username').innerText = "Desconectado"; document.getElementById('nav-userid').innerText = ""; 
-            document.getElementById('nav-status-dot').className = "status-dot"; document.getElementById('nav-status-text').innerText = "Offline";
-            const trigger = document.querySelector('.dropdown-trigger'); if(trigger.classList.contains('open')) { toggleSidebarMenu(trigger); }
-            document.getElementById('main-panel').style.display = 'none'; document.getElementById('login-screen').style.display = 'flex';
-            document.getElementById('user-in').value = ''; document.getElementById('pass-in').value = ''; document.getElementById('login-err').style.display = 'none';
+        function registrarNovoMembroLogin() {
+            const n = document.getElementById('mem-nome').value.trim(); const id = document.getElementById('mem-id').value.trim(); const d = document.getElementById('mem-discord').value.trim(); const c = document.getElementById('mem-cargo').value.trim();
+            if(!n || !id || !d || !c) return; db.membros.push({ id: id, nome: n, discord: d, senha: "1234", cargo: c, online: false });
             renderMembros();
         }
-
-        function tab(sectionId, element) {
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.menu-list li').forEach(li => li.classList.remove('active'));
-            document.getElementById(sectionId).classList.add('active');
-            element.classList.add('active');
+        function deletarMembro(id) { db.membros = db.membros.filter(m => m.id !== id); renderMembros(); }
+        function toggleSidebarMenu(t) { const m = document.getElementById('sidebar-menu-list'); t.classList.toggle('open'); m.style.maxHeight = m.style.maxHeight === '0px' || !m.style.maxHeight ? m.scrollHeight + 'px' : '0px'; }
+        function aplicarBackgrounds() {}
+        function auth() {
+            const u = document.getElementById('user-in').value.trim(); const p = document.getElementById('pass-in').value.trim();
+            const user = db.membros.find(m => (m.nome.toLowerCase() === u.toLowerCase() || m.id === u) && m.senha === p);
+            if (user) { usuarioLogado = user; user.online = true; document.getElementById('nav-username').innerText = user.nome; document.getElementById('nav-userid').innerText = `#${user.id}`; document.getElementById('nav-status-dot').className = "status-dot online"; document.getElementById('nav-status-text').innerText = "Online"; document.getElementById('login-screen').style.display = 'none'; document.getElementById('main-panel').style.display = 'flex'; toggleSidebarMenu(document.querySelector('.dropdown-trigger')); renderMembros(); renderEncomendas(); } else { document.getElementById('login-err').style.display = 'block'; }
         }
+        function logout() { location.reload(); }
+        function tab(id, el) { document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); document.querySelectorAll('.menu-list li').forEach(li => li.classList.remove('active')); document.getElementById(id).classList.add('active'); el.classList.add('active'); }
     </script>
 </body>
 </html>
