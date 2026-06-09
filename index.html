@@ -12,7 +12,7 @@
             --success: #22c55e;
             --danger: #ef4444;
             --bg: #0b0813;
-            --card: rgba(15, 12, 28, 0.65); /* Fundo dos boxes de informação */
+            --card: rgba(15, 12, 28, 0.75); /* Fundo dos boxes ligeiramente mais escuro */
             --border: rgba(255, 255, 255, 0.08);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
@@ -36,9 +36,8 @@
             background-repeat: no-repeat !important;
         }
         .login-box {
-            background: rgba(15, 12, 28, 0.85); padding: 40px; border-radius: 20px;
+            background: rgba(15, 12, 28, 0.9); padding: 40px; border-radius: 20px;
             border: 1px solid var(--border); width: 100%; max-width: 360px; text-align: center;
-            backdrop-filter: blur(10px); /* Login mantém um blur maior para privacidade */
         }
 
         /* --- ESTRUTURA CORE DO PAINEL --- */
@@ -48,13 +47,15 @@
             height: 100vh; 
             display: flex; 
             width: 100%;
-            backdrop-filter: blur(4px); /* <--- BLUR MUITO LEVE NO PAINEL INTEIRO */
+            /* Camada escura regulada por cima do wallpaper para quebrar o chamativo */
+            background: rgba(11, 8, 19, 0.6); 
         }
         
         .sidebar {
-            width: 260px; height: 100%; background: rgba(11, 8, 19, 0.85);
+            width: 260px; height: 100%; background: rgba(11, 8, 19, 0.9);
             border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 25px;
             flex-shrink: 0;
+            z-index: 10;
         }
         
         .sidebar-dropdown {
@@ -116,15 +117,22 @@
         }
         .btn-logout:hover { background: var(--danger); color: #fff; box-shadow: 0 0 10px rgba(239, 68, 68, 0.3); }
 
-        /* --- CONTAINER PRINCIPAL E CONTAINER CONTEÚDO (BOX DE CONTRASTE) --- */
+        /* --- CONTEÚDO PRINCIPAL --- */
         .main-content { 
             flex-grow: 1; 
             padding: 40px; 
             overflow-y: auto; 
-            background: rgba(0, 0, 0, 0.2); 
         }
 
-        /* CARD GERAL QUE ENVOLVE AS INFORMAÇÕES DE CADA ABA */
+        /* CORREÇÃO CRÍTICA DO COMPORTAMENTO DAS ABAS */
+        .section { 
+            display: none !important; 
+        }
+        .section.active { 
+            display: block !important; 
+        }
+
+        /* BOX DE CONTRASTE SEPARADO */
         .info-box-wrapper {
             background: var(--card);
             border: 1px solid var(--border);
@@ -132,7 +140,7 @@
             padding: 30px;
             margin-top: 20px;
             width: 100%;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            box-shadow: 0 8px 24px 0 rgba(0, 0, 0, 0.4);
         }
 
         /* --- COMPONENTES DA CARD DE CONFIGURAÇÃO --- */
