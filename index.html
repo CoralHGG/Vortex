@@ -139,7 +139,7 @@
             display: flex;
             gap: 20px;
             width: 100%;
-            flex-wrap: wrap; /* Garante ajuste se a tela diminuir demais */
+            flex-wrap: wrap;
         }
 
         /* BOX DE CONTRASTE PADRÃO */
@@ -149,25 +149,27 @@
             border-radius: 16px;
             padding: 30px;
             margin-top: 20px;
-            flex: 1; /* Faz as duas boxes dividirem o espaço igualmente */
-            min-width: 300px; /* Impede que fiquem esmagadas */
+            flex: 1;
+            min-width: 300px;
             box-shadow: 0 8px 24px 0 rgba(0, 0, 0, 0.4);
         }
 
         /* --- ESTILOS DE FORMULÁRIO EM LINHA (PRODUTOS) --- */
         .form-row {
             display: flex;
-            gap: 15px;
+            gap: 10px;
             margin-bottom: 20px;
             align-items: flex-end;
+            flex-wrap: wrap; /* Permite que os campos quebrem linha se a tela for pequena */
         }
         .form-row .form-group {
             flex: 1;
             margin-bottom: 0;
+            min-width: 110px;
         }
         .form-row button {
             width: auto;
-            padding: 12px 25px;
+            padding: 12px 20px;
             height: 45px;
         }
 
@@ -379,8 +381,8 @@
                                 <label for="prod-nome">Nome do Produto</label>
                                 <input type="text" id="prod-nome" placeholder="Ex: Produto Alfa">
                             </div>
-                            <div class="form-group" style="max-width: 120px;">
-                                <label for="prod-valor">Valor Unitário</label>
+                            <div class="form-group" style="max-width: 120px; min-width: 90px;">
+                                <label for="prod-valor">Valor Unidade</label>
                                 <input type="number" id="prod-valor" placeholder="0.00" step="0.01">
                             </div>
                             <button onclick="adicionarProduto()"><i class="fas fa-plus"></i></button>
@@ -406,11 +408,15 @@
                         
                         <div class="form-row">
                             <div class="form-group">
+                                <label for="fam-nome-grupo">Nome da Família</label>
+                                <input type="text" id="fam-nome-grupo" placeholder="Ex: Medici">
+                            </div>
+                            <div class="form-group">
                                 <label for="fam-nome">Nome do Produto</label>
                                 <input type="text" id="fam-nome" placeholder="Ex: Item Externo">
                             </div>
-                            <div class="form-group" style="max-width: 120px;">
-                                <label for="fam-valor">Valor Unitário</label>
+                            <div class="form-group" style="max-width: 110px; min-width: 80px;">
+                                <label for="fam-valor">Valor Unidade</label>
                                 <input type="number" id="fam-valor" placeholder="0.00" step="0.01">
                             </div>
                             <button onclick="adicionarProdutoFamilia()" style="background: #38bdf8;"><i class="fas fa-plus"></i></button>
@@ -419,7 +425,8 @@
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Produto Família</th>
+                                    <th>Família</th>
+                                    <th>Produto</th>
                                     <th>Valor Unidade</th>
                                     <th style="width: 50px;">Ações</th>
                                 </tr>
@@ -454,7 +461,6 @@
     </div>
 
     <script>
-        // Banco de dados simulado expandido com o array de produtos de outras famílias
         let db = {
             membros: [
                 { id: "3461", nome: "Megan", senha: "1234", cargo: "Chefe", online: false },
@@ -465,7 +471,7 @@
                 { id: 2, nome: "Colete Balístico V3", valor: 500.00 }
             ],
             produtosFamilias: [
-                { id: 1, nome: "Componente Mecânico Ext", valor: 180.00 }
+                { id: 1, familia: "Mazzini", nome: "Componente Mecânico Ext", valor: 180.00 }
             ],
             config: {
                 bgLogin: "",
@@ -480,10 +486,10 @@
             aplicarBackgrounds();
             renderMembros();
             renderProdutos(); 
-            renderProdutosFamilias(); // Inicializa a nova tabela
+            renderProdutosFamilias();
         };
 
-        // --- SISTEMA DE REGISTRO: PRODUTOS VORTEX ---
+        // --- PRODUTOS VORTEX ---
         function renderProdutos() {
             const tbody = document.getElementById('t-produtos-corpo');
             if(!tbody) return;
@@ -530,20 +536,21 @@
             renderProdutos();
         }
 
-        // --- SISTEMA DE REGISTRO: PRODUTOS FAMÍLIAS ---
+        // --- PRODUTOS FAMÍLIAS (COM REGISTRO DO NOME DA FAMÍLIA) ---
         function renderProdutosFamilias() {
             const tbody = document.getElementById('t-familias-corpo');
             if(!tbody) return;
             tbody.innerHTML = "";
 
             if(db.produtosFamilias.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: #64748b; font-style: italic;">Nenhum produto registrado.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #64748b; font-style: italic;">Nenhum produto registrado.</td></tr>`;
                 return;
             }
 
             db.produtosFamilias.forEach(p => {
                 tbody.innerHTML += `
                     <tr>
+                        <td style="color: #94a3b8; font-weight: 500;">${p.familia}</td>
                         <td style="font-weight: 600;">${p.nome}</td>
                         <td style="color: #38bdf8; font-weight: 600;">R$ ${p.valor.toFixed(2)}</td>
                         <td>
@@ -557,18 +564,30 @@
         }
 
         function adicionarProdutoFamilia() {
+            const familiaIn = document.getElementById('fam-nome-grupo');
             const nomeIn = document.getElementById('fam-nome');
             const valorIn = document.getElementById('fam-valor');
+            
+            const familia = familiaIn.value.trim();
             const nome = nomeIn.value.trim();
             const valor = parseFloat(valorIn.value);
 
-            if(!nome || isNaN(valor) || valor <= 0) {
-                alert("Preencha o nome do produto e um valor válido!");
+            if(!familia || !nome || isNaN(valor) || valor <= 0) {
+                alert("Preencha todos os campos corretamente (Família, Produto e Valor)!");
                 return;
             }
 
-            db.produtosFamilias.push({ id: Date.now(), nome: nome, valor: valor });
-            nomeIn.value = ""; valorIn.value = "";
+            db.produtosFamilias.push({ 
+                id: Date.now(), 
+                familia: familia, 
+                nome: nome, 
+                valor: valor 
+            });
+
+            // Limpa apenas os campos de produto e valor, mantendo o nome da família caso queira adicionar outro item dela em sequência
+            nomeIn.value = ""; 
+            valorIn.value = "";
+            
             renderProdutosFamilias();
         }
 
@@ -577,7 +596,7 @@
             renderProdutosFamilias();
         }
 
-        // --- OUTRAS LOGICAS DO PAINEL ---
+        // --- SISTEMAS DE BASE DO PAINEL ---
         function toggleConfigBox() {
             const content = document.getElementById('box-toggle-content');
             const icon = document.getElementById('box-toggle-icon');
