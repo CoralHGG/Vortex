@@ -12,7 +12,7 @@
             --success: #22c55e;
             --danger: #ef4444;
             --bg: #0b0813;
-            --card: rgba(255, 255, 255, 0.03);
+            --card: rgba(15, 12, 28, 0.65); /* Fundo dos boxes de informação */
             --border: rgba(255, 255, 255, 0.08);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
@@ -38,16 +38,22 @@
         .login-box {
             background: rgba(15, 12, 28, 0.85); padding: 40px; border-radius: 20px;
             border: 1px solid var(--border); width: 100%; max-width: 360px; text-align: center;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px); /* Login mantém um blur maior para privacidade */
         }
 
         /* --- ESTRUTURA CORE DO PAINEL --- */
-        #main-panel { display: none; width: 100vw; height: 100vh; display: flex; width: 100%; }
+        #main-panel { 
+            display: none; 
+            width: 100vw; 
+            height: 100vh; 
+            display: flex; 
+            width: 100%;
+            backdrop-filter: blur(4px); /* <--- BLUR MUITO LEVE NO PAINEL INTEIRO */
+        }
         
         .sidebar {
-            width: 260px; height: 100%; background: rgba(15, 12, 28, 0.75);
+            width: 260px; height: 100%; background: rgba(11, 8, 19, 0.85);
             border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 25px;
-            backdrop-filter: blur(10px);
             flex-shrink: 0;
         }
         
@@ -110,19 +116,26 @@
         }
         .btn-logout:hover { background: var(--danger); color: #fff; box-shadow: 0 0 10px rgba(239, 68, 68, 0.3); }
 
-        .main-content { flex-grow: 1; padding: 40px; overflow-y: auto; background: rgba(11, 8, 19, 0.4); }
-        .section { display: none; }
-        .section.active { display: block; }
+        /* --- CONTAINER PRINCIPAL E CONTAINER CONTEÚDO (BOX DE CONTRASTE) --- */
+        .main-content { 
+            flex-grow: 1; 
+            padding: 40px; 
+            overflow-y: auto; 
+            background: rgba(0, 0, 0, 0.2); 
+        }
 
-        /* --- COMPONENTES DA CARD DE CONFIGURAÇÃO --- */
-        .config-card {
-            background: rgba(255, 255, 255, 0.02);
+        /* CARD GERAL QUE ENVOLVE AS INFORMAÇÕES DE CADA ABA */
+        .info-box-wrapper {
+            background: var(--card);
             border: 1px solid var(--border);
             border-radius: 16px;
             padding: 30px;
-            max-width: 600px;
             margin-top: 20px;
+            width: 100%;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
         }
+
+        /* --- COMPONENTES DA CARD DE CONFIGURAÇÃO --- */
         .form-group {
             margin-bottom: 20px;
         }
@@ -136,7 +149,7 @@
 
         /* --- COMPONENTES PADRÃO --- */
         input, select {
-            width: 100%; padding: 12px; background: rgba(0,0,0,0.4);
+            width: 100%; padding: 12px; background: rgba(0,0,0,0.5);
             border: 1px solid var(--border); border-radius: 10px; color: #fff; margin-bottom: 5px; outline: none;
         }
         input:focus { border-color: var(--primary); }
@@ -145,9 +158,10 @@
             border-radius: 10px; color: #fff; font-weight: 600; cursor: pointer; transition: background 0.2s;
         }
         button:hover { background: #9333ea; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { text-align: left; padding: 10px; color: #64748b; font-size: 12px; text-transform: uppercase; }
-        td { padding: 14px 10px; border-bottom: 1px solid var(--border); font-size: 14px; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th { text-align: left; padding: 12px 10px; color: #64748b; font-size: 12px; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+        td { padding: 14px 10px; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 14px; }
         
         .badge { padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; }
         .badge.online { background: rgba(34, 197, 94, 0.15); color: var(--success); }
@@ -207,45 +221,55 @@
         <main class="main-content">
             <section id="dash" class="section active">
                 <h2>Dashboard</h2>
-                <p style="color: #94a3b8; margin-top: 10px;">Bem-vindo ao novo núcleo do sistema.</p>
+                <div class="info-box-wrapper">
+                    <p style="color: #cbd5e1;">Bem-vindo ao novo núcleo do sistema.</p>
+                </div>
             </section>
 
             <section id="membros" class="section">
                 <h2>Controle de Membros</h2>
-                <table style="width: 100%;">
-                    <thead>
-                        <tr><th>ID</th><th>Nome</th><th>Cargo</th><th>Status Real</th></tr>
-                    </thead>
-                    <tbody id="t-membros-corpo">
-                        </tbody>
-                </table>
+                <div class="info-box-wrapper">
+                    <table>
+                        <thead>
+                            <tr><th>ID</th><th>Nome</th><th>Cargo</th><th>Status Real</th></tr>
+                        </thead>
+                        <tbody id="t-membros-corpo">
+                            </tbody>
+                    </table>
+                </div>
             </section>
 
             <section id="encomendas" class="section">
                 <h2>Encomendas</h2>
-                <p style="color: #94a3b8; margin-top: 10px;">Gerencie as encomendas e pedidos pendentes.</p>
+                <div class="info-box-wrapper">
+                    <p style="color: #cbd5e1;">Gerencie as encomendas e pedidos pendentes.</p>
+                </div>
             </section>
 
             <section id="vendas" class="section">
                 <h2>Vendas</h2>
-                <p style="color: #94a3b8; margin-top: 10px;">Registro e controle de saídas e vendas do sistema.</p>
+                <div class="info-box-wrapper">
+                    <p style="color: #cbd5e1;">Registro e controle de saídas e vendas do sistema.</p>
+                </div>
             </section>
 
             <section id="movimentacao" class="section">
                 <h2>Movimentação</h2>
-                <p style="color: #94a3b8; margin-top: 10px;">Histórico financeiro e fluxo de entradas e saídas.</p>
+                <div class="info-box-wrapper">
+                    <p style="color: #cbd5e1;">Histórico financeiro e fluxo de entradas e saídas.</p>
+                </div>
             </section>
 
             <section id="importante" class="section">
                 <h2>Importante</h2>
-                <p style="color: #94a3b8; margin-top: 10px;">Mural de avisos, diretrizes essenciais e alertas da gerência.</p>
+                <div class="info-box-wrapper">
+                    <p style="color: #cbd5e1;">Mural de avisos, diretrizes essenciais e alertas da gerência.</p>
+                </div>
             </section>
 
             <section id="configuracao" class="section">
                 <h2>Configuração do Sistema</h2>
-                <p style="color: #94a3b8; margin-top: 10px;">Personalize a identidade visual e planos de fundo do seu ecossistema.</p>
-                
-                <div class="config-card">
+                <div class="info-box-wrapper" style="max-width: 600px;">
                     <h3 style="margin-bottom: 20px; font-size: 16px; letter-spacing: 0.5px; color: var(--primary);"><i class="fas fa-image"></i> Personalização de Telas (via Link)</h3>
                     
                     <div class="form-group">
@@ -298,7 +322,6 @@
             const loginScreen = document.getElementById('login-screen');
             const mainBody = document.body;
 
-            // Aplica com !important injetado diretamente via propriedade de estilo para sobrepor qualquer cor padrão
             if (db.config.bgLogin && db.config.bgLogin.trim() !== "") {
                 loginScreen.style.setProperty('background', `url('${db.config.bgLogin.trim()}')`, 'important');
             } else {
