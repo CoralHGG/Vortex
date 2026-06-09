@@ -61,49 +61,62 @@
         .menu-list li:hover { background: rgba(255,255,255,0.03); color: #fff; }
         .menu-list li.active { background: rgba(168, 85, 247, 0.15); color: #fff; font-weight: 600; }
         
-        /* --- RODAPÉ DO OPERADOR ALINHADO (NOME, ID, ONLINE E SAIR) --- */
+        /* --- RODAPÉ DO OPERADOR REORGANIZADO --- */
         .user-footer { 
             border-top: 1px solid var(--border); 
             padding-top: 20px;
             display: flex;
-            align-items: center;
-            justify-content: space-between;
+            flex-direction: column;
+            gap: 12px;
             width: 100%;
         }
-        .user-info-block {
+        
+        .user-row-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between; /* Nome na esquerda, Status na direita */
+            width: 100%;
+        }
+
+        .user-meta-info {
             display: flex;
             flex-direction: column;
-            gap: 4px;
         }
+
         .user-name-tag {
             font-weight: 700; 
             font-size: 15px;
             color: #fff;
             letter-spacing: 0.3px;
+            line-height: 1.2;
         }
         .user-id-tag {
             font-weight: 500;
-            font-size: 13px;
+            font-size: 12px;
             color: rgba(168, 85, 247, 0.8);
-            margin-left: 2px;
+            margin-top: 1px;
         }
+
         .status-container {
             display: flex; 
             align-items: center; 
             gap: 6px; 
-            font-size: 12px; 
+            font-size: 13px; 
             color: #94a3b8;
+            font-weight: 500;
         }
         .status-dot { width: 8px; height: 8px; background: #64748b; border-radius: 50%; display: inline-block; }
         .status-dot.online { background: var(--success); box-shadow: 0 0 8px var(--success); }
 
+        /* Botão Sair Ocupando o Espaço de Baixo */
         .btn-logout {
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 6px;
             background: rgba(239, 68, 68, 0.08);
-            border: 1px solid rgba(239, 68, 68, 0.2);
-            padding: 6px 12px;
+            border: 1px solid rgba(239, 68, 68, 0.15);
+            padding: 8px 12px;
             border-radius: 8px;
             color: var(--danger);
             font-size: 11px;
@@ -112,6 +125,7 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
             transition: all 0.2s ease;
+            width: 100%;
         }
         .btn-logout:hover {
             background: var(--danger);
@@ -171,8 +185,8 @@
             </div>
 
             <div class="user-footer">
-                <div class="user-info-block">
-                    <div>
+                <div class="user-row-top">
+                    <div class="user-meta-info">
                         <span class="user-name-tag" id="nav-username">Desconectado</span>
                         <span class="user-id-tag" id="nav-userid"></span>
                     </div>
@@ -182,7 +196,7 @@
                     </div>
                 </div>
                 <button class="btn-logout" onclick="logout()">
-                    <i class="fas fa-sign-out-alt"></i> Sair
+                    <i class="fas fa-sign-out-alt"></i> Sair da Conta
                 </button>
             </div>
         </aside>
@@ -241,7 +255,7 @@
                 user.online = true;
 
                 document.getElementById('nav-username').innerText = user.nome;
-                document.getElementById('nav-userid').innerText = `(#${user.id})`;
+                document.getElementById('nav-userid').innerText = `#${user.id}`;
                 
                 document.getElementById('nav-status-dot').className = "status-dot online";
                 document.getElementById('nav-status-text').innerText = "Online";
