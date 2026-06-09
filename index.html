@@ -12,7 +12,7 @@
             --success: #22c55e;
             --danger: #ef4444;
             --bg: #0b0813;
-            --card: rgba(15, 12, 28, 0.75); /* Fundo dos boxes ligeiramente mais escuro */
+            --card: rgba(15, 12, 28, 0.75);
             --border: rgba(255, 255, 255, 0.08);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
@@ -47,7 +47,6 @@
             height: 100vh; 
             display: flex; 
             width: 100%;
-            /* Camada escura regulada por cima do wallpaper para quebrar o chamativo */
             background: rgba(11, 8, 19, 0.6); 
         }
         
@@ -122,17 +121,20 @@
             flex-grow: 1; 
             padding: 40px; 
             overflow-y: auto; 
+            display: flex;
+            flex-direction: column;
         }
 
-        /* CORREÇÃO CRÍTICA DO COMPORTAMENTO DAS ABAS */
         .section { 
             display: none !important; 
+            flex-grow: 1;
         }
         .section.active { 
-            display: block !important; 
+            display: flex !important; 
+            flex-direction: column;
         }
 
-        /* BOX DE CONTRASTE SEPARADO */
+        /* BOX DE CONTRASTE PADRÃO */
         .info-box-wrapper {
             background: var(--card);
             border: 1px solid var(--border);
@@ -143,15 +145,60 @@
             box-shadow: 0 8px 24px 0 rgba(0, 0, 0, 0.4);
         }
 
-        /* --- COMPONENTES DA CARD DE CONFIGURAÇÃO --- */
+        /* --- COMPONENTES DA BOX COLAPSÁVEL DE PAPEL DE PAREDE --- */
+        .collapsible-wrapper {
+            margin-top: auto; /* Força o componente a ir sempre para o final/rodapé da tela */
+            background: rgba(15, 12, 28, 0.85);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            max-width: 600px;
+            width: 100%;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+
+        .collapsible-header {
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.02);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s;
+        }
+        .collapsible-header:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .collapsible-header h3 {
+            font-size: 14px;
+            letter-spacing: 0.5px;
+            color: #cbd5e1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .collapsible-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            padding: 0 20px;
+        }
+        /* Classe que será injetada para abrir a box */
+        .collapsible-content.open {
+            padding: 20px;
+            border-top: 1px solid var(--border);
+        }
+
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         .form-group label {
             display: block;
-            font-size: 13px;
+            font-size: 12px;
             color: #94a3b8;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             font-weight: 600;
         }
 
@@ -277,20 +324,32 @@
 
             <section id="configuracao" class="section">
                 <h2>Configuração do Sistema</h2>
-                <div class="info-box-wrapper" style="max-width: 600px;">
-                    <h3 style="margin-bottom: 20px; font-size: 16px; letter-spacing: 0.5px; color: var(--primary);"><i class="fas fa-image"></i> Personalização de Telas (via Link)</h3>
+                
+                <div id="config-top-area">
+                    <p style="color: #94a3b8; font-size: 14px; font-style: italic; margin-top: 15px;">
+                        [O topo está livre. Me diga o que vamos registrar aqui em cima...]
+                    </p>
+                </div>
+
+                <div class="collapsible-wrapper">
+                    <div class="collapsible-header" onclick="toggleConfigBox()">
+                        <h3><i class="fas fa-image" style="color: var(--primary);"></i> Personalização de Telas (via Link)</h3>
+                        <i id="box-toggle-icon" class="fas fa-plus" style="color: #94a3b8;"></i>
+                    </div>
                     
-                    <div class="form-group">
-                        <label for="cfg-bg-login">URL do Background da Tela de Login</label>
-                        <input type="text" id="cfg-bg-login" placeholder="Ex: https://site.com/imagem-login.jpg">
-                    </div>
+                    <div id="box-toggle-content" class="collapsible-content">
+                        <div class="form-group">
+                            <label for="cfg-bg-login">URL do Background da Tela de Login</label>
+                            <input type="text" id="cfg-bg-login" placeholder="Ex: https://site.com/imagem-login.jpg">
+                        </div>
 
-                    <div class="form-group">
-                        <label for="cfg-bg-panel">URL do Background do Painel Interno</label>
-                        <input type="text" id="cfg-bg-panel" placeholder="Ex: https://site.com/imagem-painel.jpg">
-                    </div>
+                        <div class="form-group">
+                            <label for="cfg-bg-panel">URL do Background do Painel Interno</label>
+                            <input type="text" id="cfg-bg-panel" placeholder="Ex: https://site.com/imagem-painel.jpg">
+                        </div>
 
-                    <button onclick="salvarConfiguracoesVisuais()" style="margin-top: 10px;"><i class="fas fa-save"></i> SALVAR CONFIGURAÇÕES</button>
+                        <button onclick="salvarConfiguracoesVisuais()"><i class="fas fa-save"></i> SALVAR CONFIGURAÇÕES</button>
+                    </div>
                 </div>
             </section>
         </main>
@@ -315,6 +374,22 @@
             aplicarBackgrounds();
             renderMembros();
         };
+
+        // Função nova para abrir e fechar a box de papel de parede (+ / -)
+        function toggleConfigBox() {
+            const content = document.getElementById('box-toggle-content');
+            const icon = document.getElementById('box-toggle-icon');
+
+            if (content.classList.contains('open')) {
+                content.style.maxHeight = '0px';
+                content.classList.remove('open');
+                icon.className = 'fas fa-plus';
+            } else {
+                content.classList.add('open');
+                content.style.maxHeight = content.scrollHeight + 'px';
+                icon.className = 'fas fa-minus';
+            }
+        }
 
         function toggleSidebarMenu(triggerElement) {
             const menu = document.getElementById('sidebar-menu-list');
