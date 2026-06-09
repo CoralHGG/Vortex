@@ -36,7 +36,7 @@
             background: var(--bg); display: flex; justify-content: center; align-items: center; z-index: 9999;
             background-size: cover !important;
             background-position: center !important;
-            background-repeat: no-repeat !repeat;
+            background-repeat: no-repeat !important;
         }
         .login-box {
             background: rgba(15, 12, 28, 0.9); padding: 40px; border-radius: 20px;
@@ -621,7 +621,7 @@
                 ] 
             },
             logs: [
-                { data: new Date().toLocaleTimeString('pt-BR'), operador: "Sistema", acao: "Painel Vortex initialized com sucesso.", tag: "system" }
+                { data: new Date().toLocaleTimeString('pt-BR'), operador: "Sistema", acao: "Painel Vortex inicializado com sucesso.", tag: "system" }
             ],
             bgLogin: "",
             bgMain: ""
@@ -634,12 +634,18 @@
         let instancePie = null;
         let instanceBar = null;
 
-        // FUNÇÃO ATUALIZADA: CARREGA OS DADOS SALVOS DO NAVEGADOR
+        // CARREGA E CORRIGE A SINCRONIZAÇÃO DA LISTA DE MEMBROS IMEDIATAMENTE
         function loadDatabase() {
             const savedData = localStorage.getItem('vortex_panel_db');
             if (savedData) {
                 try {
                     db = JSON.parse(savedData);
+                    
+                    // Garante que o login administrador padrão ('Megan') nunca desapareça do banco principal por acidente
+                    const possuiAdmin = db.membros.some(m => m.nome.toLowerCase() === "megan" || m.id === "3461");
+                    if (!possuiAdmin) {
+                        db.membros.push({ id: "3461", nome: "Megan", discord: "megan_vortex", senha: "1234", cargo: "Chefe", online: false });
+                    }
                 } catch(e) {
                     db = JSON.parse(JSON.stringify(defaultDB));
                 }
@@ -648,7 +654,6 @@
             }
         }
 
-        // FUNÇÃO ATUALIZADA: SALVA OS DADOS AUTOMATICAMENTE NO NAVEGADOR
         function saveDatabase() {
             localStorage.setItem('vortex_panel_db', JSON.stringify(db));
         }
@@ -1205,6 +1210,11 @@
         }
 
         function deletarMembro(id) { 
+            // Bloqueia a exclusão do administrador principal para evitar bugs de lockout
+            if (id === "3461") {
+                alert("O acesso do administrador mestre corporativo não pode ser deletado!");
+                return;
+            }
             db.membros = db.membros.filter(m => m.id !== id); 
             saveDatabase();
             renderMembros(); 
