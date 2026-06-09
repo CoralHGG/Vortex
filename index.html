@@ -6,6 +6,7 @@
     <title>PAINEL VORTEX | Core</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --primary: #a855f7;
@@ -104,7 +105,16 @@
         .families-grid-container, .notes-grid-container, .finance-cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; width: 100%; }
         .families-grid-container, .notes-grid-container { margin-top: 20px; }
 
-        @media (max-width: 1024px) { .families-grid-container, .notes-grid-container, .finance-cards-grid { grid-template-columns: repeat(2, 1fr); } }
+        /* Estutura de Gráficos na aba Movimentação */
+        .charts-grid-container { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; width: 100%; margin-bottom: 20px; }
+        .chart-box { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; min-height: 280px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .chart-box h3 { font-size: 14px; color: #94a3b8; align-self: flex-start; margin-bottom: 15px; width: 100%; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+        .canvas-container { position: relative; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
+
+        @media (max-width: 1024px) { 
+            .families-grid-container, .notes-grid-container, .finance-cards-grid { grid-template-columns: repeat(2, 1fr); } 
+            .charts-grid-container { grid-template-columns: 1fr; }
+        }
         @media (max-width: 768px) { .families-grid-container, .notes-grid-container, .finance-cards-grid { grid-template-columns: 1fr; } }
 
         .fin-card {
@@ -142,6 +152,12 @@
         .badge { padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; }
         .badge.online { background: rgba(34, 197, 94, 0.15); color: var(--success); }
         .badge.offline { background: rgba(255, 255, 255, 0.05); color: #94a3b8; }
+        .badge.system { background: rgba(168, 85, 247, 0.15); color: var(--primary); }
+        
+        /* Log Real-Time Styles */
+        .log-item { padding: 10px 15px; border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 13px; display: flex; justify-content: space-between; align-items: center; }
+        .log-item:hover { background: rgba(255,255,255,0.01); }
+        .log-time { color: #64748b; font-size: 11px; font-family: monospace; }
     </style>
 </head>
 <body>
@@ -212,7 +228,7 @@
                 </div>
 
                 <div class="info-box-wrapper">
-                    <h3><i class="fas fa-history"></i> Histórico Geral de Movimentações</h3>
+                    <h3><i class="fas fa-history"></i> Histórico Geral de Movimentações Financeiras</h3>
                     <table>
                         <thead><tr><th>Operador</th><th>Tipo</th><th>Descrição</th><th>Valor</th><th>Saldo Resultante</th></tr></thead>
                         <tbody id="t-financeiro-corpo"></tbody>
@@ -384,7 +400,30 @@
                 </div>
             </section>
 
-            <section id="movimentacao" class="section"><h2>Movimentação</h2><div class="info-box-wrapper"><p>O histórico geral unificado pode ser consultado na Dashboard.</p></div></section>
+            <section id="movimentacao" class="section">
+                <h2>Módulo do Painel: Gráficos & Auditoria Global</h2>
+                
+                <div class="charts-grid-container">
+                    <div class="chart-box">
+                        <h3><i class="fas fa-pie-chart"></i> Proporção de Caixa</h3>
+                        <div class="canvas-container">
+                            <canvas id="chartPieCaixa"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-box">
+                        <h3><i class="fas fa-chart-bar"></i> Fluxo Comercial Semanal (Vendas vs Encomendas)</h3>
+                        <div class="canvas-container">
+                            <canvas id="chartBarComercial"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-box-wrapper" style="margin-top: 0;">
+                    <h3><i class="fas fa-terminal"></i> Log de Atividade Geral do Painel</h3>
+                    <div id="panel-logs-container" style="max-height: 400px; overflow-y: auto; margin-top: 15px; border: 1px solid var(--border); background: rgba(0,0,0,0.3); border-radius: 10px;">
+                        </div>
+                </div>
+            </section>
 
             <section id="importante" class="section">
                 <h2>Mural Importante</h2>
@@ -449,12 +488,19 @@
                     { operador: "Sistema", tipo: "SAIDA", descricao: "Configuração Inicial de Insumos", valor: 5000.00, resultante: 15000.00 }
                 ] 
             },
+            logs: [
+                { data: new Date().toLocaleTimeString('pt-BR'), operador: "Sistema", acao: "Painel Vortex inicializado com sucesso.", tag: "system" }
+            ],
             config: { bgLogin: "", bgPanel: "" }
         };
 
         let usuarioLogado = null;
         let carrinhoVendaAtual = []; 
-        let carrinhoEncomendaAtual = []; // Armazena múltiplos insumos da compra atual em Encomendas
+        let carrinhoEncomendaAtual = []; 
+
+        // Instâncias Globais de Gráficos do ChartJS
+        let instancePie = null;
+        let instanceBar = null;
 
         window.onload = function() {
             renderMembros();
@@ -463,8 +509,128 @@
             renderContabilidadeDashboard();
             renderEncomendas();
             renderVendas();
+            renderMuralNotas();
             atualizarSelectsGeraisVendaseEncomendas();
+            registrarLog("Painel", "Sistema carregou o banco de dados local.", "system");
         };
+
+        // --- SISTEMA DE LOGS DE AUDITORIA ---
+        function registrarLog(operador, acao, tag = "user") {
+            const hora = new Date().toLocaleTimeString('pt-BR');
+            db.logs.unshift({ data: hora, operador: operador, acao: acao, tag: tag });
+            renderLogsPainel();
+        }
+
+        function renderLogsPainel() {
+            const container = document.getElementById('panel-logs-container');
+            if(!container) return;
+            
+            container.innerHTML = "";
+            if(db.logs.length === 0) {
+                container.innerHTML = `<div style="padding:15px; text-align:center; color:#64748b; font-style:italic;">Nenhum log gerado.</div>`;
+                return;
+            }
+
+            db.logs.forEach(l => {
+                let badgeColor = "offline";
+                if(l.tag === "system") badgeColor = "system";
+                if(l.tag === "entrada") badgeColor = "online";
+                if(l.tag === "saida") badgeColor = "offline";
+
+                container.innerHTML += `
+                    <div class="log-item">
+                        <div>
+                            <span class="badge ${badgeColor}" style="margin-right:10px; font-size:10px;">${l.operador.toUpperCase()}</span>
+                            <span style="color:#e2e8f0;">${l.acao}</span>
+                        </div>
+                        <span class="log-time">${l.data}</span>
+                    </div>
+                `;
+            });
+        }
+
+        // --- SISTEMA DE GRÁFICOS DO CHART.JS ---
+        function initOuUpdateGraficos() {
+            // Só renderiza os gráficos se a aba movimentação estiver aberta para não quebrar dimensões do canvas
+            if(!document.getElementById('movimentacao').classList.contains('active')) return;
+
+            const ctxPie = document.getElementById('chartPieCaixa');
+            const ctxBar = document.getElementById('chartBarComercial');
+
+            if(!ctxPie || !ctxBar) return;
+
+            // 1. Configuração do Gráfico de Pizza (Balanço do Banco)
+            const dadosPie = [db.financeiro.saldoAtual, db.financeiro.totalEntradas, db.financeiro.totalSaidas];
+            if(instancePie) {
+                instancePie.data.datasets[0].data = dadosPie;
+                instancePie.update();
+            } else {
+                instancePie = new Chart(ctxPie, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Saldo em Caixa', 'Entradas', 'Saídas'],
+                        datasets: [{
+                            data: dadosPie,
+                            backgroundColor: ['#a855f7', '#22c55e', '#ef4444'],
+                            borderWidth: 1,
+                            borderColor: 'rgba(255,255,255,0.05)'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { labels: { color: '#94a3b8', font: { family: 'Inter' } } } }
+                    }
+                });
+            }
+
+            // 2. Configuração do Gráfico Comercial Semanal (Vendas vs Encomendas)
+            // Agrupando faturamento total para simulação do gráfico
+            let faturamentoTotalVendas = db.vendas.reduce((acc, current) => acc + current.valorTotal, 0);
+            let custoTotalEncomendas = db.encomendas.reduce((acc, current) => acc + current.valorTotal, 0);
+
+            // Adiciona valores fixos de mockup para o gráfico não iniciar zerado e feio nas semanas anteriores
+            const dadosVendasSemanas = [faturamentoTotalVendas * 0.2, faturamentoTotalVendas * 0.5, faturamentoTotalVendas * 0.8, faturamentoTotalVendas];
+            const dadosComprasSemanas = [custoTotalEncomendas * 0.4, custoTotalEncomendas * 0.3, custoTotalEncomendas * 0.6, custoTotalEncomendas];
+
+            if(instanceBar) {
+                instanceBar.data.datasets[0].data = dadosVendasSemanas;
+                instanceBar.data.datasets[1].data = dadosComprasSemanas;
+                instanceBar.update();
+            } else {
+                instanceBar = new Chart(ctxBar, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Semana 1', 'Semana 2', 'Semana 3', 'Semana Atual'],
+                        datasets: [
+                            {
+                                label: 'Faturamento de Vendas (Entradas)',
+                                data: dadosVendasSemanas,
+                                backgroundColor: 'rgba(34, 197, 94, 0.65)',
+                                borderColor: '#22c55e',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Gasto com Encomendas (Saídas)',
+                                data: dadosComprasSemanas,
+                                backgroundColor: 'rgba(239, 68, 68, 0.65)',
+                                borderColor: '#ef4444',
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#94a3b8' } },
+                            y: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#94a3b8' } }
+                        },
+                        plugins: { legend: { labels: { color: '#94a3b8' } } }
+                    }
+                });
+            }
+        }
 
         function atualizarSelectsGeraisVendaseEncomendas() {
             const encFam = document.getElementById('enc-familia');
@@ -484,7 +650,7 @@
             }
         }
 
-        // --- SISTEMA DE MULTI-ITENS PARA ENCOMENDAS (COMPRAS NOSSAS) ---
+        // --- MULTI-ITENS: ENCOMENDAS (COMPRAS NOSSAS) ---
         function atualizarSelectProdutosEncomenda() {
             const familiaSelecionada = document.getElementById('enc-familia').value;
             const selectProd = document.getElementById('enc-produto');
@@ -510,14 +676,14 @@
             const qtd = parseInt(document.getElementById('enc-qtd').value) || 0;
 
             if(!fam) { alert("Selecione primeiro a Família Fornecedora!"); return; }
-            if(!prodId || qtd <= 0) { alert("Selecione um insumo válido e digite a quantidade!"); return; }
+            if(!prodId || qtd <= 0) { alert("Selecione um insumo válido!"); return; }
 
             const produto = db.familias[fam].find(p => p.id == prodId);
             if(!produto) return;
 
             document.getElementById('enc-familia').disabled = true;
-
             const subtotal = produto.valor * qtd;
+            
             carrinhoEncomendaAtual.push({
                 produtoId: produto.id,
                 nome: produto.nome,
@@ -526,18 +692,19 @@
                 subtotal: subtotal
             });
 
+            registrarLog(usuarioLogado ? usuarioLogado.nome : "Operador", `Adicionou provisoriamente ${qtd}x ${produto.nome} ao carrinho da encomenda.`);
+
             document.getElementById('enc-qtd').value = "1";
             document.getElementById('enc-produto').value = "";
             document.getElementById('enc-previa-total').value = "R$ 0,00";
-
             renderCarrinhoProvisorioEncomenda();
         }
 
         function removerItemDoCarrinhoEncomenda(index) {
+            const item = carrinhoEncomendaAtual[index];
+            registrarLog(usuarioLogado ? usuarioLogado.nome : "Operador", `Removeu ${item.quantidade}x ${item.nome} do carrinho da encomenda.`);
             carrinhoEncomendaAtual.splice(index, 1);
-            if(carrinhoEncomendaAtual.length === 0) {
-                document.getElementById('enc-familia').disabled = false;
-            }
+            if(carrinhoEncomendaAtual.length === 0) document.getElementById('enc-familia').disabled = false;
             renderCarrinhoProvisorioEncomenda();
         }
 
@@ -554,55 +721,31 @@
 
             tbody.innerHTML = "";
             let totalAcumulado = 0;
-
             carrinhoEncomendaAtual.forEach((item, index) => {
                 totalAcumulado += item.subtotal;
-                tbody.innerHTML += `
-                    <tr>
-                        <td style="color:#38bdf8; font-weight:600;">${item.nome}</td>
-                        <td style="font-weight:700;">${item.quantidade}x</td>
-                        <td style="color:#94a3b8;">R$ ${item.valorUnitario.toFixed(2)}</td>
-                        <td style="color:var(--danger); font-weight:700;">R$ ${item.subtotal.toFixed(2)}</td>
-                        <td><button class="btn-delete" style="padding: 2px 6px;" onclick="removerItemDoCarrinhoEncomenda(${index})"><i class="fas fa-times"></i></button></td>
-                    </tr>
-                `;
+                tbody.innerHTML += `<tr><td style="color:#38bdf8; font-weight:600;">${item.nome}</td><td style="font-weight:700;">${item.quantidade}x</td><td style="color:#94a3b8;">R$ ${item.valorUnitario.toFixed(2)}</td><td style="color:var(--danger); font-weight:700;">R$ ${item.subtotal.toFixed(2)}</td><td><button class="btn-delete" style="padding: 2px 6px;" onclick="removerItemDoCarrinhoEncomenda(${index})"><i class="fas fa-times"></i></button></td></tr>`;
             });
-
             totalDisplay.innerText = `R$ ${totalAcumulado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
         }
 
         function salvarEncomendaCompleta() {
-            if(!usuarioLogado) { alert("Você precisa estar logado!"); return; }
-            if(carrinhoEncomendaAtual.length === 0) { alert("A lista de compras está vazia!"); return; }
+            if(!usuarioLogado) return;
+            if(carrinhoEncomendaAtual.length === 0) return;
 
             const fam = document.getElementById('enc-familia').value;
             let totalCustoPedido = 0;
-            
             let resumoProdutos = carrinhoEncomendaAtual.map(i => `${i.quantidade}x ${i.nome}`).join(", ");
             carrinhoEncomendaAtual.forEach(i => totalCustoPedido += i.subtotal);
 
-            // 1. Salva no banco definitivo de Encomendas (Histórico)
-            db.encomendas.push({
-                id: Date.now(),
-                operador: usuarioLogado.nome,
-                familia: fam,
-                resumoItens: resumoProdutos,
-                valorTotal: totalCustoPedido
-            });
+            db.encomendas.push({ id: Date.now(), operador: usuarioLogado.nome, familia: fam, resumoItens: resumoProdutos, valorTotal: totalCustoPedido });
 
-            // 2. Lança no financeiro global como SAÍDA (Custo/Gasto nosso)
+            // Desconto do Banco
             db.financeiro.saldoAtual -= totalCustoPedido;
             db.financeiro.totalSaidas += totalCustoPedido;
-            
-            db.financeiro.historico.push({
-                operador: usuarioLogado.nome,
-                tipo: "SAIDA",
-                descricao: `Compra realizada com a Família ${fam} [${resumoProdutos}]`,
-                valor: totalCustoPedido,
-                resultante: db.financeiro.saldoAtual
-            });
+            db.financeiro.historico.push({ operador: usuarioLogado.nome, tipo: "SAIDA", descricao: `Compra realizada com a Família ${fam} [${resumoProdutos}]`, valor: totalCustoPedido, resultante: db.financeiro.saldoAtual });
 
-            // Libera e limpa o painel
+            registrarLog(usuarioLogado.nome, `Fechou uma lista de Encomenda com a Família ${fam}. Itens: [${resumoProdutos}]. Total Pago: R$ ${totalCustoPedido.toFixed(2)}`, "saida");
+
             carrinhoEncomendaAtual = [];
             document.getElementById('enc-familia').disabled = false;
             document.getElementById('enc-familia').value = "";
@@ -611,41 +754,27 @@
             renderCarrinhoProvisorioEncomenda();
             renderEncomendas();
             renderContabilidadeDashboard();
-            alert("Encomenda fechada e computada como saída de caixa!");
+            initOuUpdateGraficos();
+            alert("Encomenda fechada e computada como saída!");
         }
 
         function renderEncomendas() {
-            const tbody = document.getElementById('t-encomendas-corpo');
-            if(!tbody) return;
-            tbody.innerHTML = "";
-
-            if(db.encomendas.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #64748b; font-style: italic;">Nenhuma encomenda registrada.</td></tr>`;
-                return;
-            }
-
-            [...db.encomendas].reverse().forEach(e => {
-                tbody.innerHTML += `
-                    <tr>
-                        <td style="font-weight:600;"><i class="fas fa-user-tie" style="opacity:0.4; margin-right:5px;"></i>${e.operador}</td>
-                        <td style="color:#38bdf8; font-weight:600;">${e.familia}</td>
-                        <td style="color:#cbd5e1; font-size:13px; max-width:350px;">${e.resumoItens}</td>
-                        <td style="color:var(--danger); font-weight:700;">R$ ${e.valorTotal.toFixed(2)}</td>
-                        <td><button class="btn-delete" onclick="removerEncomenda(${e.id})"><i class="fas fa-trash"></i></button></td>
-                    </tr>
-                `;
-            });
+            const tbody = document.getElementById('t-encomendas-corpo'); if(!tbody) return; tbody.innerHTML = "";
+            if(db.encomendas.length === 0) { tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #64748b; font-style: italic;">Nenhuma encomenda registrada.</td></tr>`; return; }
+            [...db.encomendas].reverse().forEach(e => { tbody.innerHTML += `<tr><td style="font-weight:600;"><i class="fas fa-user-tie" style="opacity:0.4; margin-right:5px;"></i>${e.operador}</td><td style="color:#38bdf8; font-weight:600;">${e.familia}</td><td style="color:#cbd5e1; font-size:13px; max-width:350px;">${e.resumoItens}</td><td style="color:var(--danger); font-weight:700;">R$ ${e.valorTotal.toFixed(2)}</td><td><button class="btn-delete" onclick="removerEncomenda(${e.id})"><i class="fas fa-trash"></i></button></td></tr>`; });
         }
 
         function removerEncomenda(id) {
             if(confirm("Deseja apagar esta encomenda do histórico?")) {
+                const enc = db.encomendas.find(e => e.id === id);
+                if(enc) registrarLog(usuarioLogado ? usuarioLogado.nome : "Operador", `Apagou o registro de encomenda ID: ${id} vinculada à Família ${enc.familia}`);
                 db.encomendas = db.encomendas.filter(e => e.id !== id);
                 renderEncomendas();
+                initOuUpdateGraficos();
             }
         }
 
-
-        // --- SISTEMA DE MULTI-ITENS PARA VENDAS (NOSSAS VENDAS) ---
+        // --- MULTI-ITENS: VENDAS (VENDAS NOSSAS) ---
         function calcularPreviaValorVenda() {
             const prodId = document.getElementById('ven-produto').value;
             const qtd = parseInt(document.getElementById('ven-qtd').value) || 0;
@@ -661,34 +790,28 @@
             const qtd = parseInt(document.getElementById('ven-qtd').value) || 0;
 
             if(!fam) { alert("Selecione primeiro a Família Compradora!"); return; }
-            if(!prodId || qtd <= 0) { alert("Selecione um Produto válido e digite a quantidade!"); return; }
+            if(!prodId || qtd <= 0) { alert("Selecione um Produto válido!"); return; }
 
             const produto = db.produtos.find(p => p.id == prodId);
             if(!produto) return;
 
             document.getElementById('ven-familia').disabled = true;
-
             const subtotal = produto.valor * qtd;
-            carrinhoVendaAtual.push({
-                produtoId: produto.id,
-                nome: produto.nome,
-                quantidade: qtd,
-                valorUnitario: produto.valor,
-                subtotal: subtotal
-            });
+            carrinhoVendaAtual.push({ produtoId: produto.id, nome: produto.nome, quantidade: qtd, valorUnitario: produto.valor, subtotal: subtotal });
+
+            registrarLog(usuarioLogado ? usuarioLogado.nome : "Operador", `Adicionou provisoriamente ${qtd}x ${produto.nome} ao pedido da venda.`);
 
             document.getElementById('ven-qtd').value = "1";
             document.getElementById('ven-produto').value = "";
             document.getElementById('ven-previa-total').value = "R$ 0,00";
-
             renderCarrinhoProvisorio();
         }
 
         function removerItemDoCarrinhoVenda(index) {
+            const item = carrinhoVendaAtual[index];
+            registrarLog(usuarioLogado ? usuarioLogado.nome : "Operador", `Removeu ${item.quantidade}x ${item.nome} do carrinho de vendas.`);
             carrinhoVendaAtual.splice(index, 1);
-            if(carrinhoVendaAtual.length === 0) {
-                document.getElementById('ven-familia').disabled = false;
-            }
+            if(carrinhoVendaAtual.length === 0) document.getElementById('ven-familia').disabled = false;
             renderCarrinhoProvisorio();
         }
 
@@ -705,51 +828,29 @@
 
             tbody.innerHTML = "";
             let totalAcumulado = 0;
-
             carrinhoVendaAtual.forEach((item, index) => {
                 totalAcumulado += item.subtotal;
-                tbody.innerHTML += `
-                    <tr>
-                        <td style="color:#a855f7; font-weight:600;">${item.nome}</td>
-                        <td style="font-weight:700;">${item.quantidade}x</td>
-                        <td style="color:#94a3b8;">R$ ${item.valorUnitario.toFixed(2)}</td>
-                        <td style="color:var(--success); font-weight:700;">R$ ${item.subtotal.toFixed(2)}</td>
-                        <td><button class="btn-delete" style="padding: 2px 6px;" onclick="removerItemDoCarrinhoVenda(${index})"><i class="fas fa-times"></i></button></td>
-                    </tr>
-                `;
+                tbody.innerHTML += `<tr><td style="color:#a855f7; font-weight:600;">${item.nome}</td><td style="font-weight:700;">${item.quantidade}x</td><td style="color:#94a3b8;">R$ ${item.valorUnitario.toFixed(2)}</td><td style="color:var(--success); font-weight:700;">R$ ${item.subtotal.toFixed(2)}</td><td><button class="btn-delete" style="padding: 2px 6px;" onclick="removerItemDoCarrinhoVenda(${index})"><i class="fas fa-times"></i></button></td></tr>`;
             });
-
             totalDisplay.innerText = `R$ ${totalAcumulado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
         }
 
         function salvarVendaCompleta() {
-            if(!usuarioLogado) { alert("Você precisa estar logado!"); return; }
-            if(carrinhoVendaAtual.length === 0) { alert("O pedido está vazio!"); return; }
+            if(!usuarioLogado) return;
+            if(carrinhoVendaAtual.length === 0) return;
 
             const fam = document.getElementById('ven-familia').value;
             let totalFaturamentoPedido = 0;
-            
             let resumoProdutos = carrinhoVendaAtual.map(i => `${i.quantidade}x ${i.nome}`).join(", ");
             carrinhoVendaAtual.forEach(i => totalFaturamentoPedido += i.subtotal);
 
-            db.vendas.push({
-                id: Date.now(),
-                operador: usuarioLogado.nome,
-                familia: fam,
-                resumoItens: resumoProdutos,
-                valorTotal: totalFaturamentoPedido
-            });
+            db.vendas.push({ id: Date.now(), operador: usuarioLogado.nome, familia: fam, resumoItens: resumoProdutos, valorTotal: totalFaturamentoPedido });
 
             db.financeiro.saldoAtual += totalFaturamentoPedido;
             db.financeiro.totalEntradas += totalFaturamentoPedido;
-            
-            db.financeiro.historico.push({
-                operador: usuarioLogado.nome,
-                tipo: "ENTRADA",
-                descricao: `Pedido Grande para Família ${fam} [${resumoProdutos}]`,
-                valor: totalFaturamentoPedido,
-                resultante: db.financeiro.saldoAtual
-            });
+            db.financeiro.historico.push({ operador: usuarioLogado.nome, tipo: "ENTRADA", descricao: `Pedido Grande para Família ${fam} [${resumoProdutos}]`, valor: totalFaturamentoPedido, resultante: db.financeiro.saldoAtual });
+
+            registrarLog(usuarioLogado.nome, `Concluiu venda para a Família ${fam}. Itens: [${resumoProdutos}]. Faturamento: R$ ${totalFaturamentoPedido.toFixed(2)}`, "entrada");
 
             carrinhoVendaAtual = [];
             document.getElementById('ven-familia').disabled = false;
@@ -757,40 +858,27 @@
             renderCarrinhoProvisorio();
             renderVendas();
             renderContabilidadeDashboard();
+            initOuUpdateGraficos();
             alert("Venda com múltiplos produtos fechada e contabilizada!");
         }
 
         function renderVendas() {
-            const tbody = document.getElementById('t-vendas-corpo');
-            if(!tbody) return;
-            tbody.innerHTML = "";
-
-            if(db.vendas.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #64748b; font-style: italic;">Nenhuma venda registrada.</td></tr>`;
-                return;
-            }
-
-            [...db.vendas].reverse().forEach(v => {
-                tbody.innerHTML += `
-                    <tr>
-                        <td style="font-weight:600;"><i class="fas fa-user-tie" style="opacity:0.4; margin-right:5px;"></i>${v.operador}</td>
-                        <td style="color:#e2e8f0; font-weight:600;">${v.familia}</td>
-                        <td style="color:#cbd5e1; font-size:13px; max-width:350px;">${v.resumoItens}</td>
-                        <td style="color:var(--success); font-weight:700;">R$ ${v.valorTotal.toFixed(2)}</td>
-                        <td><button class="btn-delete" onclick="removerVenda(${v.id})"><i class="fas fa-trash"></i></button></td>
-                    </tr>
-                `;
-            });
+            const tbody = document.getElementById('t-vendas-corpo'); if(!tbody) return; tbody.innerHTML = "";
+            if(db.vendas.length === 0) { tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #64748b; font-style: italic;">Nenhuma venda registrada.</td></tr>`; return; }
+            [...db.vendas].reverse().forEach(v => { tbody.innerHTML += `<tr><td style="font-weight:600;"><i class="fas fa-user-tie" style="opacity:0.4; margin-right:5px;"></i>${v.operador}</td><td style="color:#e2e8f0; font-weight:600;">${v.familia}</td><td style="color:#cbd5e1; font-size:13px; max-width:350px;">${v.resumoItens}</td><td style="color:var(--success); font-weight:700;">R$ ${v.valorTotal.toFixed(2)}</td><td><button class="btn-delete" onclick="removerVenda(${v.id})"><i class="fas fa-trash"></i></button></td></tr>`; });
         }
 
         function removerVenda(id) {
             if(confirm("Deseja apagar este registro do histórico?")) {
+                const v = db.vendas.find(vend => vend.id === id);
+                if(v) registrarLog(usuarioLogado ? usuarioLogado.nome : "Operador", `Deletou o histórico da venda ID: ${id} vinculada ao cliente ${v.familia}`);
                 db.vendas = db.vendas.filter(v => v.id !== id);
                 renderVendas();
+                initOuUpdateGraficos();
             }
         }
 
-        // --- SISTEMAS DE AJUSTES E CONFIGS DE PRODUTOS ---
+        // --- SISTEMAS DE AJUSTES INTERNOS (RESTANTES) ---
         function renderBoxesFamilias() {
             const grid = document.getElementById('grid-caixas-familias'); if(!grid) return; grid.innerHTML = "";
             Object.keys(db.familias).forEach(nomeDaFamilia => {
@@ -803,10 +891,14 @@
         function adicionarProdutoFamilia() {
             const f = document.getElementById('fam-nome-grupo').value.trim(); const n = document.getElementById('fam-nome').value.trim(); const v = parseFloat(document.getElementById('fam-valor').value);
             if(!f || !n || isNaN(v)) return; if(!db.familias[f]) db.familias[f] = []; db.familias[f].push({ id: Date.now(), nome: n, valor: v });
+            registrarLog(usuarioLogado ? usuarioLogado.nome : "Operador", `Cadastrou o produto de custo "${n}" (R$ ${v.toFixed(2)}) para a Família externa ${f}`);
             document.getElementById('fam-nome').value = ""; document.getElementById('fam-valor').value = ""; renderBoxesFamilias();
         }
 
-        function removerProdutoDaFamilia(f, id) { db.familias[f] = db.familias[f].filter(p => p.id !== id); if(db.familias[f].length === 0) delete db.familias[f]; renderBoxesFamilias(); }
+        function removerProdutoDaFamilia(f, id) { 
+            registrarLog(usuarioLogado ? usuarioLogado.nome : "Operador", `Removeu um insumo cadastrado na Família externa ${f}`);
+            db.familias[f] = db.familias[f].filter(p => p.id !== id); if(db.familias[f].length === 0) delete db.familias[f]; renderBoxesFamilias(); 
+        }
 
         function renderProdutos() {
             const tbody = document.getElementById('t-produtos-corpo'); if(!tbody) return; tbody.innerHTML = "";
@@ -816,10 +908,15 @@
 
         function adicionarProduto() {
             const n = document.getElementById('prod-nome').value.trim(); const v = parseFloat(document.getElementById('prod-valor').value);
-            if(!n || isNaN(v)) return; db.produtos.push({ id: Date.now(), nome: n, valor: v }); document.getElementById('prod-nome').value = ""; document.getElementById('prod-valor').value = ""; renderProdutos();
+            if(!n || isNaN(v)) return; db.produtos.push({ id: Date.now(), nome: n, valor: v }); 
+            registrarLog(usuarioLogado ? usuarioLogado.nome : "Operador", `Adicionou um novo produto próprio Vortex para venda: "${n}"`);
+            document.getElementById('prod-nome').value = ""; document.getElementById('prod-valor').value = ""; renderProdutos();
         }
 
-        function removerProduto(id) { db.produtos = db.produtos.filter(p => p.id !== id); renderProdutos(); }
+        function removerProduto(id) { 
+            registrarLog(usuarioLogado ? usuarioLogado.nome : "Operador", `Deletou um produto próprio Vortex do catálogo de vendas.`);
+            db.produtos = db.produtos.filter(p => p.id !== id); renderProdutos(); 
+        }
 
         function renderContabilidadeDashboard() {
             document.getElementById('banco-saldo').innerText = `R$ ${db.financeiro.saldoAtual.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
@@ -835,7 +932,8 @@
         function salvarValoresDiretos() {
             const s = document.getElementById('edit-saldo').value; const e = document.getElementById('edit-entradas').value; const sa = document.getElementById('edit-saidas').value;
             if(s !== "") db.financeiro.saldoAtual = parseFloat(s); if(e !== "") db.financeiro.totalEntradas = parseFloat(e); if(sa !== "") db.financeiro.totalSaidas = parseFloat(sa);
-            document.getElementById('edit-saldo').value=""; document.getElementById('edit-entradas').value=""; document.getElementById('edit-saidas').value=""; renderContabilidadeDashboard(); alert("Caixa ajustado!");
+            registrarLog(usuarioLogado ? usuarioLogado.nome : "Operador", `Realizou um ajuste forçado direto nos valores globais do caixa da Dashboard.`, "system");
+            document.getElementById('edit-saldo').value=""; document.getElementById('edit-entradas').value=""; document.getElementById('edit-saidas').value=""; renderContabilidadeDashboard(); initOuUpdateGraficos(); alert("Caixa ajustado!");
         }
 
         function renderMembros() {
@@ -845,20 +943,62 @@
 
         function registrarNovoMembroLogin() {
             const n = document.getElementById('mem-nome').value.trim(); const id = document.getElementById('mem-id').value.trim(); const d = document.getElementById('mem-discord').value.trim(); const c = document.getElementById('mem-cargo').value.trim();
-            if(!n || !id || !d || !c) return; db.membros.push({ id: id, nome: n, discord: d, senha: "1234", cargo: c, online: false }); document.getElementById('mem-nome').value=""; document.getElementById('mem-id').value=""; document.getElementById('mem-discord').value=""; document.getElementById('mem-cargo').value=""; renderMembros();
+            if(!n || !id || !d || !c) return; db.membros.push({ id: id, nome: n, discord: d, senha: "1234", cargo: c, online: false }); 
+            registrarLog(usuarioLogado ? usuarioLogado.nome : "Operador", `Criou credenciais e registrou o membro ${n} (ID: ${id}) no sistema.`);
+            document.getElementById('mem-nome').value=""; document.getElementById('mem-id').value=""; document.getElementById('mem-discord').value=""; document.getElementById('mem-cargo').value=""; renderMembros();
         }
 
-        function deletarMembro(id) { db.membros = db.membros.filter(m => m.id !== id); renderMembros(); }
+        function deletarMembro(id) { 
+            registrarLog(usuarioLogado ? usuarioLogado.nome : "Operador", `Removeu o membro e revogou acesso do ID #${id} do painel.`);
+            db.membros = db.membros.filter(m => m.id !== id); renderMembros(); 
+        }
+
+        function adicionarNota() {
+            const t = document.getElementById('nota-titulo').value.trim(); const c = document.getElementById('nota-conteudo').value.trim();
+            if(!t || !c) return; db.anotacoes.push({ id: Date.now(), titulo: t, conteudo: c });
+            registrarLog(usuarioLogado ? usuarioLogado.nome : "Operador", `Fixou um aviso no Mural Importante: "${t}"`);
+            document.getElementById('nota-titulo').value = ""; document.getElementById('nota-conteudo').value = ""; renderMuralNotas();
+        }
+
+        function removerNota(id) { 
+            registrarLog(usuarioLogado ? usuarioLogado.nome : "Operador", `Removeu um aviso do mural de recados.`);
+            db.anotacoes = db.anotacoes.filter(n => n.id !== id); renderMuralNotas(); 
+        }
+
+        function renderMuralNotas() {
+            const grid = document.getElementById('grid-mural-notas'); if(!grid) return; grid.innerHTML = "";
+            db.anotacoes.forEach(n => { grid.innerHTML += `<div class="info-box-wrapper" style="border-left: 4px solid var(--warning);"><h3 style="display:flex; justify-content:space-between; align-items:center; font-size:15px;">${n.titulo}<button class="btn-delete" style="padding:2px 6px;" onclick="removerNota(${n.id})"><i class="fas fa-times"></i></button></h3><p style="margin-top:10px; color:#cbd5e1; font-size:13px; line-height:1.5;">${n.conteudo}</p></div>`; });
+        }
+
         function toggleSidebarMenu(t) { const m = document.getElementById('sidebar-menu-list'); t.classList.toggle('open'); m.style.maxHeight = m.style.maxHeight === '0px' || !m.style.maxHeight ? m.scrollHeight + 'px' : '0px'; }
         
         function auth() {
             const u = document.getElementById('user-in').value.trim(); const p = document.getElementById('pass-in').value.trim();
             const user = db.membros.find(m => (m.nome.toLowerCase() === u.toLowerCase() || m.id === u) && m.senha === p);
-            if (user) { usuarioLogado = user; user.online = true; document.getElementById('nav-username').innerText = user.nome; document.getElementById('nav-userid').innerText = `#${user.id}`; document.getElementById('nav-status-dot').className = "status-dot online"; document.getElementById('nav-status-text').innerText = "Online"; document.getElementById('login-screen').style.display = 'none'; document.getElementById('main-panel').style.display = 'flex'; toggleSidebarMenu(document.querySelector('.dropdown-trigger')); renderMembros(); renderEncomendas(); renderVendas(); } else { document.getElementById('login-err').style.display = 'block'; }
+            if (user) { 
+                usuarioLogado = user; user.online = true; 
+                document.getElementById('nav-username').innerText = user.nome; document.getElementById('nav-userid').innerText = `#${user.id}`; document.getElementById('nav-status-dot').className = "status-dot online"; document.getElementById('nav-status-text').innerText = "Online"; document.getElementById('login-screen').style.display = 'none'; document.getElementById('main-panel').style.display = 'flex'; toggleSidebarMenu(document.querySelector('.dropdown-trigger')); 
+                renderMembros(); renderEncomendas(); renderVendas(); renderLogsPainel();
+                registrarLog(user.nome, "Efetuou login com sucesso e iniciou sessão.", "system");
+            } else { 
+                document.getElementById('login-err').style.display = 'block'; 
+                registrarLog("Tentativa Inválida", `Falha de autenticação ao tentar logar com o nome de usuário: "${u}"`, "saida");
+            }
         }
         
         function logout() { location.reload(); }
-        function tab(id, el) { document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); document.querySelectorAll('.menu-list li').forEach(li => li.classList.remove('active')); document.getElementById(id).classList.add('active'); el.classList.add('active'); }
+        
+        function tab(id, el) { 
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); 
+            document.querySelectorAll('.menu-list li').forEach(li => li.classList.remove('active')); 
+            document.getElementById(id).classList.add('active'); 
+            el.classList.add('active'); 
+            
+            // Ativa ou atualiza os gráficos se o usuário navegar para a aba Movimentação
+            if(id === 'movimentacao') {
+                initOuUpdateGraficos();
+            }
+        }
     </script>
 </body>
 </html>
