@@ -35,11 +35,48 @@
             width: 260px; height: 100%; background: rgba(15, 12, 28, 0.7);
             border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 25px;
         }
-        .menu-list { list-style: none; flex-grow: 1; margin-top: 30px; }
+        
+        /* --- NOVO MENU RETRÁTIL (ABRE PRA BAIXO) --- */
+        .sidebar-dropdown {
+            margin-top: 30px;
+            flex-grow: 1;
+        }
+        .dropdown-trigger {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: #fff;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s;
+        }
+        .dropdown-trigger:hover { background: rgba(255, 255, 255, 0.05); }
+        .dropdown-trigger i.chevron { transition: transform 0.3s; }
+        
+        /* Estado Aberto do Botão Principal */
+        .dropdown-trigger.open i.chevron { transform: rotate(180deg); }
+
+        .menu-list { 
+            list-style: none; 
+            max-height: 0; /* Começa fechado */
+            overflow: hidden; 
+            transition: max-height 0.3s ease-out; /* Desliza suavemente para baixo */
+            padding-left: 5px;
+            margin-top: 5px;
+        }
+        
         .menu-list li {
             padding: 12px 15px; border-radius: 10px; color: #94a3b8;
             cursor: pointer; display: flex; align-items: center; gap: 12px; margin-bottom: 5px;
+            margin-top: 5px;
         }
+        .menu-list li:hover { background: rgba(255,255,255,0.03); color: #fff; }
         .menu-list li.active { background: rgba(168, 85, 247, 0.15); color: #fff; font-weight: 600; }
         
         .user-footer { border-top: 1px solid var(--border); padding-top: 15px; }
@@ -85,10 +122,18 @@
     <div id="main-panel">
         <aside class="sidebar">
             <h3 style="letter-spacing: 1px;">PAINEL VORTEX</h3>
-            <ul class="menu-list">
-                <li class="active" onclick="tab('dash', this)"><i class="fas fa-chart-pie"></i> Dashboard</li>
-                <li onclick="tab('membros', this)"><i class="fas fa-users"></i> Membros</li>
-            </ul>
+            
+            <div class="sidebar-dropdown">
+                <div class="dropdown-trigger" onclick="toggleSidebarMenu(this)">
+                    <span><i class="fas fa-bars" style="margin-right: 8px;"></i> Navegação</span>
+                    <i class="fas fa-chevron-down chevron"></i>
+                </div>
+                <ul class="menu-list" id="sidebar-menu-list">
+                    <li class="active" onclick="tab('dash', this)"><i class="fas fa-chart-pie"></i> Dashboard</li>
+                    <li onclick="tab('membros', this)"><i class="fas fa-users"></i> Membros</li>
+                </ul>
+            </div>
+
             <div class="user-footer">
                 <div style="font-weight: 600; font-size: 14px;" id="nav-username">Desconectado</div>
                 <div style="font-size: 12px; color: #94a3b8; display: flex; align-items: center; gap: 6px; margin-top: 4px;">
@@ -132,6 +177,20 @@
             renderMembros();
         };
 
+        // Função Inteligente para Abrir e Fechar sem perder a sequência
+        function toggleSidebarMenu(triggerElement) {
+            const menu = document.getElementById('sidebar-menu-list');
+            
+            triggerElement.classList.toggle('open');
+            
+            if (menu.style.maxHeight && menu.style.maxHeight !== '0px') {
+                menu.style.maxHeight = '0px';
+            } else {
+                // Seta dinamicamente o tamanho exato baseado no número de itens internos
+                menu.style.maxHeight = menu.scrollHeight + 'px';
+            }
+        }
+
         function auth() {
             const inputUser = document.getElementById('user-in').value.trim();
             const inputPass = document.getElementById('pass-in').value.trim();
@@ -148,6 +207,12 @@
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('main-panel').style.display = 'flex';
 
+                // Abre o menu lateral automaticamente ao fazer login
+                const trigger = document.querySelector('.dropdown-trigger');
+                if(!trigger.classList.contains('open')) {
+                    toggleSidebarMenu(trigger);
+                }
+
                 renderMembros();
             } else {
                 document.getElementById('login-err').style.display = 'block';
@@ -163,6 +228,12 @@
             document.getElementById('nav-username').innerText = "Desconectado";
             document.getElementById('nav-status-dot').className = "status-dot";
             document.getElementById('nav-status-text').innerText = "Offline";
+
+            // Fecha o menu lateral no logout para reiniciar limpo
+            const trigger = document.querySelector('.dropdown-trigger');
+            if(trigger.classList.contains('open')) {
+                toggleSidebarMenu(trigger);
+            }
 
             document.getElementById('main-panel').style.display = 'none';
             document.getElementById('login-screen').style.display = 'flex';
