@@ -266,6 +266,32 @@
             color: #fff;
             box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
         }
+
+        /* --- NOVO ESTILO BONITO E COESÃO PARA O BANCO DE FAMÍLIAS (CONFIGURAÇÃO) --- */
+        .cute-family-card {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.06), rgba(15, 12, 28, 0.8));
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            border-top: 3px solid #38bdf8;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            transition: all 0.2s ease;
+        }
+        .cute-family-card:hover {
+            border-color: rgba(56, 189, 248, 0.4);
+            box-shadow: 0 10px 28px rgba(56, 189, 248, 0.15);
+        }
+        .cute-family-card h3 {
+            font-size: 15px;
+            font-weight: 700;
+            color: #38bdf8 !important;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
@@ -427,7 +453,7 @@
                 <h2>Gerenciador de Vendas Vortex</h2>
                 <div class="boxes-row-container">
                     <div class="info-box-wrapper" style="flex: 1.3;">
-                        <h3 style="margin-bottom: 15px; color: var(--success);"><i class="fas fa-cash-register"></i> Montar Pedido de Venda</h3>
+                        <h3 style="margin-bottom: 15px; color: var(--success);"><i class="fas fa-cash-register"></i> Pedido de Venda</h3>
                         <div class="form-group">
                             <label for="ven-familia">Família Compradora</label>
                             <select id="ven-familia">
@@ -519,8 +545,8 @@
             <section id="configuracao" class="section">
                 <h2>Configuração do Sistema</h2>
                 <div class="boxes-row-container">
-                    <div class="info-box-wrapper">
-                        <h3><i class="fas fa-boxes"></i> Produtos Vortex</h3>
+                    <div class="info-box-wrapper" style="border-top: 3px solid var(--primary);">
+                        <h3 style="color: var(--primary) !important;"><i class="fas fa-boxes"></i> Produtos Vortex</h3>
                         <div class="form-row">
                             <div class="form-group"><label>Nome do Produto</label><input type="text" id="prod-nome" placeholder="Ex: Colete"></div>
                             <div class="form-group" style="max-width: 120px;"><label>Valor Unidade</label><input type="number" id="prod-valor" step="0.01"></div>
@@ -528,8 +554,9 @@
                         </div>
                         <table><thead><tr><th>Produto</th><th>Valor</th><th style="width: 50px;">Ações</th></tr></thead><tbody id="t-produtos-corpo"></tbody></table>
                     </div>
-                    <div class="info-box-wrapper">
-                        <h3><i class="fas fa-handshake"></i> Gerenciador de Produtos das Famílias</h3>
+                    
+                    <div class="info-box-wrapper" style="border-top: 3px solid #38bdf8;">
+                        <h3 style="color: #38bdf8 !important;"><i class="fas fa-handshake"></i> Gerenciador de Produtos das Famílias</h3>
                         <div class="form-row">
                             <div class="form-group"><label>Nome da Família</label><input type="text" id="fam-nome-grupo" placeholder="Ex: Medici"></div>
                             <div class="form-group"><label>Nome do Produto</label><input type="text" id="fam-nome" placeholder="Ex: Componente"></div>
@@ -538,6 +565,7 @@
                         </div>
                     </div>
                 </div>
+                
                 <div class="families-grid-container" id="grid-caixas-familias"></div>
             </section>
         </main>
@@ -569,7 +597,7 @@
                 ] 
             },
             logs: [
-                { data: new Date().toLocaleTimeString('pt-BR'), operador: "Sistema", acao: "Painel Vortex inicializado com sucesso.", tag: "system" }
+                { data: new Date().toLocaleTimeString('pt-BR'), operador: "Sistema", acao: "Painel Vortex initialized com sucesso.", tag: "system" }
             ]
         };
 
@@ -910,11 +938,16 @@
             alert("Venda com múltiplos produtos fechada e contabilizada!");
         }
 
+        /* --- ATUALIZADO: RENDERIZAÇÃO DAS CAIXAS DE PRODUTOS FAMÍLIA COM DESIGN MODELO E ÍCONES --- */
         function renderBoxesFamilias() {
             const grid = document.getElementById('grid-caixas-familias'); if(!grid) return; grid.innerHTML = "";
             Object.keys(db.familias).forEach(nomeDaFamilia => {
                 let linhasTabela = ""; db.familias[nomeDaFamilia].forEach(p => { linhasTabela += `<tr><td>${p.nome}</td><td>R$ ${p.valor.toFixed(2)}</td><td><button class="btn-delete" onclick="removerProdutoDaFamilia('${nomeDaFamilia}', ${p.id})"><i class="fas fa-trash"></i></button></td></tr>`; });
-                grid.innerHTML += `<div class="info-box-wrapper"><h3>Família: ${nomeDaFamilia}</h3><table><tbody>${linhasTabela}</tbody></table></div>`;
+                grid.innerHTML += `
+                    <div class="cute-family-card">
+                        <h3><i class="fas fa-handshake"></i> Família: ${nomeDaFamilia}</h3>
+                        <table><tbody>${linhasTabela}</tbody></table>
+                    </div>`;
             });
             atualizarSelectsGeraisVendaseEncomendas();
         }
@@ -1000,7 +1033,6 @@
 
         function toggleSidebarMenu(t) { const m = document.getElementById('sidebar-menu-list'); t.classList.toggle('open'); m.style.maxHeight = m.style.maxHeight === '0px' || !m.style.maxHeight ? m.scrollHeight + 'px' : '0px'; }
         
-        /* --- AJUSTADO: ADICIONAR NOTA PRESERVANDO LÓGICA INTEGRA --- */
         function adicionarNota() {
             const t = document.getElementById('nota-titulo').value.trim(); const c = document.getElementById('nota-conteudo').value.trim();
             if(!t || !c) return; db.anotacoes.push({ id: Date.now(), titulo: t, conteudo: c });
@@ -1009,7 +1041,6 @@
 
         function removerNota(id) { db.anotacoes = db.anotacoes.filter(n => n.id !== id); renderMuralNotas(); }
         
-        /* --- NOVO: RENDERIZAÇÃO FOFA E MINIMALISTA DO MURAL EM GRID --- */
         function renderMuralNotas() {
             const grid = document.getElementById('grid-mural-notas'); if(!grid) return; grid.innerHTML = "";
             if(db.anotacoes.length === 0) {
@@ -1054,6 +1085,7 @@
                 renderVendas(); 
                 renderLogsPainel();
                 renderMuralNotas();
+                renderBoxesFamilias();
                 renderContabilidadeDashboard();
                 registrarLog(user.nome, "Efetuou login no painel.", "system");
             } else { 
