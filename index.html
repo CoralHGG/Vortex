@@ -39,7 +39,11 @@
         .sidebar-dropdown {
             margin-top: 30px;
             flex-grow: 1;
+            overflow-y: auto; /* Permite scroll no menu se a tela for pequena */
         }
+        /* Esconder a barra de scroll do menu lateral para manter limpo */
+        .sidebar-dropdown::-webkit-scrollbar { width: 0px; }
+
         .dropdown-trigger {
             width: 100%; padding: 12px 15px; background: rgba(255, 255, 255, 0.02);
             border: 1px solid var(--border); border-radius: 10px; color: #fff;
@@ -61,7 +65,7 @@
         .menu-list li:hover { background: rgba(255,255,255,0.03); color: #fff; }
         .menu-list li.active { background: rgba(168, 85, 247, 0.15); color: #fff; font-weight: 600; }
         
-        /* --- RODAPÉ DO OPERADOR REORGANIZADO --- */
+        /* --- RODAPÉ DO OPERADOR --- */
         .user-footer { 
             border-top: 1px solid var(--border); 
             padding-top: 20px;
@@ -74,7 +78,7 @@
         .user-row-top {
             display: flex;
             align-items: center;
-            justify-content: space-between; /* Nome na esquerda, Status na direita */
+            justify-content: space-between;
             width: 100%;
         }
 
@@ -108,7 +112,6 @@
         .status-dot { width: 8px; height: 8px; background: #64748b; border-radius: 50%; display: inline-block; }
         .status-dot.online { background: var(--success); box-shadow: 0 0 8px var(--success); }
 
-        /* Botão Sair Ocupando o Espaço de Baixo */
         .btn-logout {
             display: flex;
             align-items: center;
@@ -181,6 +184,11 @@
                 <ul class="menu-list" id="sidebar-menu-list">
                     <li class="active" onclick="tab('dash', this)"><i class="fas fa-chart-pie"></i> Dashboard</li>
                     <li onclick="tab('membros', this)"><i class="fas fa-users"></i> Membros</li>
+                    <li onclick="tab('encomendas', this)"><i class="fas fa-box"></i> Encomendas</li>
+                    <li onclick="tab('vendas', this)"><i class="fas fa-shopping-cart"></i> Vendas</li>
+                    <li onclick="tab('movimentacao', this)"><i class="fas fa-exchange-alt"></i> Movimentação</li>
+                    <li onclick="tab('importante', this)"><i class="fas fa-exclamation-triangle"></i> Importante</li>
+                    <li onclick="tab('configuracao', this)"><i class="fas fa-cog"></i> Configuração</li>
                 </ul>
             </div>
 
@@ -217,6 +225,31 @@
                         </tbody>
                 </table>
             </section>
+
+            <section id="encomendas" class="section">
+                <h2>Encomendas</h2>
+                <p style="color: #94a3b8; margin-top: 10px;">Gerencie as encomendas e pedidos pendentes.</p>
+            </section>
+
+            <section id="vendas" class="section">
+                <h2>Vendas</h2>
+                <p style="color: #94a3b8; margin-top: 10px;">Registro e controle de saídas e vendas do sistema.</p>
+            </section>
+
+            <section id="movimentacao" class="section">
+                <h2>Movimentação</h2>
+                <p style="color: #94a3b8; margin-top: 10px;">Histórico financeiro e fluxo de entradas e saídas.</p>
+            </section>
+
+            <section id="importante" class="section">
+                <h2>Importante</h2>
+                <p style="color: #94a3b8; margin-top: 10px;">Mural de avisos, diretrizes essenciais e alertas da gerência.</p>
+            </section>
+
+            <section id="configuracao" class="section">
+                <h2>Configuração</h2>
+                <p style="color: #94a3b8; margin-top: 10px;">Configurações gerais do sistema e gerenciamento do catálogo.</p>
+            </section>
         </main>
     </div>
 
@@ -235,6 +268,7 @@
             renderMembros();
         };
 
+        // Atualizado para recalcular o tamanho correto com as novas abas inclusas
         function toggleSidebarMenu(triggerElement) {
             const menu = document.getElementById('sidebar-menu-list');
             triggerElement.classList.toggle('open');
