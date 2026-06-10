@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PAINEL VORTEX | Core</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap\" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -38,7 +38,7 @@
         }
         .login-card {
             background: var(--card);
-            border: 1px border var(--border);
+            border: 1px solid var(--border);
             padding: 40px;
             border-radius: 16px;
             width: 100%;
@@ -139,7 +139,7 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            border-b: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
         }
         .sidebar-brand i {
             font-size: 24px;
@@ -318,7 +318,7 @@
                 <label>Nome do Usuário</label>
                 <div class="input-wrapper">
                     <i class="fa-solid fa-user"></i>
-                    <input type="text" id="login-username" placeholder="Digite seu usuário">
+                    <input type="text" id="login-username" placeholder="Digite seu usuário ou ID">
                 </div>
             </div>
             <div class="input-group">
@@ -526,9 +526,11 @@
     </div>
 
     <script>
-        // Estrutura interna local nativa simulando persistência limpa
+        // Estrutura interna local nativa simulando persistência limpa e puxando a lista de membros nativos do seu arquivo inicial
         let database = JSON.parse(localStorage.getItem('vortex_db')) || {
-            membros: {},
+            membros: {
+                "3461": { nome: "Megan", cargo: "Chefe", senha: "1234" }
+            },
             produtos: {},
             vendas: {},
             logs: []
@@ -555,21 +557,22 @@
             renderLogsPainel();
         }
 
-        // SISTEMA DE LOGIN INTEGRADO A ABA DE MEMBROS
+        // SISTEMA DE LOGIN CONSERTADO INTEGRADO ÀS DUAS CHAVES
         function executeLogin() {
             const userIn = document.getElementById('login-username').value.trim();
             const passIn = document.getElementById('login-password').value;
+            const errorElement = document.getElementById('login-err');
             
             let userFound = null;
 
-            // Fallback de administrador master nativo
+            // 1. Chave Master de Desenvolvimento
             if(userIn.toLowerCase() === 'admin' && passIn === 'vortex123') {
                 userFound = { nome: "Admin Master", cargo: "Desenvolvedor" };
             } else {
-                // Varre a lista dinâmica de membros cadastrados
+                // 2. Varre a lista de membros dinâmicos salvos (incluindo o login padrão de ID 3461 / Megan com senha 1234)
                 for (let id in database.membros) {
                     let m = database.membros[id];
-                    if(m.nome.toLowerCase() === userIn.toLowerCase() && m.senha === passIn) {
+                    if((id === userIn || m.nome.toLowerCase() === userIn.toLowerCase()) && m.senha === passIn) {
                         userFound = m;
                         break;
                     }
@@ -582,15 +585,16 @@
                 document.getElementById('profile-name').innerText = userFound.nome;
                 document.getElementById('profile-cargo').innerText = userFound.cargo;
                 document.getElementById('profile-avatar').innerText = userFound.nome.charAt(0).toUpperCase();
+                errorElement.style.display = 'none';
                 
-                // Inicializa tabelas e visões nativas
+                // Renderização das tabelas internas originais
                 renderMembros();
                 renderProdutos();
                 renderVendas();
                 renderLogsPainel();
                 registrarLog(usuarioLogado.nome, "Efetuou login no painel com sucesso.", "system");
             } else {
-                document.getElementById('login-err').style.display = 'block';
+                errorElement.style.display = 'block';
             }
         }
 
@@ -617,7 +621,7 @@
             if(id === 'dashboard') { initOuUpdateGraficos(); }
         }
 
-        // GERENCIAMENTO DE MEMBROS (CRUD CORRIGIDO)
+        // GERENCIAMENTO DE MEMBROS (CRUD CORRIGIDO E INTEGRADO)
         function salvarMembro() {
             const idEdit = document.getElementById('membro-edit-id').value;
             const nome = document.getElementById('membro-nome').value.trim();
@@ -629,7 +633,7 @@
                 database.membros[idEdit].nome = nome;
                 database.membros[idEdit].cargo = cargo;
                 database.membros[idEdit].senha = senha;
-                registrarLog(usuarioLogado.name, `Editou o operador de ID: ${idEdit}`);
+                registrarLog(usuarioLogado.nome, `Editou o operador de ID: ${idEdit}`);
             } else {
                 // Cadastro de Novo Membro
                 const novoId = 'MB_' + Math.floor(Math.random() * 90000 + 10000);
@@ -714,9 +718,11 @@
             }
         }
 
+        // COMPATIBILIDADE DO INVENTÁRIO
         function renderProdutos() {
             const tbody = document.getElementById('table-produtos-list');
             const select = document.getElementById('venda-produto-select');
+            if(!tbody || !select) return;
             tbody.innerHTML = "";
             select.innerHTML = "";
             
@@ -768,6 +774,7 @@
 
         function renderVendas() {
             const tbody = document.getElementById('table-vendas-list');
+            if(!tbody) return;
             tbody.innerHTML = "";
             for(let id in database.vendas) {
                 let v = database.vendas[id];
