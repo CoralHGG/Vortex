@@ -833,8 +833,13 @@
         }
 
         function initOuUpdateGraficos() {
-            const ctxPie = document.getElementById('chartPieCaixa').getContext('2d');
-            const ctxBar = document.getElementById('chartBarComercial').getContext('2d');
+           const pieCanvas = document.getElementById('chartPieCaixa');
+const barCanvas = document.getElementById('chartBarComercial');
+
+if(!pieCanvas || !barCanvas) return;
+
+const ctxPie = pieCanvas.getContext('2d');
+const ctxBar = barCanvas.getContext('2d');
 
             const totalS = db.financeiro.saldoAtual;
             const totalE = db.financeiro.totalEntradas;
