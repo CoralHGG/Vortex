@@ -3,1326 +3,431 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PAINEL VORTEX | Core</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Vortex - Painel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        :root {
-            --primary: #a855f7;
-            --success: #22c55e;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --bg: #0b0813;
-            --card: rgba(15, 12, 28, 0.75);
-            --border: rgba(255, 255, 255, 0.08);
-            --input-bg: rgba(255, 255, 255, 0.03);
+        .sidebar-item.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-left: 4px solid #3b82f6;
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { 
-            background: var(--bg); 
-            color: #fff; 
-            height: 100vh; 
-            overflow: hidden; 
-            display: flex;
-            background-size: cover !important;
-            background-position: center !important;
-            background-repeat: no-repeat !important;
-        }
-
-        /* --- TELA DE LOGIN --- */
-        #login-screen {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: var(--bg); display: flex; justify-content: center; align-items: center; z-index: 9999;
-            background-size: cover !important;
-            background-position: center !important;
-            background-repeat: no-repeat !important;
-        }
-        .login-box {
-            background: rgba(15, 12, 28, 0.9); padding: 40px; border-radius: 20px;
-            border: 1px solid var(--border); width: 100%; max-width: 360px; text-align: center;
-        }
-
-        /* --- ESTRUTURA CORE DO PAINEL --- */
-        #main-panel { 
-            display: none; 
-            width: 100vw; 
-            height: 100vh; 
-            display: flex; 
-            background: rgba(11, 8, 19, 0.6); 
-        }
-        
-        .sidebar {
-            width: 260px; height: 100%; background: rgba(11, 8, 19, 0.9);
-            border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 25px;
-            flex-shrink: 0; z-index: 10;
-        }
-        
-        .sidebar-dropdown { margin-top: 30px; flex-grow: 1; overflow-y: auto; }
-        .sidebar-dropdown::-webkit-scrollbar { width: 0px; }
-
-        .dropdown-trigger {
-            width: 100%; padding: 12px 15px; background: rgba(255, 255, 255, 0.02);
-            border: 1px solid var(--border); border-radius: 10px; color: #fff;
-            font-weight: 600; display: flex; align-items: center; justify-content: space-between;
-            cursor: pointer; user-select: none; transition: background 0.2s;
-        }
-        .dropdown-trigger:hover { background: rgba(255, 255, 255, 0.05); }
-        .dropdown-trigger i.chevron { transition: transform 0.3s; }
-        .dropdown-trigger.open i.chevron { transform: rotate(180deg); }
-
-        .menu-list { 
-            list-style: none; max-height: 0; overflow: hidden; 
-            transition: max-height 0.3s ease-out; padding-left: 5px; margin-top: 5px;
-        }
-        .menu-list li {
-            padding: 12px 15px; border-radius: 10px; color: #94a3b8;
-            cursor: pointer; display: flex; align-items: center; gap: 12px; margin-bottom: 5px;
-        }
-        .menu-list li:hover { background: rgba(255,255,255,0.03); color: #fff; }
-        .menu-list li.active { background: rgba(168, 85, 247, 0.15); color: #fff; font-weight: 600; }
-        
-        /* --- RODAPÉ DO OPERADOR --- */
-        .user-footer { border-top: 1px solid var(--border); padding-top: 20px; display: flex; flex-direction: column; gap: 12px; width: 100%; }
-        .user-row-top { display: flex; align-items: center; justify-content: space-between; width: 100%; }
-        .user-meta-info { display: flex; flex-direction: column; }
-        .user-name-tag { font-weight: 700; font-size: 15px; color: #fff; letter-spacing: 0.3px; line-height: 1.2; }
-        .user-id-tag { font-weight: 500; font-size: 12px; color: rgba(168, 85, 247, 0.8); margin-top: 1px; }
-        .status-container { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #94a3b8; font-weight: 500; }
-        .status-dot { width: 8px; height: 8px; background: #64748b; border-radius: 50%; display: inline-block; }
-        .status-dot.online { background: var(--success); box-shadow: 0 0 8px var(--success); }
-
-        .btn-logout {
-            display: flex; align-items: center; justify-content: center; gap: 6px;
-            background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.15);
-            padding: 8px 12px; border-radius: 8px; color: var(--danger); font-size: 11px;
-            font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; width: 100%;
-        }
-        .btn-logout:hover { background: var(--danger); color: #fff; }
-
-        /* --- CONTEÚDO PRINCIPAL --- */
-        .main-content { flex-grow: 1; padding: 40px; overflow-y: auto; display: flex; flex-direction: column; }
-        .section { display: none; flex-grow: 1; }
-        .section.active { display: flex !important; flex-direction: column; }
-
-        .boxes-row-container { display: flex; gap: 20px; width: 100%; flex-wrap: wrap; }
-        .families-grid-container, .notes-grid-container, .finance-cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; width: 100%; }
-        .families-grid-container, .notes-grid-container { margin-top: 20px; }
-
-        /* Estrutura de Gráficos na aba Movimentação */
-        .charts-grid-container { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; width: 100%; margin-bottom: 20px; }
-        .chart-box { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; min-height: 280px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .chart-box h3 { font-size: 14px; color: #94a3b8; align-self: flex-start; margin-bottom: 15px; width: 100%; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
-        .canvas-container { position: relative; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
-
-        @media (max-width: 1024px) { 
-            .families-grid-container, .notes-grid-container, .finance-cards-grid { grid-template-columns: repeat(2, 1fr); } 
-            .charts-grid-container { grid-template-columns: 1fr; }
-        }
-        @media (max-width: 768px) { .families-grid-container, .notes-grid-container, .finance-cards-grid { grid-template-columns: 1fr; } }
-
-        .fin-card {
-            background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px 25px;
-            display: flex; align-items: center; justify-content: space-between; box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-        }
-        .fin-card-info h3 { font-size: 12px; text-transform: uppercase; color: #64748b; letter-spacing: 0.5px; margin-bottom: 4px; }
-        .fin-card-info p { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
-        .fin-card-icon { width: 45px; height: 45px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
-
-        .info-box-wrapper {
-            background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 30px;
-            margin-top: 20px; flex: 1; min-width: 300px; box-shadow: 0 8px 24px 0 rgba(0, 0, 0, 0.4);
-        }
-        .families-grid-container .info-box-wrapper { margin-top: 0; }
-
-        .form-row { display: flex; gap: 15px; margin-bottom: 20px; align-items: flex-end; flex-wrap: wrap; }
-        .form-row .form-group { flex: 1; margin-bottom: 0; min-width: 140px; }
-        .form-row button { width: auto; padding: 12px 25px; height: 45px; }
-
-        /* --- ESTILOS DE FORMULÁRIO MINIMALISTAS --- */
-        .form-group label {
-            display: block; font-size: 11px; text-transform: uppercase; color: #64748b;
-            font-weight: 600; margin-bottom: 6px; letter-spacing: 0.5px;
-        }
-        input, textarea, select { 
-            width: 100%; padding: 12px 14px; background: var(--input-bg); 
-            border: 1px solid var(--border); border-radius: 10px; color: #fff; 
-            margin-bottom: 5px; outline: none; transition: all 0.2s ease;
-        }
-        input, select { height: 45px; }
-        input:focus, textarea:focus, select:focus { 
-            border-color: var(--primary); 
-            background: rgba(168, 85, 247, 0.04);
-            box-shadow: 0 0 10px rgba(168, 85, 247, 0.15);
-        }
-        
-        select option {
-            background-color: #120e24 !important;
-            color: #fff !important;
-        }
-        
-        button { 
-            width: 100%; padding: 12px; background: var(--primary); border: none; 
-            border-radius: 10px; color: #fff; font-weight: 600; cursor: pointer; 
-            transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 8px;
-        }
-        button:hover { background: #9333ea; transform: translateY(-1px); }
-        button:active { transform: translateY(0); }
-        
-        /* --- ESTILIZAÇÃO COMPLETA DAS TABELAS --- */
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th { text-align: left; padding: 14px 12px; color: #64748b; font-size: 11px; text-transform: uppercase; border-bottom: 2px solid var(--border); letter-spacing: 0.5px; }
-        td { padding: 16px 12px; border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 14px; color: #e2e8f0; vertical-align: middle; }
-        tr:hover td { background: rgba(255, 255, 255, 0.01); }
-        
-        .btn-delete { background: rgba(239, 68, 68, 0.08); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.15); padding: 8px 12px; border-radius: 8px; font-size: 12px; cursor: pointer; width: auto; transition: all 0.2s; }
-        .btn-delete:hover { background: var(--danger); color: #fff; box-shadow: 0 0 12px rgba(239, 68, 68, 0.3); }
-
-        /* --- BADGES E ELEMENTOS VISUAIS --- */
-        .badge { padding: 5px 10px; border-radius: 8px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; display: inline-block; }
-        .badge.online { background: rgba(34, 197, 94, 0.12); color: var(--success); border: 1px solid rgba(34, 197, 94, 0.2); }
-        .badge.offline { background: rgba(255, 255, 255, 0.04); color: #94a3b8; border: 1px solid rgba(255, 255, 255, 0.06); }
-        .badge.system { background: rgba(168, 85, 247, 0.12); color: var(--primary); border: 1px solid rgba(168, 85, 247, 0.2); }
-        
-        .id-badge { background: rgba(255, 255, 255, 0.05); color: #94a3b8; font-family: monospace; font-weight: 600; padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border); }
-        
-        .discord-user-tag { display: flex; align-items: center; gap: 8px; color: #5865F2; font-weight: 500; font-size: 13px; }
-        .discord-user-tag i { font-size: 15px; }
-
-        .log-item { padding: 10px 15px; border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 13px; display: flex; justify-content: space-between; align-items: center; }
-        .log-item:hover { background: rgba(255,255,255,0.01); }
-        .log-time { color: #64748b; font-size: 11px; font-family: monospace; }
-
-        /* --- NOVO DESIGN ESTILIZADO O MURAL --- */
-        .mural-container {
-            background: rgba(255, 255, 255, 0.02);
-            border: 2px dashed rgba(168, 85, 247, 0.2);
-            border-radius: 24px;
-            padding: 30px;
-            margin-top: 25px;
-            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.2);
-        }
-        .cute-card-note {
-            background: linear-gradient(135deg, rgba(168, 85, 247, 0.12), rgba(236, 72, 153, 0.08));
-            border: 1px solid rgba(168, 85, 247, 0.25);
-            border-radius: 18px;
-            padding: 22px;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-        .cute-card-note::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 5px;
-            background: linear-gradient(90deg, #a855f7, #ec4899);
-        }
-        .cute-card-note:hover {
-            transform: translateY(-4px) scale(1.02);
-            box-shadow: 0 14px 28px rgba(168, 85, 247, 0.2);
-            border-color: rgba(236, 72, 153, 0.4);
-        }
-        .cute-card-note h3 {
-            font-size: 16px;
-            font-weight: 700;
-            color: #f4f4f5;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .cute-card-note h3 i { color: #ec4899; font-size: 14px; }
-        .cute-card-note p { color: #d4d4d8; font-size: 13.5px; line-height: 1.6; flex-grow: 1; }
-        .cute-card-note i.cute-btn-delete-container { margin-top: 20px; display: flex; justify-content: flex-end; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 12px; }
-        .btn-cute-delete {
-            background: rgba(239, 68, 68, 0.1); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2);
-            padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 600; cursor: pointer;
-            transition: all 0.2s; display: flex; align-items: center; gap: 4px;
-        }
-        .btn-cute-delete:hover { background: #ef4444; color: #fff; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); }
-
-        /* --- NOVO ESTILO PARA O BANCO DE FAMÍLIAS --- */
-        .cute-family-card {
-            background: linear-gradient(135deg, rgba(56, 189, 248, 0.06), rgba(15, 12, 28, 0.8));
-            border: 1px solid rgba(56, 189, 248, 0.2); border-top: 3px solid #38bdf8;
-            border-radius: 16px; padding: 20px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3); transition: all 0.2s ease;
-        }
-        .cute-family-card:hover { border-color: rgba(56, 189, 248, 0.4); box-shadow: 0 10px 28px rgba(56, 189, 248, 0.15); }
-        .cute-family-card h3 {
-            font-size: 15px; font-weight: 700; color: #38bdf8 !important; display: flex;
-            align-items: center; gap: 8px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding-bottom: 10px; margin-bottom: 10px;
-        }
-
-        /* CONFIGURAÇÃO EXCLUSIVA PARA O ENCOLHIMENTO DA CAIXA */
-        .collapsible-box {
-            max-height: 500px; opacity: 1; overflow: hidden; padding: 30px; margin-top: 10px;
-            transition: max-height 0.35s ease, opacity 0.3s ease, padding 0.35s ease, margin 0.35s ease;
-        }
-        .collapsible-box.closed { max-height: 0px; opacity: 0; padding-top: 0px; padding-bottom: 0px; margin-top: 0px; border: none; }
-        
-        .cfg-header-bar {
-            background: var(--card); border: 1px solid var(--border); border-left: 4px solid var(--warning);
-            border-radius: 12px; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center;
-            cursor: pointer; user-select: none; transition: background 0.2s;
-        }
-        .cfg-header-bar:hover { background: rgba(255, 255, 255, 0.03); }
-        .cfg-header-bar h3 { color: var(--warning) !important; font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
-        .toggle-cfg-btn { background: transparent; border: none; color: var(--warning); font-size: 16px; cursor: pointer; display: inline-flex; align-items: center; }
     </style>
 </head>
-<body>
+<body class="bg-gray-900 text-gray-100 font-sans min-h-screen flex flex-col">
 
-    <div id="login-screen">
-        <div class="login-box">
-            <h2 style="margin-bottom: 5px; letter-spacing: 2px;">PAINEL VORTEX</h2>
-            <p style="font-size: 12px; color: #64748b; margin-bottom: 25px;">Insira suas credenciais</p>
-            <div id="login-err" style="color: var(--danger); font-size: 13px; margin-bottom: 15px; display: none;">Usuário ou senha incorretos.</div>
-            <input type="text" id="user-in" placeholder="ID ou Usuário">
-            <input type="password" id="pass-in" placeholder="Senha">
-            <button onclick="auth()">ACESSAR PAINEL</button>
+    <div id="login-screen" class="fixed inset-0 bg-gray-950 flex items-center justify-center z-50">
+        <div class="bg-gray-900 p-8 rounded-xl border border-gray-800 w-full max-w-md shadow-2xl">
+            <div class="flex items-center gap-3 justify-center mb-8">
+                <i data-lucide="vortex" class="w-10 h-10 text-blue-500 animate-spin-slow"></i>
+                <span class="text-2xl font-bold tracking-wider text-white">VORTEX</span>
+            </div>
+            <h2 class="text-xl font-semibold mb-6 text-center text-gray-300">Acesse o seu Painel</h2>
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1">Nome do Membro / ID</label>
+                    <input type="text" id="login-username" required class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 transition">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1">Senha</label>
+                    <input type="password" id="login-password" required class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 transition">
+                </div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg transition mt-2 shadow-lg shadow-blue-600/20">
+                    Entrar no Sistema
+                </button>
+            </form>
+            <p id="login-error" class="text-red-500 text-sm text-center mt-4 hidden">Usuário ou senha incorretos!</p>
         </div>
     </div>
 
-    <div id="main-panel">
-        <aside class="sidebar">
-            <h3 style="letter-spacing: 1px;">PAINEL VORTEX</h3>
-            
-            <div class="sidebar-dropdown">
-                <div class="dropdown-trigger" onclick="toggleSidebarMenu(this)">
-                    <span><i class="fas fa-bars" style="margin-right: 8px;"></i> Navegação</span>
-                    <i class="fas fa-chevron-down chevron"></i>
-                </div>
-                <ul class="menu-list" id="sidebar-menu-list">
-                    <li class="active" onclick="tab('dash', this)"><i class="fas fa-chart-pie"></i> Dashboard</li>
-                    <li onclick="tab('membros', this)"><i class="fas fa-users"></i> Membros</li>
-                    <li onclick="tab('encomendas', this)"><i class="fas fa-box"></i> Encomendas</li>
-                    <li onclick="tab('vendas', this)"><i class="fas fa-shopping-cart"></i> Vendas</li>
-                    <li onclick="tab('movimentacao', this)"><i class="fas fa-exchange-alt"></i> Movimentação</li>
-                    <li onclick="tab('importante', this)"><i class="fas fa-exclamation-triangle"></i> Importante</li>
-                    <li onclick="tab('configuracao', this)"><i class="fas fa-cog"></i> Configuração</li>
-                </ul>
+    <div id="main-panel" class="flex flex-1 hidden">
+        <aside class="w-64 bg-gray-950 border-r border-gray-800 flex flex-col">
+            <div class="p-6 flex items-center gap-3 border-b border-gray-800">
+                <i data-lucide="vortex" class="w-8 h-8 text-blue-500"></i>
+                <span class="text-xl font-bold tracking-wider text-white">VORTEX</span>
             </div>
+            
+            <nav class="flex-1 p-4 space-y-1">
+                <button onclick="switchTab('inicio')" id="btn-inicio" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-900 transition active">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Início
+                </button>
+                <button onclick="switchTab('membros')" id="btn-membros" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-900 transition">
+                    <i data-lucide="users" class="w-5 h-5"></i> Membros
+                </button>
+                <button onclick="switchTab('produtos')" id="btn-produtos" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-900 transition">
+                    <i data-lucide="package" class="w-5 h-5"></i> Produtos
+                </button>
+                <button onclick="switchTab('vendas')" id="btn-vendas" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-900 transition">
+                    <i data-lucide="shopping-cart" class="w-5 h-5"></i> Vendas
+                </button>
+                <button onclick="switchTab('logs')" id="btn-logs" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-900 transition">
+                    <i data-lucide="file-text" class="w-5 h-5"></i> Logs
+                </button>
+                <button onclick="switchTab('configuracoes')" id="btn-configuracoes" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-900 transition">
+                    <i data-lucide="settings" class="w-5 h-5"></i> Configurações
+                </button>
+            </nav>
 
-            <div class="user-footer">
-                <div class="user-row-top">
-                    <div class="user-meta-info">
-                        <span class="user-name-tag" id="nav-username">Desconectado</span>
-                        <span class="user-id-tag" id="nav-userid"></span>
+            <div class="p-4 border-t border-gray-800">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center font-bold text-sm text-white" id="user-avatar">U</div>
+                        <span class="text-sm font-medium text-gray-300" id="user-name">Usuário</span>
                     </div>
-                    <div class="status-container">
-                        <span class="status-dot" id="nav-status-dot"></span> 
-                        <span id="nav-status-text">Offline</span>
-                    </div>
+                    <button onclick="logout()" class="text-gray-500 hover:text-red-400 transition" title="Sair">
+                        <i data-lucide="log-out" class="w-4 h-4"></i>
+                    </button>
                 </div>
-                <button class="btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Sair</button>
             </div>
         </aside>
 
-        <main class="main-content">
-            <section id="dash" class="section active">
-                <h2 style="margin-bottom: 20px;">Fluxo Bancário & Caixa</h2>
-                <div class="finance-cards-grid">
-                    <div class="fin-card"><div class="fin-card-info"><h3>Saldo Atual</h3><p id="banco-saldo">R$ 0,00</p></div><div class="fin-card-icon" style="background: rgba(168, 85, 247, 0.15); color: var(--primary);"><i class="fas fa-wallet"></i></div></div>
-                    <div class="fin-card"><div class="fin-card-info"><h3>Total Entradas</h3><p id="banco-entradas" style="color: var(--success);">R$ 0,00</p></div><div class="fin-card-icon" style="background: rgba(34, 197, 94, 0.15); color: var(--success);"><i class="fas fa-arrow-trend-up"></i></div></div>
-                    <div class="fin-card"><div class="fin-card-info"><h3>Total Saídas</h3><p id="banco-saidas" style="color: var(--danger);">R$ 0,00</p></div><div class="fin-card-icon" style="background: rgba(239, 68, 68, 0.15); color: var(--danger);"><i class="fas fa-arrow-trend-down"></i></div></div>
-                </div>
+        <main class="flex-1 bg-gray-900 p-8 overflow-y-auto">
+            
+            <section id="tab-inicio" class="tab-content space-y-6">
+                <header>
+                    <h1 class="text-3xl font-bold text-white">Dashboard Geral</h1>
+                    <p class="text-gray-400 mt-1">Bem-vindo de volta ao centro de controle da Vortex.</p>
+                </header>
 
-                <div class="info-box-wrapper" style="border: 1px dashed rgba(34, 197, 94, 0.4); margin-bottom: -5px;">
-                    <h3 style="margin-bottom: 15px; font-size: 14px; color: var(--success);"><i class="fas fa-cash-register"></i> Novo Registro de Caixa (Entrada / Retirada)</h3>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Tipo de Fluxo</label>
-                            <select id="edit-op-acao">
-                                <option value="somar">Entrada (+)</option>
-                                <option value="subtrair">Retirada / Saída (-)</option>
-                            </select>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="bg-gray-950 p-6 rounded-xl border border-gray-800 flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-400 uppercase">Membros Ativos</p>
+                            <p class="text-3xl font-bold text-white mt-2" id="count-membros">0</p>
                         </div>
-                        <div class="form-group" style="flex: 2;">
-                            <label>Descrição / Motivo do Registro</label>
-                            <input type="text" id="edit-op-desc" placeholder="Ex: Retirada para pagamento extra ou Depósito externo">
-                        </div>
-                        <div class="form-group" style="flex: 1;">
-                            <label>Valor Monetário (R$)</label>
-                            <input type="number" id="edit-op-valor" step="0.01" placeholder="Ex: 1500.00">
-                        </div>
-                        <button onclick="executarMovimentacaoReal()" style="background: var(--success);"><i class="fas fa-check"></i> Computar Registro</button>
+                        <div class="p-3 bg-blue-500/10 rounded-lg text-blue-500"><i data-lucide="users" class="w-6 h-6"></i></div>
                     </div>
-                </div>
-
-                <div class="info-box-wrapper" style="border: 1px dashed rgba(168, 85, 247, 0.4);">
-                    <h3 style="margin-bottom: 15px; font-size: 14px; color: var(--primary);"><i class="fas fa-edit"></i> Ajustar Valores Globais</h3>
-                    <div class="form-row">
-                        <div class="form-group"><label>Novo Saldo</label><input type="number" id="edit-saldo" step="0.01" placeholder="Ex: 50000"></div>
-                        <div class="form-group"><label>Novo Total Entradas</label><input type="number" id="edit-entradas" step="0.01" placeholder="Ex: 75000"></div>
-                        <div class="form-group"><label>Novo Total Saídas</label><input type="number" id="edit-saidas" step="0.01" placeholder="Ex: 25000"></div>
-                        <button onclick="salvarValoresDiretos()" style="background: #10b981;"><i class="fas fa-save"></i> Aplicar Ajustes</button>
+                    <div class="bg-gray-950 p-6 rounded-xl border border-gray-800 flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-400 uppercase">Produtos Cadastrados</p>
+                            <p class="text-3xl font-bold text-white mt-2" id="count-produtos">0</p>
+                        </div>
+                        <div class="p-3 bg-purple-500/10 rounded-lg text-purple-500"><i data-lucide="package" class="w-6 h-6"></i></div>
                     </div>
-                </div>
-
-                <div class="info-box-wrapper">
-                    <h3><i class="fas fa-history"></i> Histórico Geral de Movimentações Financeiras</h3>
-                    <table>
-                        <thead><tr><th>Operador</th><th>Tipo</th><th>Descrição</th><th>Valor</th><th>Saldo Resultante</th></tr></thead>
-                        <tbody id="t-financeiro-corpo"></tbody>
-                    </table>
+                    <div class="bg-gray-950 p-6 rounded-xl border border-gray-800 flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-400 uppercase">Total Vendas</p>
+                            <p class="text-3xl font-bold text-white mt-2" id="count-vendas">0</p>
+                        </div>
+                        <div class="p-3 bg-green-500/10 rounded-lg text-green-500"><i data-lucide="shopping-cart" class="w-6 h-6"></i></div>
+                    </div>
+                    <div class="bg-gray-950 p-6 rounded-xl border border-gray-800 flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-400 uppercase">Ações Registradas</p>
+                            <p class="text-3xl font-bold text-white mt-2" id="count-logs">0</p>
+                        </div>
+                        <div class="p-3 bg-amber-500/10 rounded-lg text-amber-500"><i data-lucide="file-text" class="w-6 h-6"></i></div>
+                    </div>
                 </div>
             </section>
 
-            <section id="membros" class="section">
-                <h2 style="margin-bottom: 5px;">Controle de Membros Core</h2>
-                <p style="color: #64748b; font-size: 13px; margin-bottom: 20px;">Gerencie credenciais de acesso, cargos e identidades vinculadas.</p>
-                
-                <div class="info-box-wrapper" style="border-top: 3px solid var(--primary); padding: 25px;">
-                    <h3 style="margin-bottom: 20px; color: #fff; font-size: 15px; font-weight: 600;"><i class="fas fa-user-plus" style="color: var(--primary); margin-right: 8px;"></i> Criar Novo Acesso / Membro</h3>
-                    <div class="form-row">
-                        <div class="form-group"><label>Nome do Operador</label><input type="text" id="mem-nome" placeholder="Ex: Megan"></div>
-                        <div class="form-group" style="max-width: 140px;"><label>ID In-Game</label><input type="text" id="mem-id" placeholder="Ex: 3461"></div>
-                        <div class="form-group"><label>Usuário do Discord</label><input type="text" id="mem-discord" placeholder="Ex: nome_user"></div>
-                        <div class="form-group"><label>Cargo Corporativo</label><input type="text" id="mem-cargo" placeholder="Ex: Gerente"></div>
-                        <button onclick="registrarNovoMembroLogin()"><i class="fas fa-plus"></i> Concluir Registro</button>
-                    </div>
-                </div>
+            <section id="tab-membros" class="tab-content hidden space-y-6">
+                <header>
+                    <h1 class="text-3xl font-bold text-white">Gerenciamento de Membros</h1>
+                    <p class="text-gray-400 mt-1">Gerencie os acessos, cargos e permissões do painel Vortex.</p>
+                </header>
 
-                <div class="info-box-wrapper" style="padding-top: 15px;">
-                    <table style="margin-top: 5px;">
-                        <thead><tr><th>ID</th><th>Nome</th><th>Vínculo Discord</th><th>Cargo</th><th>Status</th><th style="width: 80px; text-align: center;">Ações</th></tr></thead>
-                        <tbody id="t-membros-corpo"></tbody>
-                    </table>
-                </div>
-            </section>
-
-            <section id="encomendas" class="section">
-                <h2>Gerenciador de Encomendas & Compras</h2>
-                <div class="boxes-row-container">
-                    <div class="info-box-wrapper" style="flex: 1.3;">
-                        <h3 style="margin-bottom: 15px; color: #38bdf8;"><i class="fas fa-shopping-cart"></i> Montar Lista de Compra / Encomenda</h3>
-                        <div class="form-group">
-                            <label for="enc-familia">Família Fornecedora</label>
-                            <select id="enc-familia" onchange="atualizarSelectProdutosEncomenda()">
-                                <option value="">-- Selecione a Família --</option>
-                            </select>
-                        </div>
-                        <div style="border: 1px dashed rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; background: rgba(0,0,0,0.2); margin-bottom: 15px;">
-                            <span style="font-size: 11px; text-transform: uppercase; color: #38bdf8; font-weight: 700; display: block; margin-bottom: 10px;">Adicionar Insumo à Encomenda</span>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="enc-produto">Produto Cadastrado na Família</label>
-                                    <select id="enc-produto" onchange="calcularPreviaValorEncomenda()">
-                                        <option value="">-- Selecione the Produto --</option>
-                                    </select>
-                                </div>
-                                <div class="form-group" style="max-width: 100px;">
-                                    <label for="enc-qtd">Quantidade</label>
-                                    <input type="number" id="enc-qtd" value="1" min="1" oninput="calcularPreviaValorEncomenda()">
-                                </div>
-                                <div class="form-group" style="max-width: 140px;">
-                                    <label>Preço Custo</label>
-                                    <input type="text" id="enc-previa-total" value="R$ 0,00" readonly style="color: #cbd5e1; background: rgba(0,0,0,0.3);">
-                                </div>
-                                <button onclick="adicionarItemAoCarrinhoEncomenda()" style="background: #38bdf8; height: 45px;"><i class="fas fa-plus"></i></button>
-                            </div>
-                        </div>
-                        <h4 style="font-size: 13px; color: #94a3b8; margin-top: 10px;"><i class="fas fa-boxes"></i> Insumos Solicitados neste Pedido:</h4>
-                        <table style="margin-bottom: 20px;">
-                            <thead><tr><th>Insumo/Produto</th><th>Qtd</th><th>Custo Unitário</th><th>Subtotal</th><th style="width: 40px;"></th></tr></thead>
-                            <tbody id="t-carrinho-encomenda-corpo">
-                                <tr><td colspan="5" style="text-align: center; color: #64748b; font-style: italic; font-size: 13px;">Nenhum item adicionado à lista.</td></tr>
-                            </tbody>
-                        </table>
-                        <div style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border); padding-top: 15px;">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="bg-gray-950 p-6 rounded-xl border border-gray-800 h-fit">
+                        <h2 class="text-xl font-bold text-white mb-4" id="membro-form-title">Adicionar Novo Membro</h2>
+                        <form id="membro-form" class="space-y-4">
+                            <input type="hidden" id="membro-id-edicao">
                             <div>
-                                <span style="font-size: 12px; color: #94a3b8; display: block;">Custo Total da Compra</span>
-                                <h2 id="enc-carrinho-total" style="color: var(--danger);">R$ 0,00</h2>
+                                <label class="block text-sm font-medium text-gray-400 mb-1">Nome Completo</label>
+                                <input type="text" id="membro-nome" required class="w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500 transition">
                             </div>
-                            <button onclick="salvarEncomendaCompleta()" style="background: #38bdf8; width: auto; padding: 12px 30px;"><i class="fas fa-shopping-basket"></i> Finalizar e Computar Compra</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="info-box-wrapper">
-                    <h3><i class="fas fa-history"></i> Histórico de Encomendas / Gastos Computados</h3>
-                    <table>
-                        <thead><tr><th>Comprador</th><th>Família Parceira</th><th>Lista de Itens Comprados</th><th>Custo Total Pago</th><th style="width: 50px;">Ações</th></tr></thead>
-                        <tbody id="t-encomendas-corpo"></tbody>
-                    </table>
-                </div>
-            </section>
-
-            <section id="vendas" class="section">
-                <h2>Gerenciador de Vendas Vortex</h2>
-                <div class="boxes-row-container">
-                    <div class="info-box-wrapper" style="flex: 1.3;">
-                        <h3 style="margin-bottom: 15px; color: var(--success);"><i class="fas fa-cash-register"></i> Pedido de Venda</h3>
-                        <div class="form-group">
-                            <label for="ven-familia">Família Compradora</label>
-                            <select id="ven-familia">
-                                <option value="">-- Selecione a Família --</option>
-                            </select>
-                        </div>
-                        <div style="border: 1px dashed rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; background: rgba(0,0,0,0.2); margin-bottom: 15px;">
-                            <span style="font-size: 11px; text-transform: uppercase; color: #a855f7; font-weight: 700; display: block; margin-bottom: 10px;">Adicionar Item ao Pedido</span>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="ven-produto">Produto Vortex</label>
-                                    <select id="ven-produto" onchange="calcularPreviaValorVenda()">
-                                        <option value="">-- Selecione o Produto --</option>
-                                    </select>
-                                </div>
-                                <div class="form-group" style="max-width: 100px;">
-                                    <label for="ven-qtd">Quantidade</label>
-                                    <input type="number" id="ven-qtd" value="1" min="1" oninput="calcularPreviaValorVenda()">
-                                </div>
-                                <div class="form-group" style="max-width: 140px;">
-                                    <label>Preço Item</label>
-                                    <input type="text" id="ven-previa-total" value="R$ 0,00" readonly style="color: #cbd5e1; background: rgba(0,0,0,0.3);">
-                                </div>
-                                <button onclick="adicionarItemAoCarrinhoVenda()" style="background: #a855f7; height: 45px;"><i class="fas fa-plus"></i></button>
-                            </div>
-                        </div>
-                        <h4 style="font-size: 13px; color: #94a3b8; margin-top: 10px;"><i class="fas fa-shopping-basket"></i> Itens no Pedido Atual:</h4>
-                        <table style="margin-bottom: 20px;">
-                            <thead><tr><th>Produto</th><th>Qtd</th><th>Unitário</th><th>Subtotal</th><th style="width: 40px;"></th></tr></thead>
-                            <tbody id="t-carrinho-venda-corpo">
-                                <tr><td colspan="5" style="text-align: center; color: #64748b; font-style: italic; font-size: 13px;">Nenhum produto adicionado ainda.</td></tr>
-                            </tbody>
-                        </table>
-                        <div style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border); padding-top: 15px;">
                             <div>
-                                <span style="font-size: 12px; color: #94a3b8; display: block;">Faturamento Acumulado</span>
-                                <h2 id="ven-carrinho-total" style="color: var(--success);">R$ 0,00</h2>
+                                <label class="block text-sm font-medium text-gray-400 mb-1">Cargo / Função</label>
+                                <input type="text" id="membro-cargo" required class="w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500 transition">
                             </div>
-                            <button onclick="salvarVendaCompleta()" style="background: var(--success); width: auto; padding: 12px 30px;"><i class="fas fa-check-double"></i> Fechar e Confirmar Venda</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="info-box-wrapper">
-                    <h3><i class="fas fa-receipt"></i> Histórico de Vendas Concluídas</h3>
-                    <table>
-                        <thead><tr><th>Vendedor</th><th>Família Cliente</th><th>Produtos Vendidos</th><th>Faturamento Total</th><th style="width: 50px;">Ações</th></tr></thead>
-                        <tbody id="t-vendas-corpo"></tbody>
-                    </table>
-                </div>
-            </section>
-
-            <section id="movimentacao" class="section">
-                <h2>Módulo do Painel: Gráficos & Auditoria Global</h2>
-                <div class="charts-grid-container">
-                    <div class="chart-box">
-                        <h3><i class="fas fa-pie-chart"></i> Proporção de Caixa</h3>
-                        <div class="canvas-container"><canvas id="chartPieCaixa"></canvas></div>
-                    </div>
-                    <div class="chart-box">
-                        <h3><i class="fas fa-chart-bar"></i> Fluxo Comercial Semanal</h3>
-                        <div class="canvas-container"><canvas id="chartBarComercial"></canvas></div>
-                    </div>
-                </div>
-                <div class="info-box-wrapper" style="margin-top: 0;">
-                    <h3><i class="fas fa-terminal"></i> Log de Atividade Geral do Painel</h3>
-                    <div id="panel-logs-container" style="max-height: 400px; overflow-y: auto; margin-top: 15px; border: 1px solid var(--border); background: rgba(0,0,0,0.3); border-radius: 10px;"></div>
-                </div>
-            </section>
-
-            <section id="importante" class="section">
-                <h2 style="margin-bottom: 5px;">Mural de Avisos</h2>
-                <p style="color: #64748b; font-size: 13px; margin-bottom: 25px;">Fixe avisos rápidos, regras e lembretes corporativos cruciais.</p>
-                
-                <div class="info-box-wrapper" style="max-width: 100%; border-radius: 20px; padding: 25px;">
-                    <h3 style="margin-bottom: 15px; font-size: 14px; color: var(--primary);"><i class="fas fa-pen-nib"></i> Escrever Novo Recado</h3>
-                    <div class="form-row" style="align-items: flex-start;">
-                        <div class="form-group" style="flex: 1; min-width: 200px;"><label>Título do Aviso</label><input type="text" id="nota-titulo" placeholder="Ex: Reunião Geral de Metas"></div>
-                        <div class="form-group" style="flex: 2; min-width: 250px;"><label>Conteúdo do Recado</label><textarea id="nota-conteudo" style="height: 45px; resize: none;" placeholder="Digite os detalhes importantes aqui..."></textarea></div>
-                        <button onclick="adicionarNota()" style="background: var(--primary); height: 45px; padding: 0 30px;"><i class="fas fa-thumbtack"></i> Fixar no Mural</button>
-                    </div>
-                </div>
-                
-                <div class="mural-container">
-                    <span style="font-size: 11px; text-transform: uppercase; color: #94a3b8; font-weight: 700; letter-spacing: 1px; display: block; margin-bottom: 20px;"><i class="fas fa-clipboard-list" style="color:#ec4899;"></i> Recados Fixados</span>
-                    <div class="notes-grid-container" id="grid-mural-notas"></div>
-                </div>
-            </section>
-
-            <section id="configuracao" class="section">
-                <h2>Configuração do Sistema</h2>
-                <div class="boxes-row-container">
-                    <div class="info-box-wrapper" style="border-top: 3px solid var(--primary);">
-                        <h3 style="color: var(--primary) !important;"><i class="fas fa-boxes"></i> Produtos Vortex</h3>
-                        <div class="form-row">
-                            <div class="form-group"><label>Nome do Produto</label><input type="text" id="prod-nome" placeholder="Ex: Colete"></div>
-                            <div class="form-group" style="max-width: 120px;"><label>Valor Unidade</label><input type="number" id="prod-valor" step="0.01"></div>
-                            <button onclick="adicionarProduto()"><i class="fas fa-plus"></i></button>
-                        </div>
-                        <table><thead><tr><th>Produto</th><th>Valor</th><th style="width: 50px;">Ações</th></tr></thead><tbody id="t-produtos-corpo"></tbody></table>
-                    </div>
-                    
-                    <div class="info-box-wrapper" style="border-top: 3px solid #38bdf8;">
-                        <h3 style="color: #38bdf8 !important;"><i class="fas fa-handshake"></i> Gerenciador de Produtos das Famílias</h3>
-                        <div class="form-row">
-                            <div class="form-group"><label>Nome da Família</label><input type="text" id="fam-nome-grupo" placeholder="Ex: Medici"></div>
-                            <div class="form-group"><label>Nome do Produto</label><input type="text" id="fam-nome" placeholder="Ex: Componente"></div>
-                            <div class="form-group" style="max-width: 110px;"><label>Valor Unidade</label><input type="number" id="fam-valor" step="0.01"></div>
-                            <button onclick="adicionarProdutoFamilia()" style="background: #38bdf8;"><i class="fas fa-plus"></i></button>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="families-grid-container" id="grid-caixas-familias" style="margin-bottom: 20px;"></div>
-
-                <div style="margin-top: 15px; width: 100%;">
-                    <div class="cfg-header-bar" onclick="toggleCaixaPapelParede()">
-                        <h3><i class="fas fa-image"></i> Personalização de Fundo</h3>
-                        <button class="toggle-cfg-btn" id="btn-cfg-icon"><i class="fas fa-plus"></i></button>
-                    </div>
-                    
-                    <div id="wrapper-papeis-parede" class="info-box-wrapper collapsible-box closed">
-                        <div class="form-row" style="margin-bottom: 0;">
-                            <div class="form-group" style="flex: 2;">
-                                <label>Link da Imagem para a Tela de Login</label>
-                                <input type="text" id="cfg-bg-login" placeholder="https://exemplo.com/imagem-login.jpg">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-400 mb-1">Senha de Acesso</label>
+                                <input type="password" id="membro-senha" required class="w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500 transition">
                             </div>
-                            <div class="form-group" style="flex: 2;">
-                                <label>Link da Imagem para o Painel Principal</label>
-                                <input type="text" id="cfg-bg-main" placeholder="https://exemplo.com/imagem-painel.jpg">
+                            <div class="flex gap-2">
+                                <button type="submit" id="btn-salvar-membro" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition shadow-lg shadow-blue-600/10">
+                                    Cadastrar Membro
+                                </button>
+                                <button type="button" id="btn-cancelar-edicao" onclick="resetMembroForm()" class="hidden bg-gray-800 hover:bg-gray-700 text-gray-300 font-medium py-2 px-4 rounded-lg transition">
+                                    Cancelar
+                                </button>
                             </div>
-                            <button onclick="aplicarPapeisDeParede()" style="background: var(--warning);"><i class="fas fa-paint-roller"></i> Aplicar Fundos</button>
+                        </form>
+                    </div>
+
+                    <div class="lg:grid-cols-1 lg:col-span-2 bg-gray-950 rounded-xl border border-gray-800 overflow-hidden">
+                        <div class="p-6 border-b border-gray-800"><h2 class="text-xl font-bold text-white">Membros Cadastrados</h2></div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full border-collapse text-left">
+                                <thead>
+                                    <tr class="bg-gray-900/50 border-b border-gray-800 text-gray-400 text-sm font-medium">
+                                        <th class="p-4">Membro</th>
+                                        <th class="p-4">Cargo</th>
+                                        <th class="p-4">Senha</th>
+                                        <th class="p-4 text-right">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabela-membros-body" class="divide-y divide-gray-800 text-sm">
+                                    </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
             </section>
+
+            <section id="tab-produtos" class="tab-content hidden space-y-6">
+                <h1 class="text-3xl font-bold text-white">Produtos</h1>
+                <p class="text-gray-400">Gerenciamento de estoque e itens virtuais.</p>
+            </section>
+            <section id="tab-vendas" class="tab-content hidden space-y-6">
+                <h1 class="text-3xl font-bold text-white">Vendas</h1>
+                <p class="text-gray-400">Histórico de faturamentos e pedidos do sistema.</p>
+            </section>
+            <section id="tab-logs" class="tab-content hidden space-y-6">
+                <h1 class="text-3xl font-bold text-white">Logs do Sistema</h1>
+                <p class="text-gray-400">Histórico de ações em tempo real realizadas na plataforma.</p>
+            </section>
+            <section id="tab-configuracoes" class="tab-content hidden space-y-6">
+                <h1 class="text-3xl font-bold text-white">Configurações</h1>
+                <p class="text-gray-400">Ajustes operacionais do ecossistema Vortex.</p>
+            </section>
+
         </main>
     </div>
 
-    <script>
-        // CONFIGURAÇÃO DOS DADOS PADRÃO DO SISTEMA
-        const defaultDB = {
-            membros: [
-                { id: "3461", nome: "Megan", discord: "megan_vortex", senha: "1234", cargo: "Chefe", online: false }
-            ],
-            produtos: [
-                { id: 1, nome: "Kit de Reparo Premium", valor: 250.00 },
-                { id: 2, nome: "Colete Balístico V3", valor: 500.00 }
-            ],
-            familias: {
-                "Medici": [{ id: 101, nome: "Componente Mecânico Ext", valor: 180.00 }],
-                "Mazzini": [{ id: 102, nome: "Algema de Aço", valor: 90.00 }]
-            },
-            encomendas: [],
-            vendas: [],
-            anotacoes: [],
-            financeiro: { 
-                saldoAtual: 15000.00, 
-                totalEntradas: 20000.00, 
-                totalSaidas: 5000.00, 
-                historico: [
-                    { operador: "Sistema", tipo: "ENTRADA", descricao: "Balanço Inicial de Caixa", valor: 20000.00, resulting: 20000.00 },
-                    { operador: "Sistema", tipo: "SAIDA", descricao: "Configuração Inicial de Insumos", valor: 5000.00, resulting: 15000.00 }
-                ] 
-            },
-            logs: [
-                { data: new Date().toLocaleTimeString('pt-BR'), operador: "Sistema", acao: "Painel Vortex inicializado com sucesso.", tag: "system" }
-            ],
-            bgLogin: "",
-            bgMain: ""
+    <script type="module">
+        // Importação dos módulos oficiais do SDK Web do Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, set, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        // Configuração de Credenciais da sua aplicação vinculada ao projeto vortex-f7559
+        const firebaseConfig = {
+            databaseURL: "https://vortex-f7559-default-rtdb.firebaseio.com"
         };
 
-        let db = {};
-        let usuarioLogado = null;
-        let carrinhoVendaAtual = []; 
-        let carrinhoEncomendaAtual = []; 
-        let instancePie = null;
-        let instanceBar = null;
+        // Inicialização do Ecossistema
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
 
-        // FORÇA O LOGIN PADRÃO A SEMPRE EXISTIR E CORRIGE CONFLITOS DE CACHE
-        function loadDatabase() {
-            const savedData = localStorage.getItem('vortex_panel_db');
-            if (savedData) {
-                try {
-                    db = JSON.parse(savedData);
-                    
-                    // Se a estrutura de membros quebrou por algum motivo, reconstrói com segurança
-                    if (!db.membros || !Array.isArray(db.membros) || db.membros.length === 0) {
-                        db.membros = [{ id: "3461", nome: "Megan", discord: "megan_vortex", senha: "1234", cargo: "Chefe", online: false }];
-                    } else {
-                        // Garante o login padrão
-                        const possuiAdmin = db.membros.some(m => m.nome.toLowerCase() === "megan" || m.id === "3461");
-                        if (!possuiAdmin) {
-                            db.membros.push({ id: "3461", nome: "Megan", discord: "megan_vortex", senha: "1234", cargo: "Chefe", online: false });
-                        }
-                    }
-                } catch(e) {
-                    db = JSON.parse(JSON.stringify(defaultDB));
+        // VARIÁVEIS GLOBAIS DE CONTROLE
+        let listaMembrosGlobais = {};
+
+        // INICIALIZADOR GLOBAL DE ÍCONES LUCIDE
+        window.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+        });
+
+        // NAVEGAÇÃO ENTRE ABAS
+        window.switchTab = function(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+            document.querySelectorAll('.sidebar-item').forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+            document.getElementById(`btn-${tabName}`).classList.add('active');
+        };
+
+        // AUTENTICAÇÃO E LOGIN ATRELADO AO BANCO DE DADOS
+        const loginForm = document.getElementById('login-form');
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const usernameInput = document.getElementById('login-username').value.trim();
+            const passwordInput = document.getElementById('login-password').value;
+            const loginError = document.getElementById('login-error');
+
+            let usuarioEncontrado = null;
+
+            // Percorre a lista de membros coletados no Firebase para validar as credenciais
+            for (let id in listaMembrosGlobais) {
+                const m = listaMembrosGlobais[id];
+                if ((m.nome.toLowerCase() === usernameInput.toLowerCase() || id === usernameInput) && m.senha === passwordInput) {
+                    usuarioEncontrado = m;
+                    break;
                 }
-            } else {
-                db = JSON.parse(JSON.stringify(defaultDB));
             }
-        }
 
-        function saveDatabase() {
-            localStorage.setItem('vortex_panel_db', JSON.stringify(db));
-        }
+            // Fallback Admin Master padrão (Caso o banco de dados esteja vazio inicialmente)
+            if (!usuarioEncontrado && usernameInput === "admin" && passwordInput === "vortex123") {
+                usuarioEncontrado = { nome: "Administrador Master", cargo: "Dono" };
+            }
 
-        window.onload = function() {
-            loadDatabase();
-            aplicarFundosSalvosAoCarregar();
-            renderMembros();
-            renderProdutos();
-            renderBoxesFamilias();
-            renderContabilidadeDashboard();
-            renderEncomendas();
-            renderVendas();
-            renderMuralNotas();
-            atualizarSelectsGeraisVendaseEncomendas();
-            
-            // Garante visualmente que a tela de login esteja aberta e o painel oculto no início
-            document.getElementById('login-screen').style.display = 'flex';
-            document.getElementById('main-panel').style.display = 'none';
+            if (usuarioEncontrado) {
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('main-panel').classList.remove('hidden');
+                document.getElementById('user-name').innerText = usuarioEncontrado.nome;
+                document.getElementById('user-avatar').innerText = usuarioEncontrado.nome.charAt(0).toUpperCase();
+                loginError.classList.add('hidden');
+                loginForm.reset();
+                registrarLog(`Usuário ${usuarioEncontrado.nome} efetuou login com sucesso.`);
+            } else {
+                loginError.classList.remove('hidden');
+            }
+        });
+
+        window.logout = function() {
+            document.getElementById('main-panel').classList.add('hidden');
+            document.getElementById('login-screen').classList.remove('hidden');
+            registrarLog("Usuário efetuou logout.");
         };
 
-        function aplicarFundosSalvosAoCarregar() {
-            if(db.bgLogin && db.bgLogin !== "") {
-                document.getElementById('login-screen').style.background = `url('${db.bgLogin}')`;
-                document.getElementById('cfg-bg-login').value = db.bgLogin;
-            }
-            if(db.bgMain && db.bgMain !== "") {
-                document.body.style.background = `url('${db.bgMain}')`;
-                document.getElementById('cfg-bg-main').value = db.bgMain;
-            }
-        }
-
-        function ejecutarMovimentacaoReal() {
-            const acao = document.getElementById('edit-op-acao').value;
-            const descricaoInput = document.getElementById('edit-op-desc').value.trim();
-            const valorInput = document.getElementById('edit-op-valor').value;
-
-            if (descricaoInput === "") {
-                alert("Por favor, preencha o motivo/descrição do registro!");
-                return;
-            }
-
-            if (valorInput === "" || isNaN(parseFloat(valorInput)) || parseFloat(valorInput) <= 0) {
-                alert("Por favor, insira um valor válido maior que zero!");
-                return;
-            }
-
-            const valorAlvo = parseFloat(valorInput);
-            let nomeOperador = usuarioLogado ? usuarioLogado.nome : "Operador";
-            let tipoHistorico = "";
-            let tagLog = "";
-
-            if (acao === "somar") {
-                db.financeiro.saldoAtual += valorAlvo;
-                db.financeiro.totalEntradas += valorAlvo;
-                tipoHistorico = "ENTRADA";
-                tagLog = "entrada";
-            } else {
-                db.financeiro.saldoAtual -= valorAlvo;
-                db.financeiro.totalSaidas += valorAlvo;
-                tipoHistorico = "SAIDA";
-                tagLog = "saida";
-            }
-
-            db.financeiro.historico.push({
-                operador: nomeOperador,
-                tipo: tipoHistorico,
-                descricao: descricaoInput,
-                valor: valorAlvo,
-                resulting: db.financeiro.saldoAtual
-            });
-
-            registrarLog(nomeOperador, `Registrou ${tipoHistorico}: ${descricaoInput} no valor de R$ ${valorAlvo.toFixed(2)}`, tagLog);
+        // ENVIAR / ATUALIZAR DADOS DE MEMBROS
+        const membroForm = document.getElementById('membro-form');
+        membroForm.addEventListener('submit', (e) => {
+            e.preventDefault();
             
-            document.getElementById('edit-op-desc').value = "";
-            document.getElementById('edit-op-valor').value = "";
-            
-            saveDatabase();
-            renderContabilidadeDashboard();
-            if(document.getElementById('movimentacao').style.display === 'flex') {
-                initOuUpdateGraficos();
-            }
-            alert("Movimentação registrada com sucesso no caixa!");
-        }
+            const idEdicao = document.getElementById('membro-id-edicao').value;
+            const nome = document.getElementById('membro-nome').value.trim();
+            const cargo = document.getElementById('membro-cargo').value.trim();
+            const senha = document.getElementById('membro-senha').value;
 
-        function toggleCaixaPapelParede() {
-            const box = document.getElementById('wrapper-papeis-parede');
-            const icon = document.querySelector('#btn-cfg-icon i');
-            if(box.classList.contains('closed')) {
-                box.classList.remove('closed');
-                icon.className = "fas fa-minus";
+            if (idEdicao) {
+                // Modo Edição: Atualiza os dados do registro existente
+                update(ref(db, `membros/${idEdicao}`), {
+                    nome: nome,
+                    cargo: cargo,
+                    senha: senha
+                }).then(() => {
+                    registrarLog(`Membro editado: ${nome} (Função: ${cargo})`);
+                    resetMembroForm();
+                });
             } else {
-                box.classList.add('closed');
-                icon.className = "fas fa-plus";
-            }
-        }
-
-        function aplicarPapeisDeParede() {
-            const bgLoginUrl = document.getElementById('cfg-bg-login').value.trim();
-            const bgMainUrl = document.getElementById('cfg-bg-main').value.trim();
-
-            db.bgLogin = bgLoginUrl;
-            db.bgMain = bgMainUrl;
-
-            if(bgLoginUrl !== "") {
-                document.getElementById('login-screen').style.background = `url('${bgLoginUrl}')`;
-            } else {
-                document.getElementById('login-screen').style.background = 'var(--bg)';
-            }
-            
-            if(bgMainUrl !== "") {
-                document.body.style.background = `url('${bgMainUrl}')`;
-            } else {
-                document.body.style.background = 'var(--bg)';
-            }
-
-            let op = usuarioLogado ? usuarioLogado.nome : "Sistema";
-            registrarLog(op, "Alterou as configurações de imagem de fundo do painel.", "system");
-            saveDatabase();
-            alert("Novos papéis de parede aplicados e salvos com sucesso!");
-        }
-
-        function salvarValoresDiretos() {
-            const s = document.getElementById('edit-saldo').value;
-            const e = document.getElementById('edit-entradas').value;
-            const sa = document.getElementById('edit-saidas').value;
-            
-            let mudouAlgo = false;
-            let nomeOperador = usuarioLogado ? usuarioLogado.nome : "Operador";
-            let descricaoAlteracoes = "Ajuste manual:";
-
-            if(s !== "") { 
-                db.financeiro.saldoAtual = parseFloat(s); 
-                descricaoAlteracoes += ` [Novo Saldo: R$ ${db.financeiro.saldoAtual.toFixed(2)}]`;
-                mudouAlgo = true; 
-            }
-            if(e !== "") { 
-                db.financeiro.totalEntradas = parseFloat(e); 
-                descricaoAlteracoes += ` [Novas Entradas: R$ ${db.financeiro.totalEntradas.toFixed(2)}]`;
-                mudouAlgo = true; 
-            }
-            if(sa !== "") { 
-                db.financeiro.totalSaidas = parseFloat(sa); 
-                descricaoAlteracoes += ` [Novas Saídas: R$ ${db.financeiro.totalSaidas.toFixed(2)}]`;
-                mudouAlgo = true; 
-            }
-
-            if(!mudouAlgo) {
-                alert("Preencha pelo menos um campo para aplicar os novos valores!");
-                return;
-            }
-
-            db.financeiro.historico.push({
-                operador: nomeOperador,
-                tipo: "SYSTEM",
-                descricao: descricaoAlteracoes,
-                valor: 0,
-                resulting: db.financeiro.saldoAtual
-            });
-
-            registrarLog(nomeOperador, `Modificou manualmente as finanças: ${descricaoAlteracoes}`, "system");
-
-            document.getElementById('edit-saldo').value = "";
-            document.getElementById('edit-entradas').value = "";
-            document.getElementById('edit-saidas').value = "";
-
-            saveDatabase();
-            renderContabilidadeDashboard();
-            if(document.getElementById('movimentacao').style.display === 'flex') {
-                initOuUpdateGraficos();
-            }
-            alert("Valores do Caixa updated e logs sincronizados!");
-        }
-
-        function registrarLog(operador, acao, tag = "user") {
-            const hora = new Date().toLocaleTimeString('pt-BR');
-            db.logs.unshift({ data: hora, operador: operador, acao: acao, tag: tag });
-            saveDatabase();
-            renderLogsPainel();
-        }
-
-        function renderLogsPainel() {
-            const container = document.getElementById('panel-logs-container');
-            if(!container) return;
-            container.innerHTML = "";
-            if(db.logs.length === 0) {
-                container.innerHTML = `<div style="padding:15px; text-align:center; color:#64748b; font-style:italic;">Nenhum log gerado.</div>`;
-                return;
-            }
-            db.logs.forEach(l => {
-                let badgeColor = "offline";
-                if(l.tag === "system") badgeColor = "system";
-                if(l.tag === "entrada") badgeColor = "online";
-                if(l.tag === "saida") badgeColor = "offline";
-
-                container.innerHTML += `
-                    <div class="log-item">
-                        <div>
-                            <span class="badge ${badgeColor}" style="margin-right:10px; font-size:10px;">${l.operador.toUpperCase()}</span>
-                            <span style="color:#e2e8f0;">${l.acao}</span>
-                        </div>
-                        <span class="log-time">${l.data}</span>
-                    </div>
-                `;
-            });
-        }
-
-        function initOuUpdateGraficos() {
-            if(document.getElementById('movimentacao').style.display !== 'flex') return;
-            const ctxPie = document.getElementById('chartPieCaixa');
-            const ctxBar = document.getElementById('chartBarComercial');
-            if(!ctxPie || !ctxBar) return;
-
-            const dadosPie = [db.financeiro.saldoAtual, db.financeiro.totalEntradas, db.financeiro.totalSaidas];
-            if(instancePie) {
-                instancePie.data.datasets[0].data = dadosPie;
-                instancePie.update();
-            } else {
-                instancePie = new Chart(ctxPie, {
-                    type: 'pie',
-                    data: {
-                        labels: ['Saldo em Caixa', 'Entradas', 'Saídas'],
-                        datasets: [{ data: dadosPie, backgroundColor: ['#a855f7', '#22c55e', '#ef4444'], borderWidth: 1, borderColor: 'rgba(255,255,255,0.05)' }]
-                    },
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#94a3b8' } } } }
+                // Modo Cadastro: Cria um novo nó com ID dinâmico gerado pelo push
+                const novoMembroRef = push(ref(db, 'membros'));
+                set(novoMembroRef, {
+                    nome: nome,
+                    cargo: cargo,
+                    senha: senha
+                }).then(() => {
+                    registrarLog(`Novo membro cadastrado: ${nome} (${cargo})`);
+                    membroForm.reset();
                 });
             }
+        });
 
-            let fatVendas = db.vendas.reduce((acc, c) => acc + c.valorTotal, 0);
-            let custEncomendas = db.encomendas.reduce((acc, c) => acc + c.valorTotal, 0);
-            const dadosVendasSemanas = [fatVendas * 0.2, fatVendas * 0.5, fatVendas * 0.8, fatVendas];
-            const dadosComprasSWeeks = [custEncomendas * 0.4, custEncomendas * 0.3, custEncomendas * 0.6, custEncomendas];
+        // CONFIGURAÇÕES DO MODO DE EDIÇÃO
+        window.prepararEdicaoMembro = function(id) {
+            const membro = listaMembrosGlobais[id];
+            if (!membro) return;
 
-            if(instanceBar) {
-                instanceBar.data.datasets[0].data = dadosVendasSemanas;
-                instanceBar.data.datasets[1].data = dadosComprasSWeeks;
-                instanceBar.update();
-            } else {
-                instanceBar = new Chart(ctxBar, {
-                    type: 'bar',
-                    data: {
-                        labels: ['Semana 1', 'Semana 2', 'Semana 3', 'Semana Atual'],
-                        datasets: [
-                            { label: 'Vendas (Entradas)', data: dadosVendasSemanas, backgroundColor: 'rgba(34, 197, 94, 0.65)', borderColor: '#22c55e', borderWidth: 1 },
-                            { label: 'Encomendas (Saídas)', data: dadosComprasSWeeks, backgroundColor: 'rgba(239, 68, 68, 0.65)', borderColor: '#ef4444', borderWidth: 1 }
-                        ]
-                    },
-                    options: {
-                        responsive: true, maintainAspectRatio: false,
-                        scales: { x: { ticks: { color: '#94a3b8' } }, y: { ticks: { color: '#94a3b8' } } },
-                        plugins: { legend: { labels: { color: '#94a3b8' } } }
-                    }
+            document.getElementById('membro-id-edicao').value = id;
+            document.getElementById('membro-nome').value = membro.nome;
+            document.getElementById('membro-cargo').value = membro.cargo;
+            document.getElementById('membro-senha').value = membro.senha;
+
+            document.getElementById('membro-form-title').innerText = "Editar Dados do Membro";
+            document.getElementById('btn-salvar-membro').innerText = "Salvar Alterações";
+            document.getElementById('btn-cancelar-edicao').classList.remove('hidden');
+        };
+
+        window.resetMembroForm = function() {
+            document.getElementById('membro-id-edicao').value = "";
+            membroForm.reset();
+            document.getElementById('membro-form-title').innerText = "Adicionar Novo Membro";
+            document.getElementById('btn-salvar-membro').innerText = "Cadastrar Membro";
+            document.getElementById('btn-cancelar-edicao').classList.add('hidden');
+        };
+
+        // EXCLUSÃO DE MEMBROS
+        window.deletarMembro = function(id, nome) {
+            if (confirm(`Tem certeza que deseja desvincular e remover as permissões de acesso de ${nome}?`)) {
+                remove(ref(db, `membros/${id}`)).then(() => {
+                    registrarLog(`Membro removido do ecossistema: ${nome}`);
                 });
             }
-        }
+        };
 
-        function atualizarSelectsGeraisVendaseEncomendas() {
-            const encFam = document.getElementById('enc-familia');
-            if(encFam && carrinhoEncomendaAtual.length === 0) {
-                encFam.innerHTML = '<option value="">-- Selecione a Família --</option>';
-                Object.keys(db.familias).forEach(f => encFam.innerHTML += `<option value="${f}">${f}</option>`);
+        // RECURSO DE MOSTRAR / OCULTAR SENHA NA TABELA
+        window.toggleVisualizacaoSenha = function(button, inputId) {
+            const campo = document.getElementById(inputId);
+            const icone = button.querySelector('i');
+            if (campo.classList.contains('password-masked')) {
+                campo.innerText = campo.getAttribute('data-real-password');
+                campo.classList.remove('password-masked');
+                button.innerHTML = '<i data-lucide="eye-off" class="w-4 h-4"></i>';
+            } else {
+                campo.innerText = '••••••';
+                campo.classList.add('password-masked');
+                button.innerHTML = '<i data-lucide="eye" class="w-4 h-4"></i>';
             }
-            const venFam = document.getElementById('ven-familia');
-            const venProd = document.getElementById('ven-produto');
-            if(venFam && carrinhoVendaAtual.length === 0) { 
-                venFam.innerHTML = '<option value="">-- Selecione a Família --</option>';
-                Object.keys(db.familias).forEach(f => venFam.innerHTML += `<option value="${f}">${f}</option>`);
-            }
-            if(venProd) {
-                venProd.innerHTML = '<option value="">-- Selecione o Produto --</option>';
-                db.produtos.forEach(p => venProd.innerHTML += `<option value="${p.id}">${p.nome} (R$ ${p.valor.toFixed(2)})</option>`);
-            }
-        }
+            lucide.createIcons();
+        };
 
-        function atualizarSelectProdutosEncomenda() {
-            const familiaSelecionada = document.getElementById('enc-familia').value;
-            const selectProd = document.getElementById('enc-produto');
-            selectProd.innerHTML = '<option value="">-- Selecione o Produto --</option>';
-            if(!familiaSelecionada || !db.familias[familiaSelecionada]) { calcularPreviaValorEncomenda(); return; }
-            db.familias[familiaSelecionada].forEach(p => { selectProd.innerHTML += `<option value="${p.id}">${p.nome} (R$ ${p.valor.toFixed(2)})</option>`; });
-            calcularPreviaValorEncomenda();
-        }
-
-        function calcularPreviaValorEncomenda() {
-            const fam = document.getElementById('enc-familia').value; 
-            const prodId = document.getElementById('enc-produto').value;
-            const qtd = parseInt(document.getElementById('enc-qtd').value) || 0; 
-            const inputPrevia = document.getElementById('enc-previa-total');
-            if(!fam || !prodId || qtd <= 0) { inputPrevia.value = "R$ 0,00"; return; }
-            const produto = db.familias[fam].find(p => p.id == prodId);
-            if(produto) { inputPrevia.value = `R$ ${(produto.valor * qtd).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`; }
-        }
-
-        function adicionarItemAoCarrinhoEncomenda() {
-            const fam = document.getElementById('enc-familia').value;
-            const prodId = document.getElementById('enc-produto').value;
-            const qtd = parseInt(document.getElementById('enc-qtd').value) || 0;
-            if(!fam) { alert("Selecione primeiro a Família Fornecedora!"); return; }
-            if(!prodId || qtd <= 0) { alert("Selecione um insumo válido!"); return; }
-            const produto = db.familias[fam].find(p => p.id == prodId);
-            if(!produto) return;
-
-            document.getElementById('enc-familia').disabled = true;
-            const subtotal = produto.valor * qtd;
-            carrinhoEncomendaAtual.push({ produtoId: produto.id, nome: produto.nome, House_Qtd: qtd, quantidade: qtd, valorUnitario: produto.valor, subtotal: subtotal });
-            document.getElementById('enc-qtd').value = "1";
-            document.getElementById('enc-produto').value = "";
-            document.getElementById('enc-previa-total').value = "R$ 0,00";
-            renderCarrinhoProvisorioEncomenda();
-        }
-
-        function removerItemDoCarrinhoEncomenda(index) {
-            carrinhoEncomendaAtual.splice(index, 1);
-            if(carrinhoEncomendaAtual.length === 0) document.getElementById('enc-familia').disabled = false;
-            renderCarrinhoProvisorioEncomenda();
-        }
-
-        function renderCarrinhoProvisorioEncomenda() {
-            const tbody = document.getElementById('t-carrinho-encomenda-corpo');
-            const totalDisplay = document.getElementById('enc-carrinho-total');
-            if(!tbody) return;
-            if(carrinhoEncomendaAtual.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #64748b; font-style: italic; font-size: 13px;">Nenhum item adicionado à lista.</td></tr>`;
-                totalDisplay.innerText = "R$ 0,00";
-                return;
-            }
-            tbody.innerHTML = "";
-            let totalAcumulado = 0;
-            carrinhoEncomendaAtual.forEach((item, index) => {
-                totalAcumulado += item.subtotal;
-                tbody.innerHTML += `<tr><td>${item.nome}</td><td>${item.quantidade}x</td><td>R$ ${item.valorUnitario.toFixed(2)}</td><td>R$ ${item.subtotal.toFixed(2)}</td><td><button class="btn-delete" style="padding: 2px 6px;" onclick="removerItemDoCarrinhoEncomenda(${index})"><i class="fas fa-times"></i></button></td></tr>`;
-            });
-            totalDisplay.innerText = `R$ ${totalAcumulado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
-        }
-
-        function salvarEncomendaCompleta() {
-            if(!usuarioLogado || carrinhoEncomendaAtual.length === 0) return;
-            const fam = document.getElementById('enc-familia').value;
-            let totalCustoPedido = 0;
-            let resumoProdutos = carrinhoEncomendaAtual.map(i => `${i.quantidade}x ${i.nome}`).join(", ");
-            carrinhoEncomendaAtual.forEach(i => totalCustoPedido += i.subtotal);
-
-            db.encomendas.push({ id: Date.now(), operador: usuarioLogado.nome, familia: fam, resumoItens: resumoProdutos, valorTotal: totalCustoPedido });
-            db.financeiro.saldoAtual -= totalCustoPedido;
-            db.financeiro.totalSaidas += totalCustoPedido;
-            db.financeiro.historico.push({ operador: usuarioLogado.nome, tipo: "SAIDA", descricao: `Compra realizada com a Família ${fam} [${resumoProdutos}]`, valor: totalCustoPedido, resulting: db.financeiro.saldoAtual });
-
-            registrarLog(usuarioLogado.nome, `Fechou uma lista de Encomenda com a Família ${fam}. Total: R$ ${totalCustoPedido.toFixed(2)}`, "saida");
-            carrinhoEncomendaAtual = [];
-            document.getElementById('enc-familia').disabled = false;
-            document.getElementById('enc-familia').value = "";
+        // SINCRONIZAÇÃO EM TEMPO REAL DOS DADOS
+        onValue(ref(db, 'membros'), (snapshot) => {
+            const data = snapshot.val() || {};
+            listaMembrosGlobais = data; // Atualiza a variável de cache local
             
-            saveDatabase();
-            renderCarrinhoProvisorioEncomenda();
-            renderEncomendas();
-            renderContabilidadeDashboard();
-            alert("Encomenda fechada e computada como saída!");
-        }
-
-        function renderEncomendas() {
-            const tbody = document.getElementById('t-encomendas-corpo'); if(!tbody) return; tbody.innerHTML = "";
-            if(db.encomendas.length === 0) { tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #64748b; font-style: italic;">Nenhuma encomenda registrada.</td></tr>`; return; }
-            [...db.encomendas].reverse().forEach(e => { tbody.innerHTML += `<tr><td>${e.operador}</td><td>${e.familia}</td><td>${e.resumoItens}</td><td>R$ ${e.valorTotal.toFixed(2)}</td><td><button class="btn-delete" onclick="removerEncomenda(${e.id})"><i class="fas fa-trash"></i></button></td></tr>`; });
-        }
-
-        function removerEncomenda(id) {
-            if(confirm("Deseja apagar esta encomenda?")) {
-                db.encomendas = db.encomendas.filter(e => e.id !== id);
-                saveDatabase();
-                renderEncomendas();
-            }
-        }
-
-        function calcularPreviaValorVenda() {
-            const prodId = document.getElementById('ven-produto').value;
-            const qtd = parseInt(document.getElementById('ven-qtd').value) || 0;
-            const inputPrevia = document.getElementById('ven-previa-total');
-            if(!prodId || qtd <= 0) { inputPrevia.value = "R$ 0,00"; return; }
-            const produto = db.produtos.find(p => p.id == prodId);
-            if(produto) { inputPrevia.value = `R$ ${(produto.valor * qtd).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`; }
-        }
-
-        function adicionarItemAoCarrinhoVenda() {
-            const fam = document.getElementById('ven-familia').value;
-            const prodId = document.getElementById('ven-produto').value;
-            const qtd = parseInt(document.getElementById('ven-qtd').value) || 0;
-            if(!fam || !prodId || qtd <= 0) return;
-
-            const produto = db.produtos.find(p => p.id == prodId);
-            if(!produto) return;
-
-            document.getElementById('ven-familia').disabled = true;
-            const subtotal = produto.valor * qtd;
-            carrinhoVendaAtual.push({ produtoId: produto.id, nome: produto.nome, quantidade: qtd, valorUnitario: produto.valor, subtotal: subtotal });
-            document.getElementById('ven-qtd').value = "1";
-            document.getElementById('ven-produto').value = "";
-            document.getElementById('ven-previa-total').value = "R$ 0,00";
-            renderCarrinhoProvisorio();
-        }
-
-        function removerItemDoCarrinhoVenda(index) {
-            carrinhoVendaAtual.splice(index, 1);
-            if(carrinhoVendaAtual.length === 0) document.getElementById('ven-familia').disabled = false;
-            renderCarrinhoProvisorio();
-        }
-
-        function renderCarrinhoProvisorio() {
-            const tbody = document.getElementById('t-carrinho-venda-corpo');
-            const totalDisplay = document.getElementById('ven-carrinho-total');
-            if(!tbody) return;
-            if(carrinhoVendaAtual.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #64748b; font-style: italic; font-size: 13px;">Nenhum produto adicionado ainda.</td></tr>`;
-                totalDisplay.innerText = "R$ 0,00";
-                return;
-            }
-            tbody.innerHTML = "";
-            let totalAcumulado = 0;
-            carrinhoVendaAtual.forEach((item, index) => {
-                totalAcumulado += item.subtotal;
-                tbody.innerHTML += `<tr><td>${item.nome}</td><td>${item.quantidade}x</td><td>R$ ${item.valorUnitario.toFixed(2)}</td><td>R$ ${item.subtotal.toFixed(2)}</td><td><button class="btn-delete" style="padding: 2px 6px;" onclick="removerItemDoCarrinhoVenda(${index})"><i class="fas fa-times"></i></button></td></tr>`;
-            });
-            totalDisplay.innerText = `R$ ${totalAcumulado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
-        }
-
-        function salvarVendaCompleta() {
-            if(!usuarioLogado || carrinhoVendaAtual.length === 0) return;
-            const fam = document.getElementById('ven-familia').value;
-            let totalFaturamentoPedido = 0;
-            let resumeProdutos = carrinhoVendaAtual.map(i => `${i.quantidade}x ${i.nome}`).join(", ");
-            carrinhoVendaAtual.forEach(i => totalFaturamentoPedido += i.subtotal);
-
-            db.vendas.push({ id: Date.now(), operador: usuarioLogado.nome, familia: fam, resumoItens: resumeProdutos, valorTotal: totalFaturamentoPedido });
-            db.financeiro.saldoAtual += totalFaturamentoPedido;
-            db.financeiro.totalEntradas += totalFaturamentoPedido;
-            db.financeiro.historico.push({ operador: usuarioLogado.nome, tipo: "ENTRADA", descricao: `Pedido Grande para Família ${fam} [${resumeProdutos}]`, valor: totalFaturamentoPedido, resulting: db.financeiro.saldoAtual });
-
-            registrarLog(usuarioLogado.nome, `Concluiu venda para a Família ${fam}. Total: R$ ${totalFaturamentoPedido.toFixed(2)}`, "entrada");
-            carrinhoVendaAtual = [];
-            document.getElementById('ven-familia').disabled = false;
-            document.getElementById('ven-familia').value = "";
+            const tbody = document.getElementById('tabela-membros-body');
+            tbody.innerHTML = '';
             
-            saveDatabase();
-            renderCarrinhoProvisorio();
-            renderVendas();
-            renderContabilidadeDashboard();
-            alert("Venda com múltiplos produtos fechada e contabilizada!");
-        }
+            let totalMembros = 0;
 
-        function renderVendas() {
-            const tbody = document.getElementById('t-vendas-corpo'); if(!tbody) return; tbody.innerHTML = "";
-            if(db.vendas.length === 0) { tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #64748b; font-style: italic;">Nenhuma venda registrada.</td></tr>`; return; }
-            [...db.vendas].reverse().forEach(v => { tbody.innerHTML += `<tr><td>${v.operador}</td><td>${v.familia}</td><td>${v.resumoItens}</td><td>R$ ${v.valorTotal.toFixed(2)}</td><td><button class="btn-delete" onclick="removerVenda(${v.id})"><i class="fas fa-trash"></i></button></td></tr>`; });
-        }
-
-        function removerVenda(id) {
-            if(confirm("Deseja apagar esta venda?")) {
-                db.vendas = db.vendas.filter(v => v.id !== id);
-                saveDatabase();
-                renderVendas();
-            }
-        }
-
-        function renderBoxesFamilias() {
-            const grid = document.getElementById('grid-caixas-familias'); if(!grid) return; grid.innerHTML = "";
-            Object.keys(db.familias).forEach(nomeDaFamilia => {
-                let linesT = ""; db.familias[nomeDaFamilia].forEach(p => { linesT += `<tr><td>${p.nome}</td><td>R$ ${p.valor.toFixed(2)}</td><td><button class="btn-delete" onclick="removerProdutoDaFamilia('${nomeDaFamilia}', ${p.id})"><i class="fas fa-trash"></i></button></td></tr>`; });
-                grid.innerHTML += `
-                    <div class="cute-family-card">
-                        <h3><i class="fas fa-handshake"></i> Família: ${nomeDaFamilia}</h3>
-                        <table><tbody>${linesT}</tbody></table>
-                    </div>`;
-            });
-            atualizarSelectsGeraisVendaseEncomendas();
-        }
-
-        function adicionarProdutoFamilia() {
-            const f = document.getElementById('fam-nome-grupo').value.trim(); const n = document.getElementById('fam-nome').value.trim(); const v = parseFloat(document.getElementById('fam-valor').value);
-            if(!f || !n || isNaN(v)) return; if(!db.familias[f]) db.familias[f] = []; db.familias[f].push({ id: Date.now(), nome: n, valor: v });
-            document.getElementById('fam-nome').value = ""; document.getElementById('fam-valor').value = ""; 
-            saveDatabase();
-            renderBoxesFamilias();
-        }
-
-        function removerProdutoDaFamilia(f, id) { 
-            db.familias[f] = db.familias[f].filter(p => p.id !== id); if(db.familias[f].length === 0) delete db.familias[f]; 
-            saveDatabase();
-            renderBoxesFamilias(); 
-        }
-
-        function renderProdutos() {
-            const tbody = document.getElementById('t-produtos-corpo'); if(!tbody) return; tbody.innerHTML = "";
-            db.produtos.forEach(p => { tbody.innerHTML += `<tr><td>${p.nome}</td><td>R$ ${p.valor.toFixed(2)}</td><td><button class="btn-delete" onclick="removerProduto(${p.id})"><i class="fas fa-trash"></i></button></td></tr>`; });
-            atualizarSelectsGeraisVendaseEncomendas();
-        }
-
-        function adicionarProduto() {
-            const n = document.getElementById('prod-nome').value.trim(); const v = parseFloat(document.getElementById('prod-valor').value);
-            if(!n || isNaN(v)) return; db.produtos.push({ id: Date.now(), nome: n, valor: v }); 
-            document.getElementById('prod-nome').value = ""; document.getElementById('prod-valor').value = ""; 
-            saveDatabase();
-            renderProdutos();
-        }
-
-        function removerProduto(id) { db.produtos = db.produtos.filter(p => p.id !== id); saveDatabase(); renderProdutos(); }
-
-        function renderContabilidadeDashboard() {
-            document.getElementById('banco-saldo').innerText = `R$ ${db.financeiro.saldoAtual.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
-            document.getElementById('banco-entradas').innerText = `R$ ${db.financeiro.totalEntradas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
-            document.getElementById('banco-saidas').innerText = `R$ ${db.financeiro.totalSaidas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
-            const tbody = document.getElementById('t-financeiro-corpo'); if(!tbody) return; tbody.innerHTML = "";
-            [...db.financeiro.historico].reverse().forEach(m => {
-                const cor = m.tipo === "ENTRADA" ? "var(--success)" : (m.tipo === "SAIDA" ? "var(--danger)" : "var(--primary)");
-                tbody.innerHTML += `<tr><td><b>${m.operador}</b></td><td><span class="badge ${m.tipo === 'ENTRADA'?'online':(m.tipo==='SAIDA'?'offline':'system')}">${m.tipo}</span></td><td>${m.descricao}</td><td style="color:${cor}; font-weight:700;">R$ ${m.valor.toFixed(2)}</td><td>R$ ${m.resulting.toFixed(2)}</td></tr>`;
-            });
-        }
-
-        function renderMembros() {
-            const tbody = document.getElementById('t-membros-corpo'); if(!tbody) return; tbody.innerHTML = "";
-            db.membros.forEach(m => { 
-                tbody.innerHTML += `
-                    <tr>
-                        <td><span class="id-badge">#${m.id}</span></td>
-                        <td><strong style="color: #fff; font-size: 15px;">${m.nome}</strong></td>
-                        <td>
-                            <div class="discord-user-tag">
-                                <i class="fab fa-discord"></i> @${m.discord}
-                            </div>
-                        </td>
-                        <td><span style="background: rgba(255,255,255,0.05); padding: 4px 10px; border-radius: 6px; font-size: 13px; color: #cbd5e1;">${m.cargo}</span></td>
-                        <td><span class="badge ${m.online?'online':'offline'}">${m.online?'Conectado':'Offline'}</span></td>
-                        <td style="text-align: center;"><button class="btn-delete" onclick="deletarMembro('${m.id}')"><i class="fas fa-user-minus"></i></button></td>
-                    </tr>`; 
-            });
-        }
-
-        function registrarNovoMembroLogin() {
-            const n = document.getElementById('mem-nome').value.trim(); 
-            const id = document.getElementById('mem-id').value.trim(); 
-            const d = document.getElementById('mem-discord').value.trim(); 
-            const c = document.getElementById('mem-cargo').value.trim();
-            
-            if(!n || !id || !d || !c) {
-                alert("Preencha todos os campos para registrar!");
-                return;
-            }
-            
-            db.membros.push({ id: id, nome: n, discord: d, senha: "1234", cargo: c, online: false }); 
-            document.getElementById('mem-nome').value=""; 
-            document.getElementById('mem-id').value=""; 
-            document.getElementById('mem-discord').value=""; 
-            document.getElementById('mem-cargo').value=""; 
-            
-            if(usuarioLogado) {
-                registrarLog(usuarioLogado.nome, `Registrou um novo acesso corporativo para ${n} (#${id})`, "system");
-            }
-            saveDatabase();
-            renderMembros();
-        }
-
-        function deletarMembro(id) { 
-            if (id === "3461") {
-                alert("O acesso do administrador mestre corporativo não pode ser deletado!");
-                return;
-            }
-            db.membros = db.membros.filter(m => m.id !== id); 
-            saveDatabase();
-            renderMembros(); 
-        }
-
-        function toggleSidebarMenu(t) { const m = document.getElementById('sidebar-menu-list'); t.classList.toggle('open'); m.style.maxHeight = m.style.maxHeight === '0px' || !m.style.maxHeight ? m.scrollHeight + 'px' : '0px'; }
-        
-        function adicionarNota() {
-            const t = document.getElementById('nota-titulo').value.trim(); const c = document.getElementById('nota-conteudo').value.trim();
-            if(!t || !c) return; db.anotacoes.push({ id: Date.now(), titulo: t, conteudo: c });
-            document.getElementById('nota-titulo').value = ""; document.getElementById('nota-conteudo').value = ""; 
-            saveDatabase();
-            renderMuralNotas();
-        }
-
-        function removerNota(id) { db.anotacoes = db.anotacoes.filter(n => n.id !== id); saveDatabase(); renderMuralNotas(); }
-        
-        function renderMuralNotas() {
-            const grid = document.getElementById('grid-mural-notas'); if(!grid) return; grid.innerHTML = "";
-            if(db.anotacoes.length === 0) {
-                grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #64748b; font-style: italic; padding: 20px;">Nenhum recado fixado no momento... ✨</div>`;
-                return;
-            }
-            db.anotacoes.forEach(n => { 
-                grid.innerHTML += `
-                    <div class="cute-card-note">
-                        <div>
-                            <h3><i class="fas fa-star"></i> ${n.titulo}</h3>
-                            <p>${n.conteudo.replace(/\n/g, '<br>')}</p>
+            for (let id in data) {
+                totalMembros++;
+                const m = data[id];
+                
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-gray-900/30 transition border-b border-gray-800/60";
+                tr.innerHTML = `
+                    <td class="p-4 font-medium text-white flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center border border-gray-700 text-gray-300 font-bold text-xs">
+                            ${m.nome.charAt(0).toUpperCase()}
                         </div>
-                        <div class="cute-btn-delete-container">
-                            <button class="btn-cute-delete" onclick="removerNota(${n.id})">
-                                <i class="fas fa-eraser"></i> Remover
+                        <div>
+                            <p>${m.nome}</p>
+                            <span class="text-xs text-gray-500 font-mono">ID: ${id}</span>
+                        </div>
+                    </td>
+                    <td class="p-4 text-gray-300">${m.cargo}</td>
+                    <td class="p-4">
+                        <div class="flex items-center gap-2">
+                            <span id="pwd-display-${id}" class="font-mono text-gray-400 password-masked" data-real-password="${m.senha}">••••••</span>
+                            <button onclick="toggleVisualizacaoSenha(this, 'pwd-display-${id}')" class="text-gray-500 hover:text-gray-300 transition" title="Ver senha">
+                                <i data-lucide="eye" class="w-4 h-4"></i>
                             </button>
                         </div>
-                    </div>`; 
-            });
-        }
+                    </td>
+                    <td class="p-4 text-right">
+                        <div class="flex items-center justify-end gap-2">
+                            <button onclick="prepararEdicaoMembro('${id}')" class="p-1.5 bg-gray-800 hover:bg-gray-700 text-blue-400 rounded transition" title="Editar Informações">
+                                <i data-lucide="edit-3" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="deletarMembro('${id}', '${m.nome}')" class="p-1.5 bg-gray-800 hover:bg-red-950/40 text-red-400 rounded transition" title="Remover Usuário">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            }
 
-        function auth() {
-            const u = document.getElementById('user-in').value.trim(); 
-            const p = document.getElementById('pass-in').value.trim();
-            
-            const user = db.membros.find(m => (m.nome.toLowerCase() === u.toLowerCase() || m.id === u) && m.senha === p);
-            
-            if (user) { 
-                usuarioLogado = user; 
-                user.online = true; 
-                document.getElementById('nav-username').innerText = user.nome; 
-                document.getElementById('nav-userid').innerText = `#${user.id}`; 
-                document.getElementById('nav-status-dot').className = "status-dot online"; 
-                document.getElementById('nav-status-text').innerText = "Online"; 
-                
-                // Abre o painel principal e fecha o login completamente
-                document.getElementById('login-screen').style.display = 'none'; 
-                document.getElementById('main-panel').style.display = 'flex'; 
-                
-                toggleSidebarMenu(document.querySelector('.dropdown-trigger')); 
-                
-                saveDatabase();
-                renderMembros(); 
-                renderEncomendas(); 
-                renderVendas(); 
-                renderLogsPainel();
-                renderMuralNotas();
-                renderBoxesFamilias();
-                renderContabilidadeDashboard();
-                registrarLog(user.nome, "Efetuou login no painel.", "system");
-            } else { 
-                document.getElementById('login-err').style.display = 'block'; 
+            if (totalMembros === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="p-8 text-center text-gray-500">
+                            Nenhum membro operacional cadastrado até o momento.
+                        </td>
+                    </tr>
+                `;
             }
-        }
-        
-        function logout() { 
-            if(usuarioLogado) {
-                usuarioLogado.online = false;
-                saveDatabase();
-            }
-            location.reload(); 
-        }
-        
-        function tab(id, el) { 
-            // CORREÇÃO: Força todas as seções a sumirem usando o .style.display direto
-            document.querySelectorAll('.section').forEach(s => {
-                s.style.setProperty('display', 'none', 'important');
-                s.classList.remove('active');
-            }); 
-            
-            // Tira a classe active dos botões do menu
-            document.querySelectorAll('.menu-list li').forEach(li => li.classList.remove('active')); 
-            
-            // Mostra apenas a aba atual desejada
-            const targetSection = document.getElementById(id);
-            targetSection.style.setProperty('display', 'flex', 'important');
-            targetSection.classList.add('active');
-            
-            el.classList.add('active'); 
-            
-            if(id === 'movimentacao') { initOuUpdateGraficos(); }
-        }
+
+            // Atualiza os contadores estáticos da Dashboard
+            document.getElementById('count-membros').innerText = totalMembros;
+            lucide.createIcons();
+        });
+
+        // MÓDULO AUXILIAR: REGISTRO DE LOGS E DADOS DINÂMICOS
+        window.registrarLog = function(descricao) {
+            const novoLogRef = push(ref(db, 'logs'));
+            set(novoLogRef, {
+                descricao: descricao,
+                timestamp: new Date().toLocaleString('pt-BR')
+            });
+        };
+
+        // Escutas de contadores auxiliares (Logs) para preencher a Dashboard
+        onValue(ref(db, 'logs'), (snapshot) => {
+            const data = snapshot.val() || {};
+            document.getElementById('count-logs').innerText = Object.keys(data).length;
+        });
     </script>
 </body>
 </html>
