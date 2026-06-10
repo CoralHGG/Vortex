@@ -738,7 +738,7 @@
             
             saveDatabase();
             renderContabilidadeDashboard();
-            if(document.getElementById('movimentacao').classList.contains('active')) {
+            if(document.getElementById('movimentacao').style.display === 'flex') {
                 initOuUpdateGraficos();
             }
             alert("Movimentação registrada com sucesso no caixa!");
@@ -827,7 +827,7 @@
 
             saveDatabase();
             renderContabilidadeDashboard();
-            if(document.getElementById('movimentacao').classList.contains('active')) {
+            if(document.getElementById('movimentacao').style.display === 'flex') {
                 initOuUpdateGraficos();
             }
             alert("Valores do Caixa updated e logs sincronizados!");
@@ -867,7 +867,7 @@
         }
 
         function initOuUpdateGraficos() {
-            if(!document.getElementById('movimentacao').classList.contains('active')) return;
+            if(document.getElementById('movimentacao').style.display !== 'flex') return;
             const ctxPie = document.getElementById('chartPieCaixa');
             const ctxBar = document.getElementById('chartBarComercial');
             if(!ctxPie || !ctxBar) return;
@@ -963,7 +963,7 @@
 
             document.getElementById('enc-familia').disabled = true;
             const subtotal = produto.valor * qtd;
-            carrinhoEncomendaAtual.push({ produtoId: produto.id, nome: produto.nome, quantidade: qtd, valorUnitario: produto.valor, subtotal: subtotal });
+            carrinhoEncomendaAtual.push({ produtoId: produto.id, nome: produto.nome, House_Qtd: qtd, quantidade: qtd, valorUnitario: produto.valor, subtotal: subtotal });
             document.getElementById('enc-qtd').value = "1";
             document.getElementById('enc-produto').value = "";
             document.getElementById('enc-previa-total').value = "R$ 0,00";
@@ -1124,11 +1124,11 @@
         function renderBoxesFamilias() {
             const grid = document.getElementById('grid-caixas-familias'); if(!grid) return; grid.innerHTML = "";
             Object.keys(db.familias).forEach(nomeDaFamilia => {
-                let linhasTabela = ""; db.familias[nomeDaFamilia].forEach(p => { linhasTabela += `<tr><td>${p.nome}</td><td>R$ ${p.valor.toFixed(2)}</td><td><button class="btn-delete" onclick="removerProdutoDaFamilia('${nomeDaFamilia}', ${p.id})"><i class="fas fa-trash"></i></button></td></tr>`; });
+                let linesT = ""; db.familias[nomeDaFamilia].forEach(p => { linesT += `<tr><td>${p.nome}</td><td>R$ ${p.valor.toFixed(2)}</td><td><button class="btn-delete" onclick="removerProdutoDaFamilia('${nomeDaFamilia}', ${p.id})"><i class="fas fa-trash"></i></button></td></tr>`; });
                 grid.innerHTML += `
                     <div class="cute-family-card">
                         <h3><i class="fas fa-handshake"></i> Família: ${nomeDaFamilia}</h3>
-                        <table><tbody>${linhasTabela}</tbody></table>
+                        <table><tbody>${linesT}</tbody></table>
                     </div>`;
             });
             atualizarSelectsGeraisVendaseEncomendas();
@@ -1305,10 +1305,22 @@
         }
         
         function tab(id, el) { 
-            document.querySelectorAll('.section').forEach(s => s.style.display = 'none'); 
+            // CORREÇÃO: Força todas as seções a sumirem usando o .style.display direto
+            document.querySelectorAll('.section').forEach(s => {
+                s.style.setProperty('display', 'none', 'important');
+                s.classList.remove('active');
+            }); 
+            
+            // Tira a classe active dos botões do menu
             document.querySelectorAll('.menu-list li').forEach(li => li.classList.remove('active')); 
-            document.getElementById(id).style.display = 'flex'; 
+            
+            // Mostra apenas a aba atual desejada
+            const targetSection = document.getElementById(id);
+            targetSection.style.setProperty('display', 'flex', 'important');
+            targetSection.classList.add('active');
+            
             el.classList.add('active'); 
+            
             if(id === 'movimentacao') { initOuUpdateGraficos(); }
         }
     </script>
