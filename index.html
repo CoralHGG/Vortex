@@ -102,7 +102,7 @@
 
         /* --- CONTEÚDO PRINCIPAL --- */
         .main-content { flex-grow: 1; padding: 40px; overflow-y: auto; display: flex; flex-direction: column; }
-        .section { display: none !important; flex-grow: 1; }
+        .section { display: none; flex-grow: 1; }
         .section.active { display: flex !important; flex-direction: column; }
 
         .boxes-row-container { display: flex; gap: 20px; width: 100%; flex-wrap: wrap; }
@@ -193,7 +193,7 @@
         .log-item:hover { background: rgba(255,255,255,0.01); }
         .log-time { color: #64748b; font-size: 11px; font-family: monospace; }
 
-        /* --- NOVO DESIGN ESTILIZADO E FOFO DO MURAL --- */
+        /* --- NOVO DESIGN ESTILIZADO O MURAL --- */
         .mural-container {
             background: rgba(255, 255, 255, 0.02);
             border: 2px dashed rgba(168, 85, 247, 0.2);
@@ -412,7 +412,7 @@
                                 <div class="form-group">
                                     <label for="enc-produto">Produto Cadastrado na Família</label>
                                     <select id="enc-produto" onchange="calcularPreviaValorEncomenda()">
-                                        <option value="">-- Selecione the Produto --</option>
+                                        <option value="">-- Selecione o Produto --</option>
                                     </select>
                                 </div>
                                 <div class="form-group" style="max-width: 100px;">
@@ -634,17 +634,22 @@
         let instancePie = null;
         let instanceBar = null;
 
-        // CARREGA E CORRIGE A SINCRONIZAÇÃO DA LISTA DE MEMBROS IMEDIATAMENTE
+        // FORÇA O LOGIN PADRÃO A SEMPRE EXISTIR E CORRIGE CONFLITOS DE CACHE
         function loadDatabase() {
             const savedData = localStorage.getItem('vortex_panel_db');
             if (savedData) {
                 try {
                     db = JSON.parse(savedData);
                     
-                    // Garante que o login administrador padrão ('Megan') nunca desapareça do banco principal por acidente
-                    const possuiAdmin = db.membros.some(m => m.nome.toLowerCase() === "megan" || m.id === "3461");
-                    if (!possuiAdmin) {
-                        db.membros.push({ id: "3461", nome: "Megan", discord: "megan_vortex", senha: "1234", cargo: "Chefe", online: false });
+                    // Se a estrutura de membros quebrou por algum motivo, reconstrói com segurança
+                    if (!db.membros || !Array.isArray(db.membros) || db.membros.length === 0) {
+                        db.membros = [{ id: "3461", nome: "Megan", discord: "megan_vortex", senha: "1234", cargo: "Chefe", online: false }];
+                    } else {
+                        // Garante o login padrão
+                        const possuiAdmin = db.membros.some(m => m.nome.toLowerCase() === "megan" || m.id === "3461");
+                        if (!possuiAdmin) {
+                            db.membros.push({ id: "3461", nome: "Megan", discord: "megan_vortex", senha: "1234", cargo: "Chefe", online: false });
+                        }
                     }
                 } catch(e) {
                     db = JSON.parse(JSON.stringify(defaultDB));
@@ -669,6 +674,10 @@
             renderVendas();
             renderMuralNotas();
             atualizarSelectsGeraisVendaseEncomendas();
+            
+            // Garante visualmente que a tela de login esteja aberta e o painel oculto no início
+            document.getElementById('login-screen').style.display = 'flex';
+            document.getElementById('main-panel').style.display = 'none';
         };
 
         function aplicarFundosSalvosAoCarregar() {
@@ -1210,7 +1219,6 @@
         }
 
         function deletarMembro(id) { 
-            // Bloqueia a exclusão do administrador principal para evitar bugs de lockout
             if (id === "3461") {
                 alert("O acesso do administrador mestre corporativo não pode ser deletado!");
                 return;
@@ -1267,8 +1275,11 @@
                 document.getElementById('nav-userid').innerText = `#${user.id}`; 
                 document.getElementById('nav-status-dot').className = "status-dot online"; 
                 document.getElementById('nav-status-text').innerText = "Online"; 
+                
+                // Abre o painel principal e fecha o login completamente
                 document.getElementById('login-screen').style.display = 'none'; 
                 document.getElementById('main-panel').style.display = 'flex'; 
+                
                 toggleSidebarMenu(document.querySelector('.dropdown-trigger')); 
                 
                 saveDatabase();
@@ -1294,9 +1305,9 @@
         }
         
         function tab(id, el) { 
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); 
+            document.querySelectorAll('.section').forEach(s => s.style.display = 'none'); 
             document.querySelectorAll('.menu-list li').forEach(li => li.classList.remove('active')); 
-            document.getElementById(id).classList.add('active'); 
+            document.getElementById(id).style.display = 'flex'; 
             el.classList.add('active'); 
             if(id === 'movimentacao') { initOuUpdateGraficos(); }
         }
