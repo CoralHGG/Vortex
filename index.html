@@ -412,7 +412,7 @@
                                 <div class="form-group">
                                     <label for="enc-produto">Produto Cadastrado na Família</label>
                                     <select id="enc-produto" onchange="calcularPreviaValorEncomenda()">
-                                        <option value="">-- Selecione o Produto --</option>
+                                        <option value="">-- Selecione the Produto --</option>
                                     </select>
                                 </div>
                                 <div class="form-group" style="max-width: 100px;">
@@ -691,7 +691,7 @@
             }
         }
 
-        function executarMovimentacaoReal() {
+        function ejecutarMovimentacaoReal() {
             const acao = document.getElementById('edit-op-acao').value;
             const descricaoInput = document.getElementById('edit-op-desc').value.trim();
             const valorInput = document.getElementById('edit-op-valor').value;
@@ -766,13 +766,13 @@
             if(bgLoginUrl !== "") {
                 document.getElementById('login-screen').style.background = `url('${bgLoginUrl}')`;
             } else {
-                document.getElementById('login-screen').style.background = var(--bg);
+                document.getElementById('login-screen').style.background = 'var(--bg)';
             }
             
             if(bgMainUrl !== "") {
                 document.body.style.background = `url('${bgMainUrl}')`;
             } else {
-                document.body.style.background = var(--bg);
+                document.body.style.background = 'var(--bg)';
             }
 
             let op = usuarioLogado ? usuarioLogado.nome : "Sistema";
