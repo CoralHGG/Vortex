@@ -3,431 +3,851 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vortex - Painel</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <title>PAINEL VORTEX | Core</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap\" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        .sidebar-item.active {
-            background-color: rgba(255, 255, 255, 0.1);
-            border-left: 4px solid #3b82f6;
+        :root {
+            --primary: #a855f7;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --bg: #0b0813;
+            --card: rgba(15, 12, 28, 0.75);
+            --border: rgba(255, 255, 255, 0.08);
+            --input-bg: rgba(255, 255, 255, 0.03);
         }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { 
+            background: var(--bg); 
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+        }
+        
+        /* LOGIN SCREEN */
+        .login-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #060409;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-card {
+            background: var(--card);
+            border: 1px border var(--border);
+            padding: 40px;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 400px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+        .login-card h2 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-align: center;
+            letter-spacing: 1px;
+            background: linear-gradient(45deg, #fff, var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .login-card p {
+            color: #8b869f;
+            font-size: 14px;
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        .input-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #a8a29e;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .input-wrapper {
+            position: relative;
+        }
+        .input-wrapper i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #52525b;
+            font-size: 16px;
+        }
+        .input-wrapper input {
+            width: 100%;
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            padding: 14px 16px 14px 48px;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        .input-wrapper input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.15);
+            outline: none;
+        }
+        .login-btn {
+            width: 100%;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
+        }
+        .login-btn:hover {
+            filter: brightness(1.1);
+            box-shadow: 0 6px 20px rgba(168, 85, 247, 0.4);
+        }
+        .login-err {
+            color: var(--danger);
+            font-size: 13px;
+            text-align: center;
+            margin-top: 16px;
+            display: none;
+        }
+
+        /* MAIN APP STRUC */
+        .sidebar {
+            width: 260px;
+            background: rgba(10, 7, 20, 0.6);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            backdrop-filter: blur(10px);
+        }
+        .sidebar-brand {
+            padding: 30px 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-b: 1px solid var(--border);
+        }
+        .sidebar-brand i {
+            font-size: 24px;
+            color: var(--primary);
+        }
+        .sidebar-brand span {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+        }
+        .menu-list {
+            list-style: none;
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex: 1;
+        }
+        .menu-list li {
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #8b869f;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        .menu-list li i { font-size: 16px; width: 20px; }
+        .menu-list li:hover {
+            color: #fff;
+            background: rgba(255,255,255,0.02);
+        }
+        .menu-list li.active {
+            color: #fff;
+            background: linear-gradient(90deg, rgba(168, 85, 247, 0.15), transparent);
+            border-left: 3px solid var(--primary);
+        }
+        
+        .user-profile-footer {
+            padding: 20px 24px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .user-info-meta { display: flex; align-items: center; gap: 10px; }
+        .user-avatar-circle {
+            width: 36px; height: 36px; border-radius: 50%;
+            background: var(--primary);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 600; font-size: 14px;
+        }
+        .user-text-details h4 { font-size: 13px; font-weight: 600; }
+        .user-text-details p { font-size: 11px; color: #8b869f; }
+        .logout-action-btn {
+            background: none; border: none; color: #52525b; cursor: pointer; transition: color 0.3s;
+        }
+        .logout-action-btn:hover { color: var(--danger); }
+
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            max-height: 100vh;
+        }
+        
+        .section {
+            display: none !important;
+            flex-direction: column;
+            gap: 32px;
+        }
+        .section.active {
+            display: flex !important;
+        }
+        
+        .section-header h1 { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+        .section-header p { color: #8b869f; font-size: 14px; }
+        
+        /* CARD DASHBOARD */
+        .grid-boxes-dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 24px;
+        }
+        .stat-card-box {
+            background: var(--card);
+            border: 1px solid var(--border);
+            padding: 24px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .stat-info-num h3 { font-size: 12px; font-weight: 600; color: #8b869f; text-transform: uppercase; margin-bottom: 8px; }
+        .stat-info-num p { font-size: 28px; font-weight: 700; }
+        .stat-icon-w {
+            width: 48px; height: 48px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px;
+        }
+        
+        /* BLOCKS STRUC */
+        .double-block-layout {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 32px;
+            align-items: start;
+        }
+        @media(max-width: 992px) {
+            .double-block-layout { grid-template-columns: 1fr; }
+        }
+        
+        .block-card-panel {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 24px;
+        }
+        .block-card-panel h2 { font-size: 18px; font-weight: 600; margin-bottom: 20px; }
+        
+        /* FORMS COMPONENT */
+        .form-vortex-group { margin-bottom: 16px; }
+        .form-vortex-group label { display: block; font-size: 12px; color: #8b869f; margin-bottom: 6px; font-weight: 500; }
+        .form-vortex-group input, .form-vortex-group select {
+            width: 100%; background: var(--input-bg); border: 1px solid var(--border);
+            padding: 10px 14px; border-radius: 6px; color: #fff; font-size: 14px; transition: border 0.3s;
+        }
+        .form-vortex-group input:focus, .form-vortex-group select:focus { border-color: var(--primary); outline: none; }
+        
+        .vortex-btn-action {
+            width: 100%; background: var(--primary); color: #fff; border: none; padding: 12px;
+            border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.3s;
+        }
+        .vortex-btn-action:hover { filter: brightness(1.1); }
+        .vortex-btn-secondary {
+            width: 100%; background: rgba(255,255,255,0.05); color: #fff; border: none; padding: 12px;
+            border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.3s; margin-top: 8px;
+        }
+        .vortex-btn-secondary:hover { background: rgba(255,255,255,0.1); }
+        
+        /* TABLES COMPONENT */
+        .table-responsive-wrapper { overflow-x: auto; margin-top: 12px; }
+        .vortex-data-table { width: 100%; border-collapse: collapse; text-align: left; }
+        .vortex-data-table th { padding: 14px 16px; background: rgba(0,0,0,0.2); font-size: 12px; font-weight: 600; color: #8b869f; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+        .vortex-data-table td { padding: 14px 16px; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.03); color: #e2e8f0; }
+        .vortex-data-table tr:hover td { background: rgba(255,255,255,0.01); }
+        
+        .action-row-btns { display: flex; gap: 8px; }
+        .btn-table-action { background: rgba(255,255,255,0.04); border: 1px solid var(--border); width: 32px; height: 32px; border-radius: 6px; color: #8b869f; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
+        .btn-table-action:hover { color: #fff; border-color: var(--primary); }
+        .btn-table-action.delete:hover { color: var(--danger); border-color: var(--danger); }
+        
+        /* BOX LOGS */
+        .logs-terminal-box {
+            background: #050308; border: 1px solid var(--border); border-radius: 8px; padding: 16px; font-family: monospace; font-size: 13px; max-height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;
+        }
+        .log-row-item { display: flex; gap: 12px; line-height: 1.5; }
+        .log-time { color: var(--primary); }
+        .log-user { color: var(--success); }
+        .log-text { color: #d4d4d8; }
+        
+        /* CHARTS COMPONENT */
+        .chart-box-container { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 24px; }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-100 font-sans min-h-screen flex flex-col">
+<body>
 
-    <div id="login-screen" class="fixed inset-0 bg-gray-950 flex items-center justify-center z-50">
-        <div class="bg-gray-900 p-8 rounded-xl border border-gray-800 w-full max-w-md shadow-2xl">
-            <div class="flex items-center gap-3 justify-center mb-8">
-                <i data-lucide="vortex" class="w-10 h-10 text-blue-500 animate-spin-slow"></i>
-                <span class="text-2xl font-bold tracking-wider text-white">VORTEX</span>
+    <div class="login-screen" id="login-container">
+        <div class="login-card">
+            <h2>VORTEX</h2>
+            <p>Insira suas credenciais operacionais</p>
+            <div class="input-group">
+                <label>Nome do Usuário</label>
+                <div class="input-wrapper">
+                    <i class="fa-solid fa-user"></i>
+                    <input type="text" id="login-username" placeholder="Digite seu usuário">
+                </div>
             </div>
-            <h2 class="text-xl font-semibold mb-6 text-center text-gray-300">Acesse o seu Painel</h2>
-            <form id="login-form" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-400 mb-1">Nome do Membro / ID</label>
-                    <input type="text" id="login-username" required class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 transition">
+            <div class="input-group">
+                <label>Senha de Acesso</label>
+                <div class="input-wrapper">
+                    <i class="fa-solid fa-lock"></i>
+                    <input type="password" id="login-password" placeholder="••••••••">
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-400 mb-1">Senha</label>
-                    <input type="password" id="login-password" required class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 transition">
-                </div>
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg transition mt-2 shadow-lg shadow-blue-600/20">
-                    Entrar no Sistema
-                </button>
-            </form>
-            <p id="login-error" class="text-red-500 text-sm text-center mt-4 hidden">Usuário ou senha incorretos!</p>
+            </div>
+            <button class="login-btn" onclick="executeLogin()">Autenticar Sistema</button>
+            <div class="login-err" id="login-err">Credenciais inválidas ou sem autorização.</div>
         </div>
     </div>
 
-    <div id="main-panel" class="flex flex-1 hidden">
-        <aside class="w-64 bg-gray-950 border-r border-gray-800 flex flex-col">
-            <div class="p-6 flex items-center gap-3 border-b border-gray-800">
-                <i data-lucide="vortex" class="w-8 h-8 text-blue-500"></i>
-                <span class="text-xl font-bold tracking-wider text-white">VORTEX</span>
-            </div>
-            
-            <nav class="flex-1 p-4 space-y-1">
-                <button onclick="switchTab('inicio')" id="btn-inicio" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-900 transition active">
-                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Início
-                </button>
-                <button onclick="switchTab('membros')" id="btn-membros" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-900 transition">
-                    <i data-lucide="users" class="w-5 h-5"></i> Membros
-                </button>
-                <button onclick="switchTab('produtos')" id="btn-produtos" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-900 transition">
-                    <i data-lucide="package" class="w-5 h-5"></i> Produtos
-                </button>
-                <button onclick="switchTab('vendas')" id="btn-vendas" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-900 transition">
-                    <i data-lucide="shopping-cart" class="w-5 h-5"></i> Vendas
-                </button>
-                <button onclick="switchTab('logs')" id="btn-logs" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-900 transition">
-                    <i data-lucide="file-text" class="w-5 h-5"></i> Logs
-                </button>
-                <button onclick="switchTab('configuracoes')" id="btn-configuracoes" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-900 transition">
-                    <i data-lucide="settings" class="w-5 h-5"></i> Configurações
-                </button>
-            </nav>
-
-            <div class="p-4 border-t border-gray-800">
-                <div class="flex items-center justify-between mb-2">
-                    <div class="flex items-center gap-2">
-                        <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center font-bold text-sm text-white" id="user-avatar">U</div>
-                        <span class="text-sm font-medium text-gray-300" id="user-name">Usuário</span>
-                    </div>
-                    <button onclick="logout()" class="text-gray-500 hover:text-red-400 transition" title="Sair">
-                        <i data-lucide="log-out" class="w-4 h-4"></i>
-                    </button>
+    <div class="sidebar">
+        <div class="sidebar-brand">
+            <i class="fa-solid fa-bolt"></i>
+            <span>VORTEX</span>
+        </div>
+        <ul class="menu-list">
+            <li class="active" onclick="tab('dashboard', this)"><i class="fa-solid fa-chart-pie"></i>Dashboard</li>
+            <li onclick="tab('membros', this)"><i class="fa-solid fa-users-gear"></i>Membros</li>
+            <li onclick="tab('produtos', this)"><i class="fa-solid fa-box-open"></i>Produtos</li>
+            <li onclick="tab('movimentacao', this)"><i class="fa-solid fa-money-bill-transfer"></i>Movimentação</li>
+            <li onclick="tab('logs', this)"><i class="fa-solid fa-terminal"></i>Logs do Core</li>
+        </ul>
+        <div class="user-profile-footer">
+            <div class="user-info-meta">
+                <div class="user-avatar-circle" id="profile-avatar">A</div>
+                <div class="user-text-details">
+                    <h4 id="profile-name">Carregando...</h4>
+                    <p id="profile-cargo">Acesso Restrito</p>
                 </div>
             </div>
-        </aside>
-
-        <main class="flex-1 bg-gray-900 p-8 overflow-y-auto">
-            
-            <section id="tab-inicio" class="tab-content space-y-6">
-                <header>
-                    <h1 class="text-3xl font-bold text-white">Dashboard Geral</h1>
-                    <p class="text-gray-400 mt-1">Bem-vindo de volta ao centro de controle da Vortex.</p>
-                </header>
-
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                    <div class="bg-gray-950 p-6 rounded-xl border border-gray-800 flex items-center justify-between">
-                        <div>
-                            <p class="text-sm font-medium text-gray-400 uppercase">Membros Ativos</p>
-                            <p class="text-3xl font-bold text-white mt-2" id="count-membros">0</p>
-                        </div>
-                        <div class="p-3 bg-blue-500/10 rounded-lg text-blue-500"><i data-lucide="users" class="w-6 h-6"></i></div>
-                    </div>
-                    <div class="bg-gray-950 p-6 rounded-xl border border-gray-800 flex items-center justify-between">
-                        <div>
-                            <p class="text-sm font-medium text-gray-400 uppercase">Produtos Cadastrados</p>
-                            <p class="text-3xl font-bold text-white mt-2" id="count-produtos">0</p>
-                        </div>
-                        <div class="p-3 bg-purple-500/10 rounded-lg text-purple-500"><i data-lucide="package" class="w-6 h-6"></i></div>
-                    </div>
-                    <div class="bg-gray-950 p-6 rounded-xl border border-gray-800 flex items-center justify-between">
-                        <div>
-                            <p class="text-sm font-medium text-gray-400 uppercase">Total Vendas</p>
-                            <p class="text-3xl font-bold text-white mt-2" id="count-vendas">0</p>
-                        </div>
-                        <div class="p-3 bg-green-500/10 rounded-lg text-green-500"><i data-lucide="shopping-cart" class="w-6 h-6"></i></div>
-                    </div>
-                    <div class="bg-gray-950 p-6 rounded-xl border border-gray-800 flex items-center justify-between">
-                        <div>
-                            <p class="text-sm font-medium text-gray-400 uppercase">Ações Registradas</p>
-                            <p class="text-3xl font-bold text-white mt-2" id="count-logs">0</p>
-                        </div>
-                        <div class="p-3 bg-amber-500/10 rounded-lg text-amber-500"><i data-lucide="file-text" class="w-6 h-6"></i></div>
-                    </div>
-                </div>
-            </section>
-
-            <section id="tab-membros" class="tab-content hidden space-y-6">
-                <header>
-                    <h1 class="text-3xl font-bold text-white">Gerenciamento de Membros</h1>
-                    <p class="text-gray-400 mt-1">Gerencie os acessos, cargos e permissões do painel Vortex.</p>
-                </header>
-
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <div class="bg-gray-950 p-6 rounded-xl border border-gray-800 h-fit">
-                        <h2 class="text-xl font-bold text-white mb-4" id="membro-form-title">Adicionar Novo Membro</h2>
-                        <form id="membro-form" class="space-y-4">
-                            <input type="hidden" id="membro-id-edicao">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-400 mb-1">Nome Completo</label>
-                                <input type="text" id="membro-nome" required class="w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500 transition">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-400 mb-1">Cargo / Função</label>
-                                <input type="text" id="membro-cargo" required class="w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500 transition">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-400 mb-1">Senha de Acesso</label>
-                                <input type="password" id="membro-senha" required class="w-full bg-gray-900 border border-gray-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500 transition">
-                            </div>
-                            <div class="flex gap-2">
-                                <button type="submit" id="btn-salvar-membro" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition shadow-lg shadow-blue-600/10">
-                                    Cadastrar Membro
-                                </button>
-                                <button type="button" id="btn-cancelar-edicao" onclick="resetMembroForm()" class="hidden bg-gray-800 hover:bg-gray-700 text-gray-300 font-medium py-2 px-4 rounded-lg transition">
-                                    Cancelar
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-
-                    <div class="lg:grid-cols-1 lg:col-span-2 bg-gray-950 rounded-xl border border-gray-800 overflow-hidden">
-                        <div class="p-6 border-b border-gray-800"><h2 class="text-xl font-bold text-white">Membros Cadastrados</h2></div>
-                        <div class="overflow-x-auto">
-                            <table class="w-full border-collapse text-left">
-                                <thead>
-                                    <tr class="bg-gray-900/50 border-b border-gray-800 text-gray-400 text-sm font-medium">
-                                        <th class="p-4">Membro</th>
-                                        <th class="p-4">Cargo</th>
-                                        <th class="p-4">Senha</th>
-                                        <th class="p-4 text-right">Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tabela-membros-body" class="divide-y divide-gray-800 text-sm">
-                                    </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section id="tab-produtos" class="tab-content hidden space-y-6">
-                <h1 class="text-3xl font-bold text-white">Produtos</h1>
-                <p class="text-gray-400">Gerenciamento de estoque e itens virtuais.</p>
-            </section>
-            <section id="tab-vendas" class="tab-content hidden space-y-6">
-                <h1 class="text-3xl font-bold text-white">Vendas</h1>
-                <p class="text-gray-400">Histórico de faturamentos e pedidos do sistema.</p>
-            </section>
-            <section id="tab-logs" class="tab-content hidden space-y-6">
-                <h1 class="text-3xl font-bold text-white">Logs do Sistema</h1>
-                <p class="text-gray-400">Histórico de ações em tempo real realizadas na plataforma.</p>
-            </section>
-            <section id="tab-configuracoes" class="tab-content hidden space-y-6">
-                <h1 class="text-3xl font-bold text-white">Configurações</h1>
-                <p class="text-gray-400">Ajustes operacionais do ecossistema Vortex.</p>
-            </section>
-
-        </main>
+            <button class="logout-action-btn" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i></button>
+        </div>
     </div>
 
-    <script type="module">
-        // Importação dos módulos oficiais do SDK Web do Firebase
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, set, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-
-        // Configuração de Credenciais da sua aplicação vinculada ao projeto vortex-f7559
-        const firebaseConfig = {
-            databaseURL: "https://vortex-f7559-default-rtdb.firebaseio.com"
-        };
-
-        // Inicialização do Ecossistema
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-
-        // VARIÁVEIS GLOBAIS DE CONTROLE
-        let listaMembrosGlobais = {};
-
-        // INICIALIZADOR GLOBAL DE ÍCONES LUCIDE
-        window.addEventListener('DOMContentLoaded', () => {
-            lucide.createIcons();
-        });
-
-        // NAVEGAÇÃO ENTRE ABAS
-        window.switchTab = function(tabName) {
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
-            document.querySelectorAll('.sidebar-item').forEach(btn => btn.classList.remove('active'));
+    <div class="main-content">
+        
+        <div class="section active" id="dashboard">
+            <div class="section-header">
+                <h1>Visão Geral do Core</h1>
+                <p>Métricas consolidadas e monitoramento operacional em tempo real.</p>
+            </div>
+            <div class="grid-boxes-dashboard">
+                <div class="stat-card-box">
+                    <div class="stat-info-num"><h3>Membros Ativos</h3><p id="dash-membros-count">0</p></div>
+                    <div class="stat-icon-w" style="background: rgba(168,85,247,0.1); color: var(--primary);"><i class="fa-solid fa-users"></i></div>
+                </div>
+                <div class="stat-card-box">
+                    <div class="stat-info-num"><h3>Produtos Ativos</h3><p id="dash-produtos-count">0</p></div>
+                    <div class="stat-icon-w" style="background: rgba(34,197,94,0.1); color: var(--success);"><i class="fa-solid fa-box"></i></div>
+                </div>
+                <div class="stat-card-box">
+                    <div class="stat-info-num"><h3>Entradas Totais</h3><p id="dash-entradas-money">R$ 0,00</p></div>
+                    <div class="stat-icon-w" style="background: rgba(245,158,11,0.1); color: var(--warning);"><i class="fa-solid fa-arrow-trend-up"></i></div>
+                </div>
+                <div class="stat-card-box">
+                    <div class="stat-info-num"><h3>Ações Logs</h3><p id="dash-logs-count">0</p></div>
+                    <div class="stat-icon-w" style="background: rgba(239,68,68,0.1); color: var(--danger);"><i class="fa-solid fa-code-branch"></i></div>
+                </div>
+            </div>
             
-            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
-            document.getElementById(`btn-${tabName}`).classList.add('active');
+            <div class="chart-box-container">
+                <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 20px;">Balanço Operacional Histórico</h3>
+                <div style="width: 100%; height: 300px;"><canvas id="vortexMainChart"></canvas></div>
+            </div>
+        </div>
+
+        <div class="section" id="membros">
+            <div class="section-header">
+                <h1>Controle Operacional de Membros</h1>
+                <p>Gerencie o cadastro, senhas e funções dos operadores com permissão de login.</p>
+            </div>
+            <div class="double-block-layout">
+                <div class="block-card-panel">
+                    <h2 id="form-membro-title">Adicionar Operador</h2>
+                    <form id="form-membro-data" onsubmit="event.preventDefault(); salvarMembro();">
+                        <input type="hidden" id="membro-edit-id">
+                        <div class="form-vortex-group">
+                            <label>Nome do Operador</label>
+                            <input type="text" id="membro-nome" required placeholder="Ex: Lucas Silva">
+                        </div>
+                        <div class="form-vortex-group">
+                            <label>Função / Cargo</label>
+                            <input type="text" id="membro-cargo" required placeholder="Ex: Supervisor">
+                        </div>
+                        <div class="form-vortex-group">
+                            <label>Senha de Acesso</label>
+                            <input type="password" id="membro-senha" required placeholder="Defina a senha">
+                        </div>
+                        <button type="submit" class="vortex-btn-action" id="btn-membro-submit">Cadastrar no Core</button>
+                        <button type="button" class="vortex-btn-secondary" id="btn-membro-cancel" style="display:none;" onclick="cancelarEdicaoMembro()">Cancelar Edição</button>
+                    </form>
+                </div>
+                <div class="block-card-panel">
+                    <h2>Operadores Autorizados</h2>
+                    <div class="table-responsive-wrapper">
+                        <table class="vortex-data-table">
+                            <thead>
+                                <tr>
+                                    <th>Operador</th>
+                                    <th>Cargo</th>
+                                    <th>Senha</th>
+                                    <th style="text-align: right;">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-membros-list"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="produtos">
+            <div class="section-header">
+                <h1>Estoque de Produtos</h1>
+                <p>Controle global de itens virtuais e mercadorias ativas.</p>
+            </div>
+            <div class="double-block-layout">
+                <div class="block-card-panel">
+                    <h2>Adicionar Item</h2>
+                    <form onsubmit="event.preventDefault(); salvarProduto();">
+                        <div class="form-vortex-group">
+                            <label>Nome do Produto</label>
+                            <input type="text" id="prod-nome" required>
+                        </div>
+                        <div class="form-vortex-group">
+                            <label>Valor Unitário (R$)</label>
+                            <input type="number" step="0.01" id="prod-valor" required>
+                        </div>
+                        <button type="submit" class="vortex-btn-action">Registrar Item</button>
+                    </form>
+                </div>
+                <div class="block-card-panel">
+                    <h2>Inventário Cadastrado</h2>
+                    <div class="table-responsive-wrapper">
+                        <table class="vortex-data-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Produto</th>
+                                    <th>Valor</th>
+                                    <th style="text-align: right;">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-produtos-list"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="movimentacao">
+            <div class="section-header">
+                <h1>Fluxo de Caixa & Movimentação</h1>
+                <p>Lançamentos e faturamentos de vendas dentro do ecossistema.</p>
+            </div>
+            <div class="double-block-layout">
+                <div class="block-card-panel">
+                    <h2>Lançar Venda</h2>
+                    <form onsubmit="event.preventDefault(); lancarVenda();">
+                        <div class="form-vortex-group">
+                            <label>Selecionar Produto</label>
+                            <select id="venda-produto-select" required></select>
+                        </div>
+                        <div class="form-vortex-group">
+                            <label>Quantidade</label>
+                            <input type="number" id="venda-qtd" min="1" value="1" required>
+                        </div>
+                        <button type="submit" class="vortex-btn-action">Confirmar Transação</button>
+                    </form>
+                </div>
+                <div class="block-card-panel">
+                    <h2>Histórico de Faturamento</h2>
+                    <div class="table-responsive-wrapper">
+                        <table class="vortex-data-table">
+                            <thead>
+                                <tr>
+                                    <th>Data / Hora</th>
+                                    <th>Produto</th>
+                                    <th>Qtd</th>
+                                    <th>Total</th>
+                                    <th style="text-align: right;">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-vendas-list"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="logs">
+            <div class="section-header">
+                <h1>Logs Operacionais do Core</h1>
+                <p>Auditoria completa de todas as requisições e ações executadas no painel.</p>
+            </div>
+            <div class="block-card-panel" style="background: rgba(6,4,9,0.9);">
+                <div class="logs-terminal-box" id="logs-container-box"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Estrutura interna local nativa simulando persistência limpa
+        let database = JSON.parse(localStorage.getItem('vortex_db')) || {
+            membros: {},
+            produtos: {},
+            vendas: {},
+            logs: []
         };
 
-        // AUTENTICAÇÃO E LOGIN ATRELADO AO BANCO DE DADOS
-        const loginForm = document.getElementById('login-form');
-        loginForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const usernameInput = document.getElementById('login-username').value.trim();
-            const passwordInput = document.getElementById('login-password').value;
-            const loginError = document.getElementById('login-error');
+        let usuarioLogado = null;
+        let mainChartInstance = null;
 
-            let usuarioEncontrado = null;
+        function saveDatabase() {
+            localStorage.setItem('vortex_db', JSON.stringify(database));
+            renderDashboard();
+        }
 
-            // Percorre a lista de membros coletados no Firebase para validar as credenciais
-            for (let id in listaMembrosGlobais) {
-                const m = listaMembrosGlobais[id];
-                if ((m.nome.toLowerCase() === usernameInput.toLowerCase() || id === usernameInput) && m.senha === passwordInput) {
-                    usuarioEncontrado = m;
-                    break;
+        // FUNÇÃO AUXILIAR DE LOGS
+        function registrarLog(user, acao, tipo = "info") {
+            const novoLog = {
+                time: new Date().toLocaleTimeString('pt-BR'),
+                user: user || "Desconhecido",
+                text: acao,
+                tipo: tipo
+            };
+            database.logs.unshift(novoLog);
+            saveDatabase();
+            renderLogsPainel();
+        }
+
+        // SISTEMA DE LOGIN INTEGRADO A ABA DE MEMBROS
+        function executeLogin() {
+            const userIn = document.getElementById('login-username').value.trim();
+            const passIn = document.getElementById('login-password').value;
+            
+            let userFound = null;
+
+            // Fallback de administrador master nativo
+            if(userIn.toLowerCase() === 'admin' && passIn === 'vortex123') {
+                userFound = { nome: "Admin Master", cargo: "Desenvolvedor" };
+            } else {
+                // Varre a lista dinâmica de membros cadastrados
+                for (let id in database.membros) {
+                    let m = database.membros[id];
+                    if(m.nome.toLowerCase() === userIn.toLowerCase() && m.senha === passIn) {
+                        userFound = m;
+                        break;
+                    }
                 }
             }
 
-            // Fallback Admin Master padrão (Caso o banco de dados esteja vazio inicialmente)
-            if (!usuarioEncontrado && usernameInput === "admin" && passwordInput === "vortex123") {
-                usuarioEncontrado = { nome: "Administrador Master", cargo: "Dono" };
-            }
-
-            if (usuarioEncontrado) {
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('main-panel').classList.remove('hidden');
-                document.getElementById('user-name').innerText = usuarioEncontrado.nome;
-                document.getElementById('user-avatar').innerText = usuarioEncontrado.nome.charAt(0).toUpperCase();
-                loginError.classList.add('hidden');
-                loginForm.reset();
-                registrarLog(`Usuário ${usuarioEncontrado.nome} efetuou login com sucesso.`);
+            if(userFound) {
+                usuarioLogado = userFound;
+                document.getElementById('login-container').style.display = 'none';
+                document.getElementById('profile-name').innerText = userFound.nome;
+                document.getElementById('profile-cargo').innerText = userFound.cargo;
+                document.getElementById('profile-avatar').innerText = userFound.nome.charAt(0).toUpperCase();
+                
+                // Inicializa tabelas e visões nativas
+                renderMembros();
+                renderProdutos();
+                renderVendas();
+                renderLogsPainel();
+                registrarLog(usuarioLogado.nome, "Efetuou login no painel com sucesso.", "system");
             } else {
-                loginError.classList.remove('hidden');
+                document.getElementById('login-err').style.display = 'block';
             }
-        });
+        }
 
-        window.logout = function() {
-            document.getElementById('main-panel').classList.add('hidden');
-            document.getElementById('login-screen').classList.remove('hidden');
-            registrarLog("Usuário efetuou logout.");
-        };
+        function logout() {
+            if(usuarioLogado) {
+                registrarLog(usuarioLogado.nome, "Efetuou logout voluntário.", "system");
+            }
+            location.reload();
+        }
 
-        // ENVIAR / ATUALIZAR DADOS DE MEMBROS
-        const membroForm = document.getElementById('membro-form');
-        membroForm.addEventListener('submit', (e) => {
-            e.preventDefault();
+        // CONTROLE DE ABAS
+        function tab(id, el) {
+            document.querySelectorAll('.section').forEach(s => {
+                s.style.setProperty('display', 'none', 'important');
+                s.classList.remove('active');
+            });
+            document.querySelectorAll('.menu-list li').forEach(li => li.classList.remove('active'));
             
-            const idEdicao = document.getElementById('membro-id-edicao').value;
+            const targetSection = document.getElementById(id);
+            targetSection.style.setProperty('display', 'flex', 'important');
+            targetSection.classList.add('active');
+            el.classList.add('active');
+
+            if(id === 'dashboard') { initOuUpdateGraficos(); }
+        }
+
+        // GERENCIAMENTO DE MEMBROS (CRUD CORRIGIDO)
+        function salvarMembro() {
+            const idEdit = document.getElementById('membro-edit-id').value;
             const nome = document.getElementById('membro-nome').value.trim();
             const cargo = document.getElementById('membro-cargo').value.trim();
             const senha = document.getElementById('membro-senha').value;
 
-            if (idEdicao) {
-                // Modo Edição: Atualiza os dados do registro existente
-                update(ref(db, `membros/${idEdicao}`), {
-                    nome: nome,
-                    cargo: cargo,
-                    senha: senha
-                }).then(() => {
-                    registrarLog(`Membro editado: ${nome} (Função: ${cargo})`);
-                    resetMembroForm();
-                });
+            if(idEdit) {
+                // Edição de Membro Existente
+                database.membros[idEdit].nome = nome;
+                database.membros[idEdit].cargo = cargo;
+                database.membros[idEdit].senha = senha;
+                registrarLog(usuarioLogado.name, `Editou o operador de ID: ${idEdit}`);
             } else {
-                // Modo Cadastro: Cria um novo nó com ID dinâmico gerado pelo push
-                const novoMembroRef = push(ref(db, 'membros'));
-                set(novoMembroRef, {
-                    nome: nome,
-                    cargo: cargo,
-                    senha: senha
-                }).then(() => {
-                    registrarLog(`Novo membro cadastrado: ${nome} (${cargo})`);
-                    membroForm.reset();
-                });
-            }
-        });
-
-        // CONFIGURAÇÕES DO MODO DE EDIÇÃO
-        window.prepararEdicaoMembro = function(id) {
-            const membro = listaMembrosGlobais[id];
-            if (!membro) return;
-
-            document.getElementById('membro-id-edicao').value = id;
-            document.getElementById('membro-nome').value = membro.nome;
-            document.getElementById('membro-cargo').value = membro.cargo;
-            document.getElementById('membro-senha').value = membro.senha;
-
-            document.getElementById('membro-form-title').innerText = "Editar Dados do Membro";
-            document.getElementById('btn-salvar-membro').innerText = "Salvar Alterações";
-            document.getElementById('btn-cancelar-edicao').classList.remove('hidden');
-        };
-
-        window.resetMembroForm = function() {
-            document.getElementById('membro-id-edicao').value = "";
-            membroForm.reset();
-            document.getElementById('membro-form-title').innerText = "Adicionar Novo Membro";
-            document.getElementById('btn-salvar-membro').innerText = "Cadastrar Membro";
-            document.getElementById('btn-cancelar-edicao').classList.add('hidden');
-        };
-
-        // EXCLUSÃO DE MEMBROS
-        window.deletarMembro = function(id, nome) {
-            if (confirm(`Tem certeza que deseja desvincular e remover as permissões de acesso de ${nome}?`)) {
-                remove(ref(db, `membros/${id}`)).then(() => {
-                    registrarLog(`Membro removido do ecossistema: ${nome}`);
-                });
-            }
-        };
-
-        // RECURSO DE MOSTRAR / OCULTAR SENHA NA TABELA
-        window.toggleVisualizacaoSenha = function(button, inputId) {
-            const campo = document.getElementById(inputId);
-            const icone = button.querySelector('i');
-            if (campo.classList.contains('password-masked')) {
-                campo.innerText = campo.getAttribute('data-real-password');
-                campo.classList.remove('password-masked');
-                button.innerHTML = '<i data-lucide="eye-off" class="w-4 h-4"></i>';
-            } else {
-                campo.innerText = '••••••';
-                campo.classList.add('password-masked');
-                button.innerHTML = '<i data-lucide="eye" class="w-4 h-4"></i>';
-            }
-            lucide.createIcons();
-        };
-
-        // SINCRONIZAÇÃO EM TEMPO REAL DOS DADOS
-        onValue(ref(db, 'membros'), (snapshot) => {
-            const data = snapshot.val() || {};
-            listaMembrosGlobais = data; // Atualiza a variável de cache local
-            
-            const tbody = document.getElementById('tabela-membros-body');
-            tbody.innerHTML = '';
-            
-            let totalMembros = 0;
-
-            for (let id in data) {
-                totalMembros++;
-                const m = data[id];
-                
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-gray-900/30 transition border-b border-gray-800/60";
-                tr.innerHTML = `
-                    <td class="p-4 font-medium text-white flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center border border-gray-700 text-gray-300 font-bold text-xs">
-                            ${m.nome.charAt(0).toUpperCase()}
-                        </div>
-                        <div>
-                            <p>${m.nome}</p>
-                            <span class="text-xs text-gray-500 font-mono">ID: ${id}</span>
-                        </div>
-                    </td>
-                    <td class="p-4 text-gray-300">${m.cargo}</td>
-                    <td class="p-4">
-                        <div class="flex items-center gap-2">
-                            <span id="pwd-display-${id}" class="font-mono text-gray-400 password-masked" data-real-password="${m.senha}">••••••</span>
-                            <button onclick="toggleVisualizacaoSenha(this, 'pwd-display-${id}')" class="text-gray-500 hover:text-gray-300 transition" title="Ver senha">
-                                <i data-lucide="eye" class="w-4 h-4"></i>
-                            </button>
-                        </div>
-                    </td>
-                    <td class="p-4 text-right">
-                        <div class="flex items-center justify-end gap-2">
-                            <button onclick="prepararEdicaoMembro('${id}')" class="p-1.5 bg-gray-800 hover:bg-gray-700 text-blue-400 rounded transition" title="Editar Informações">
-                                <i data-lucide="edit-3" class="w-4 h-4"></i>
-                            </button>
-                            <button onclick="deletarMembro('${id}', '${m.nome}')" class="p-1.5 bg-gray-800 hover:bg-red-950/40 text-red-400 rounded transition" title="Remover Usuário">
-                                <i data-lucide="trash-2" class="w-4 h-4"></i>
-                            </button>
-                        </div>
-                    </td>
-                `;
-                tbody.appendChild(tr);
+                // Cadastro de Novo Membro
+                const novoId = 'MB_' + Math.floor(Math.random() * 90000 + 10000);
+                database.membros[novoId] = { nome, cargo, senha };
+                registrarLog(usuarioLogado.nome, `Cadastrou o novo operador: ${nome}`);
             }
 
-            if (totalMembros === 0) {
-                tbody.innerHTML = `
+            cancelarEdicaoMembro();
+            saveDatabase();
+            renderMembros();
+        }
+
+        function prepararEdicaoMembro(id) {
+            const m = database.membros[id];
+            document.getElementById('membro-edit-id').value = id;
+            document.getElementById('membro-nome').value = m.nome;
+            document.getElementById('membro-cargo').value = m.cargo;
+            document.getElementById('membro-senha').value = m.senha;
+
+            document.getElementById('form-membro-title').innerText = "Editar Operador";
+            document.getElementById('btn-membro-submit').innerText = "Salvar Alterações";
+            document.getElementById('btn-membro-cancel').style.display = "block";
+        }
+
+        function cancelarEdicaoMembro() {
+            document.getElementById('membro-edit-id').value = "";
+            document.getElementById('form-membro-data').reset();
+            document.getElementById('form-membro-title').innerText = "Adicionar Operador";
+            document.getElementById('btn-membro-submit').innerText = "Cadastrar no Core";
+            document.getElementById('btn-membro-cancel').style.display = "none";
+        }
+
+        function deletarMembro(id) {
+            if(confirm("Deseja banir e remover este membro do banco de dados?")) {
+                registrarLog(usuarioLogado.nome, `Removeu as permissões do operador ${database.membros[id].nome}`);
+                delete database.membros[id];
+                saveDatabase();
+                renderMembros();
+            }
+        }
+
+        function renderMembros() {
+            const tbody = document.getElementById('table-membros-list');
+            tbody.innerHTML = "";
+            for(let id in database.membros) {
+                let m = database.membros[id];
+                tbody.innerHTML += `
                     <tr>
-                        <td colspan="4" class="p-8 text-center text-gray-500">
-                            Nenhum membro operacional cadastrado até o momento.
+                        <td><strong>${m.nome}</strong><br><span style="font-size:11px; color:#6b7280;">ID: ${id}</span></td>
+                        <td>${m.cargo}</td>
+                        <td style="font-family: monospace; color: var(--primary);">${m.senha}</td>
+                        <td style="text-align: right;">
+                            <div class="action-row-btns" style="justify-content: flex-end;">
+                                <button class="btn-table-action" onclick="prepararEdicaoMembro('${id}')"><i class="fa-solid fa-pen"></i></button>
+                                <button class="btn-table-action delete" onclick="deletarMembro('${id}')"><i class="fa-solid fa-trash-can"></i></button>
+                            </div>
                         </td>
                     </tr>
                 `;
             }
+        }
 
-            // Atualiza os contadores estáticos da Dashboard
-            document.getElementById('count-membros').innerText = totalMembros;
-            lucide.createIcons();
-        });
+        // GERENCIAMENTO DE PRODUTOS
+        function salvarProduto() {
+            const nome = document.getElementById('prod-nome').value.trim();
+            const valor = parseFloat(document.getElementById('prod-valor').value);
+            const id = 'PRD_' + Math.floor(Math.random() * 90000 + 10000);
+            
+            database.produtos[id] = { nome, valor };
+            registrarLog(usuarioLogado.nome, `Cadastrou o produto: ${nome} (R$ ${valor.toFixed(2)})`);
+            document.getElementById('prod-nome').value = "";
+            document.getElementById('prod-valor').value = "";
+            saveDatabase();
+            renderProdutos();
+        }
 
-        // MÓDULO AUXILIAR: REGISTRO DE LOGS E DADOS DINÂMICOS
-        window.registrarLog = function(descricao) {
-            const novoLogRef = push(ref(db, 'logs'));
-            set(novoLogRef, {
-                descricao: descricao,
-                timestamp: new Date().toLocaleString('pt-BR')
+        function deletarProduto(id) {
+            if(confirm("Remover este produto do estoque?")) {
+                delete database.produtos[id];
+                saveDatabase();
+                renderProdutos();
+            }
+        }
+
+        function renderProdutos() {
+            const tbody = document.getElementById('table-produtos-list');
+            const select = document.getElementById('venda-produto-select');
+            tbody.innerHTML = "";
+            select.innerHTML = "";
+            
+            for(let id in database.produtos) {
+                let p = database.produtos[id];
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${id}</td>
+                        <td>${p.nome}</td>
+                        <td>R$ ${p.valor.toFixed(2)}</td>
+                        <td style="text-align: right;">
+                            <button class="btn-table-action delete" onclick="deletarProduto('${id}')"><i class="fa-solid fa-trash-can"></i></button>
+                        </td>
+                    </tr>
+                `;
+                select.innerHTML += `<option value="${id}">${p.nome} - R$ ${p.valor.toFixed(2)}</option>`;
+            }
+        }
+
+        // GERENCIAMENTO DE VENDAS
+        function lancarVenda() {
+            const pId = document.getElementById('venda-produto-select').value;
+            const qtd = parseInt(document.getElementById('venda-qtd').value);
+            if(!pId || !database.produtos[pId]) return;
+
+            const produto = database.produtos[pId];
+            const total = produto.valor * qtd;
+            const id = 'VND_' + Date.now();
+
+            database.vendas[id] = {
+                data: new Date().toLocaleString('pt-BR'),
+                prodNome: produto.nome,
+                qtd: qtd,
+                total: total
+            };
+
+            registrarLog(usuarioLogado.nome, `Lançou venda: ${qtd}x ${produto.nome} (Total: R$ ${total.toFixed(2)})`);
+            saveDatabase();
+            renderVendas();
+        }
+
+        function deletarVenda(id) {
+            if(confirm("Estornar e deletar esta venda do histórico?")) {
+                delete database.vendas[id];
+                saveDatabase();
+                renderVendas();
+            }
+        }
+
+        function renderVendas() {
+            const tbody = document.getElementById('table-vendas-list');
+            tbody.innerHTML = "";
+            for(let id in database.vendas) {
+                let v = database.vendas[id];
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${v.data}</td>
+                        <td>${v.prodNome}</td>
+                        <td>${v.qtd}</td>
+                        <td style="color: var(--success); font-weight:600;">R$ ${v.total.toFixed(2)}</td>
+                        <td style="text-align: right;">
+                            <button class="btn-table-action delete" onclick="deletarVenda('${id}')"><i class="fa-solid fa-arrow-rotate-left"></i></button>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        // TERMINAL DE LOGS
+        function renderLogsPainel() {
+            const container = document.getElementById('logs-container-box');
+            if(!container) return;
+            container.innerHTML = "";
+            database.logs.slice(0, 50).forEach(log => {
+                container.innerHTML += `
+                    <div class="log-row-item">
+                        <span class="log-time">[${log.time}]</span>
+                        <span class="log-user">${log.user}:</span>
+                        <span class="log-text">${log.text}</span>
+                    </div>
+                `;
             });
-        };
+        }
 
-        // Escutas de contadores auxiliares (Logs) para preencher a Dashboard
-        onValue(ref(db, 'logs'), (snapshot) => {
-            const data = snapshot.val() || {};
-            document.getElementById('count-logs').innerText = Object.keys(data).length;
-        });
+        // DASHBOARD COUNTERS & CHARTS
+        function renderDashboard() {
+            document.getElementById('dash-membros-count').innerText = Object.keys(database.membros).length;
+            document.getElementById('dash-produtos-count').innerText = Object.keys(database.produtos).length;
+            document.getElementById('dash-logs-count').innerText = database.logs.length;
+
+            let totalDinheiro = 0;
+            for(let id in database.vendas) { totalDinheiro += database.vendas[id].total; }
+            document.getElementById('dash-entradas-money').innerText = "R$ " + totalDinheiro.toFixed(2);
+        }
+
+        function initOuUpdateGraficos() {
+            const ctx = document.getElementById('vortexMainChart');
+            if(!ctx) return;
+
+            if(mainChartInstance) { mainChartInstance.destroy(); }
+
+            mainChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+                    datasets: [{
+                        label: 'Faturamento de Entrada (R$)',
+                        data: [500, 1200, 900, 2400, 1800, 3200],
+                        borderColor: '#a855f7',
+                        backgroundColor: 'rgba(168, 85, 247, 0.05)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { color: 'rgba(255,255,255,0.02)' }, ticks: { color: '#8b869f' } },
+                        y: { grid: { color: 'rgba(255,255,255,0.02)' }, ticks: { color: '#8b869f' } }
+                    }
+                }
+            });
+        }
+
+        // EXECUÇÃO INICIAL DE LEITURA FIXA DO DASHBOARD
+        window.onload = function() {
+            renderDashboard();
+            initOuUpdateGraficos();
+        };
     </script>
 </body>
 </html>
