@@ -610,7 +610,7 @@
             financeiro: {
                 saldoAtual: 0.00,
                 totalEntradas: 0.00,
-                totalSaídas: 0.00,
+                totalSaidas: 0.00,
                 historico: []
             },
             encomendas: [],
@@ -633,7 +633,14 @@
             if(raw) {
                 try {
                     db = JSON.parse(raw);
-                    if(!db.financeiro) db.financeiro = JSON.parse(JSON.stringify(defaultDB.financeiro));
+                    if(!db.financeiro){
+    db.financeiro = {
+        saldoAtual: 0,
+        totalEntradas: 0,
+        totalSaidas: 0,
+        historico: []
+    };
+}
                     if(!db.encomendas) db.encomendas = [];
                     if(!db.vendas) db.vendas = [];
                     if(!db.anotacoes) db.anotacoes = [];
@@ -686,7 +693,7 @@
             }
         }
 
-        function ejecutarMovimentacaoReal() {
+        function executarMovimentacaoReal() {
             const acao = document.getElementById('edit-op-acao').value;
             const descricaoInput = document.getElementById('edit-op-desc').value.trim();
             const valorInput = document.getElementById('edit-op-valor').value;
